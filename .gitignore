@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Abaikan folder gambar
+public/images/
+src/assets/
