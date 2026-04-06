@@ -1,18 +1,7 @@
 import React from "react";
-import {
-  getProgressGroupedByDate,
-  getFavoriteBooks,
-  getSavedBooks,
-} from "../services/api";
 import ProgressCard from "./ProgressCard";
 
-const Progress = ({ activeFilter, search }) => {
-  const getData = () => {
-    if (activeFilter === "favorit") return { Favorit: getFavoriteBooks() };
-    if (activeFilter === "disimpan") return { Disimpan: getSavedBooks() };
-    return getProgressGroupedByDate();
-  };
-
+const Progress = ({ data, search }) => {
   const filterBySearch = (items) => {
     if (!search) return items;
     return items.filter((item) =>
@@ -20,8 +9,7 @@ const Progress = ({ activeFilter, search }) => {
     );
   };
 
-  const grouped = getData();
-  const groups = Object.entries(grouped);
+  const groups = Object.entries(data);
   const hasResults = groups.some(
     ([, items]) => filterBySearch(items).length > 0,
   );
@@ -44,7 +32,6 @@ const Progress = ({ activeFilter, search }) => {
           <div key={label} className="mt-10">
             <h3 className="text-lg font-bold text-gray-800 mb-4">{label}</h3>
 
-            {/* ✅ grid responsive: 2 kolom mobile → 4 tablet → 5 md → 6 lg → 7 xl */}
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 md:gap-4">
               {filtered.map((item) => (
                 <ProgressCard key={item.id} progress={item} />

@@ -1,7 +1,6 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
-import { getCategoriesWithBooks } from "../services/api";
 import "swiper/css";
 import "swiper/css/pagination";
 import Card from "./Card";
@@ -42,14 +41,11 @@ const CategoryCard = ({ category }) => (
   <div className="w-40 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
     {category.image && (
       <img
-        src={`../src/assets/category/banner_${category.image}`}
+        src={`/images/category/banner_${category.image}`}
         alt={category.name}
         className="w-full h-56 object-cover"
       />
     )}
-
-    {/* bisa dihapus nanti */}
-    {/* <p>{book.title}</p> */}
   </div>
 );
 
@@ -84,8 +80,8 @@ const CategorySection = ({ category }) => (
 
         {category.books.map((book) => (
           <SwiperSlide key={book.id}>
-            {/* ✅ tambah aspect-[3/4] agar tinggi card buku konsisten dengan CategoryCard */}
-            <div className="cursor-pointer hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden aspect-[3/4]">
+            {/* Class aspect-[3/4] diganti jadi aspect-3/4 */}
+            <div className="cursor-pointer hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden aspect-3/4">
               <Card book={book} />
             </div>
           </SwiperSlide>
@@ -97,8 +93,8 @@ const CategorySection = ({ category }) => (
   </div>
 );
 
-const ListBooks = () => {
-  const filtered = getCategoriesWithBooks().filter((c) => c.image !== null);
+const ListBooks = ({ data }) => {
+  const filtered = data.filter((c) => c.image !== null);
 
   return (
     <section className="mx-3 md:mx-20 lg:mx-42 px-6 md:px-10">

@@ -26,7 +26,7 @@ const Category = ({ categories }) => {
           <SwiperSlide key={category.id}>
             <div className="cursor-pointer hover:scale-105 transition-transform duration-300">
               <img
-                src={`../src/assets/category/${category.image}`}
+                src={`/images/category/${category.image}`}
                 alt={category.name}
                 className="w-full h-auto object-cover rounded-2xl"
               />

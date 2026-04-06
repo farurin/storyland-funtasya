@@ -8,7 +8,7 @@ const ProgressCard = ({ progress }) => {
       {/* cover buku */}
       <img
         src={
-          book?.image ? `../images/books/${book.image}` : "/images/default.png"
+          book?.image ? `/images/books/${book.image}` : "/images/default.png"
         }
         alt={book?.title || "Buku"}
         className="w-full h-52 object-cover"

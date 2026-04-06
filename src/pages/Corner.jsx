@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import {
-  getAllProgress,
   getFavoriteBooks,
   getSavedBooks,
+  getProgressGroupedByDate,
 } from "../services/api";
 import BannerCorner from "../components/BannerCorner";
 import FilterCorner from "../components/FilterCorner";
@@ -13,6 +13,16 @@ const Corner = () => {
   const [activeFilter, setActiveFilter] = useState("riwayat");
   const [search, setSearch] = useState("");
 
+  // Langsung hitung data tanpa useEffect
+  let progressData = {};
+  if (activeFilter === "favorit") {
+    progressData = { Favorit: getFavoriteBooks() };
+  } else if (activeFilter === "disimpan") {
+    progressData = { Disimpan: getSavedBooks() };
+  } else {
+    progressData = getProgressGroupedByDate();
+  }
+
   return (
     <div>
       <BannerCorner />
@@ -21,9 +31,7 @@ const Corner = () => {
         onChangeFilter={setActiveFilter}
         onSearch={setSearch}
       />
-      <Progress activeFilter={activeFilter} search={search} />
-
-      {/* banner */}
+      <Progress data={progressData} search={search} />
       <HeroBanner />
     </div>
   );
