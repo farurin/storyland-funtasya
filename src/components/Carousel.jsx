@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -6,7 +6,7 @@ import "swiper/css/pagination";
 
 import Card from "./Card";
 
-// Komponen Ikon SVG yang disesuaikan ukurannya (lebih proporsional)
+// Komponen Ikon SVG
 const IconLike = () => (
   <div className="bg-white/30 p-1.5 rounded-full">
     <svg
@@ -48,10 +48,8 @@ const IconStar = () => (
 );
 
 const Carousel = ({ books, onSearch }) => {
-  const swiperRef = useRef(null);
+  const [activeTab, setActiveTab] = useState(0);
 
-  // Membagi buku menjadi 3 kelompok (masing-masing 6 buku)
-  // Di dunia nyata, ini diambil berdasarkan id_categories atau flag tertentu
   const categoriesData = [
     {
       id: 0,
@@ -76,23 +74,19 @@ const Carousel = ({ books, onSearch }) => {
     },
   ];
 
-  const goToSlide = (index) => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.slideTo(index);
-    }
-  };
-
   return (
     <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-16 custom-swiper-container">
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-10">
-        {/* Filter Buttons */}
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
+        {/* TAB BUTTONS */}
         <div className="flex flex-wrap items-center gap-4">
           {categoriesData.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => goToSlide(cat.id)}
+              onClick={() => setActiveTab(cat.id)}
               style={{ backgroundColor: cat.color }}
-              className="flex items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition hover:opacity-90 shadow-sm"
+              className={`flex items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition shadow-sm focus:outline-none 
+                ${activeTab === cat.id ? "ring-4 ring-offset-2 opacity-100 scale-105" : "opacity-60 hover:opacity-80"}
+              `}
             >
               {cat.icon}
               {cat.label}
@@ -127,28 +121,21 @@ const Carousel = ({ books, onSearch }) => {
         </div>
       </div>
 
-      {/* Slider: Hanya 3 Slide (Per Kategori) */}
-      <div className="pb-12">
+      {/* SLIDER BUKU */}
+      <div className="relative">
         <Swiper
-          ref={swiperRef}
+          key={activeTab}
           modules={[Pagination, Autoplay]}
-          slidesPerView={1} // Satu kategori per slide
-          spaceBetween={50}
+          slidesPerView="auto"
+          spaceBetween={20}
           pagination={{ clickable: true }}
-          className="w-full"
+          autoplay={{ delay: 3500, disableOnInteraction: false }}
+          className="w-full custom-carousel-swiper"
         >
-          {categoriesData.map((category) => (
-            <SwiperSlide key={category.id}>
-              {/* Grid 6 Buku di dalam satu slide kategori */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 px-2">
-                {category.items.map((book) => (
-                  <div
-                    key={book.id}
-                    className="flex justify-center transition-transform duration-300 hover:scale-105"
-                  >
-                    <Card book={book} />
-                  </div>
-                ))}
+          {categoriesData[activeTab].items.map((book) => (
+            <SwiperSlide key={book.id} style={{ width: "179px" }}>
+              <div className="w-[179px] h-[255px] transition-transform duration-300 hover:scale-105 cursor-pointer">
+                <Card book={book} />
               </div>
             </SwiperSlide>
           ))}
@@ -156,14 +143,30 @@ const Carousel = ({ books, onSearch }) => {
       </div>
 
       <style jsx global>{`
-        .custom-swiper-container .swiper-pagination-bullet {
-          width: 14px;
-          height: 14px;
+        /* CSS untuk Pagination Swiper */
+        .custom-carousel-swiper {
+          /* Memberikan ruang agar buku saat membesar tidak terpotong atasnya */
+          padding-top: 15px !important;
+          /* Memberikan ruang di bawah untuk titik pagination agar tidak terpotong */
+          padding-bottom: 50px !important;
+          /* KUNCI: overflow dibiarkan default (hidden) agar buku berlebih tidak bocor ke samping */
+        }
+        .custom-carousel-swiper .swiper-pagination {
+          position: absolute;
+          bottom: 0px !important;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+        }
+        .custom-carousel-swiper .swiper-pagination-bullet {
+          width: 12px;
+          height: 12px;
           background: #a454ff !important;
           opacity: 0.3;
           margin: 0 6px !important;
+          display: inline-block;
         }
-        .custom-swiper-container .swiper-pagination-bullet-active {
+        .custom-carousel-swiper .swiper-pagination-bullet-active {
           opacity: 1;
         }
       `}</style>
