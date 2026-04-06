@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import AuthLayout, {
   IconEye,
@@ -8,8 +8,11 @@ import AuthLayout, {
   IconFacebook,
 } from "../components/AuthLayout";
 import { validateAuth } from "../utils/validation";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,25 +23,31 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // 1. Cek field kosong
     if (!email || !password) {
       setIsError(true);
       setErrorMessage("*Harap lengkapi email dan password.");
       return;
     }
 
+    // 2. Jalankan fungsi validasi format
     const validation = validateAuth(email, password);
     if (!validation.isValid) {
       setIsError(true);
-      // Pesan error register bisa disesuaikan, atau pakai yang sama
       setErrorMessage(
         "*Email tidak valid atau password kurang dari 8 karakter.",
       );
       return;
     }
 
+    // 3. Simulasi Pendaftaran Berhasil
     setIsError(false);
     setErrorMessage("");
-    console.log("Data Pendaftaran Valid!", { email, password });
+
+    // Di dunia nyata, di sini kita akan mengirim data ke database Laragon.
+    // Untuk sekarang, kita buat user otomatis login setelah daftar.
+    login();
+    navigate("/");
   };
 
   return (
@@ -100,8 +109,6 @@ const Register = () => {
               {showPassword ? <IconEyeOff /> : <IconEye />}
             </button>
           </div>
-
-          {/* Pesan Error Global di bawah Password */}
           {isError && (
             <p className="text-xs text-red-500 mt-2 ml-1 font-medium">
               {errorMessage}
@@ -116,7 +123,10 @@ const Register = () => {
             className="focus:ring-amber-400 text-amber-500"
             required
           />
-          <Label htmlFor="terms" className="text-sm font-medium text-gray-700">
+          <Label
+            htmlFor="terms"
+            className="text-sm font-medium text-gray-700 cursor-pointer"
+          >
             Saya setuju dengan syarat & ketentuan
           </Label>
         </div>
@@ -130,29 +140,32 @@ const Register = () => {
         </Button>
       </form>
 
+      {/* Pembatas */}
       <div className="flex items-center gap-3 my-8">
         <div className="flex-1 h-px bg-gray-300"></div>
         <p className="text-xs text-gray-400 font-medium">atau daftar dengan</p>
         <div className="flex-1 h-px bg-gray-300"></div>
       </div>
 
+      {/* Tombol Sosial */}
       <div className="flex items-center gap-4">
         <button
           type="button"
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition font-medium text-sm text-gray-700"
         >
           <IconGoogle />
-          <span className="text-sm text-gray-700 font-medium">Google</span>
+          Google
         </button>
         <button
           type="button"
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition font-medium text-sm text-white"
         >
           <IconFacebook />
-          <span className="text-sm text-white font-medium">Facebook</span>
+          Facebook
         </button>
       </div>
 
+      {/* Navigasi Toggle */}
       <div className="mt-12 text-center text-sm">
         <p className="text-gray-500 font-medium">
           Sudah mempunyai akun?{" "}

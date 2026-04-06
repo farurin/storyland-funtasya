@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -5,8 +6,8 @@ import {
   NavbarToggle,
   Button,
 } from "flowbite-react";
-import { NavLink } from "react-router-dom";
-
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
 const IconProfile = () => (
@@ -43,14 +44,15 @@ const IconLanguage = () => (
   </svg>
 );
 
-// active link
 const NavItem = ({ to, children }) => (
   <NavLink
     to={to}
     end={to === "/"}
     className={({ isActive }) =>
       `lg:text-[20px] text-base py-2 ${
-        isActive ? "border-b-2 border-purple-500" : "text-gray-700"
+        isActive
+          ? "border-b-2 border-purple-500 text-purple-600 font-semibold"
+          : "text-gray-700 hover:text-purple-500"
       }`
     }
   >
@@ -58,7 +60,6 @@ const NavItem = ({ to, children }) => (
   </NavLink>
 );
 
-// data nav item
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/categories", label: "Categories" },
@@ -66,29 +67,96 @@ const navLinks = [
 ];
 
 export default function Navigation() {
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Fungsi Logout yang sudah diperbaiki
+  const handleLogout = (e) => {
+    e.preventDefault(); // Hindari aksi default link/button
+    e.stopPropagation(); // Pastikan event tidak bocor ke elemen lain
+    setIsDropdownOpen(false);
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <Navbar fluid className="px-3 md:px-20 lg:px-42 shadow">
-      {/* logo */}
+    <Navbar fluid className="px-3 md:px-20 lg:px-42 shadow relative z-50">
       <NavbarBrand href="/">
         <img src={LogoFuntasya} alt="Logo Funtasya" className="h-8" />
       </NavbarBrand>
 
-      {/* button */}
       <div className="flex items-center gap-2 md:order-2">
-        <Button color="yellow" className="rounded-full px-6 gap-2">
-          <IconProfile />
-          Profile
-        </Button>
-        <Button color="blue" className="opacity-70 rounded-full px-6 gap-2">
+        {isLoggedIn ? (
+          <div className="relative">
+            {/* Tombol Profil */}
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-medium rounded-full px-6 py-2 gap-2 cursor-pointer transition focus:outline-none"
+            >
+              <IconProfile />
+              Profile
+            </button>
+
+            {/* Menu Dropdown */}
+            {isDropdownOpen && (
+              <>
+                {/* Overlay transparan untuk menutup dropdown jika klik di luar */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsDropdownOpen(false)}
+                ></div>
+
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <span className="block text-sm font-semibold text-gray-900 truncate">
+                      Pengguna Storyland
+                    </span>
+                  </div>
+                  <ul className="py-1">
+                    <li>
+                      <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                        Pengaturan Akun
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={handleLogout} // Memanggil fungsi logout yang diperbaiki
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50 transition"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <Button
+            as={Link}
+            to="/login"
+            color="yellow"
+            className="rounded-full px-8 font-bold"
+          >
+            Masuk
+          </Button>
+        )}
+
+        <Button
+          color="blue"
+          className="opacity-70 rounded-full px-6 gap-2 hidden md:flex"
+        >
           <IconLanguage />
           Indonesia
         </Button>
         <NavbarToggle />
       </div>
 
-      {/* navbar link */}
       <NavbarCollapse className="md:flex md:items-center">
-        {/* mapping data nav item */}
         {navLinks.map(({ to, label }) => (
           <NavItem key={to} to={to}>
             {label}
