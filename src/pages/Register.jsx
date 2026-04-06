@@ -7,14 +7,38 @@ import AuthLayout, {
   IconGoogle,
   IconFacebook,
 } from "../components/AuthLayout";
+import { validateAuth } from "../utils/validation";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form pendaftaran dikirim!");
+
+    if (!email || !password) {
+      setIsError(true);
+      setErrorMessage("*Harap lengkapi email dan password.");
+      return;
+    }
+
+    const validation = validateAuth(email, password);
+    if (!validation.isValid) {
+      setIsError(true);
+      // Pesan error register bisa disesuaikan, atau pakai yang sama
+      setErrorMessage(
+        "*Email tidak valid atau password kurang dari 8 karakter.",
+      );
+      return;
+    }
+
+    setIsError(false);
+    setErrorMessage("");
+    console.log("Data Pendaftaran Valid!", { email, password });
   };
 
   return (
@@ -28,7 +52,8 @@ const Register = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        {/* Email */}
         <div>
           <div className="mb-2 block">
             <Label
@@ -41,12 +66,14 @@ const Register = () => {
             id="email"
             type="email"
             placeholder="Masukkan email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             color={isError ? "failure" : "gray"}
             className="[&_input]:rounded-full"
-            required
           />
         </div>
 
+        {/* Password */}
         <div>
           <div className="mb-2 block">
             <Label
@@ -60,9 +87,10 @@ const Register = () => {
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="Masukkan Paswword"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               color={isError ? "failure" : "gray"}
               className="[&_input]:rounded-full [&_input]:pr-12"
-              required
             />
             <button
               type="button"
@@ -72,8 +100,16 @@ const Register = () => {
               {showPassword ? <IconEyeOff /> : <IconEye />}
             </button>
           </div>
+
+          {/* Pesan Error Global di bawah Password */}
+          {isError && (
+            <p className="text-xs text-red-500 mt-2 ml-1 font-medium">
+              {errorMessage}
+            </p>
+          )}
         </div>
 
+        {/* Syarat dan Ketentuan */}
         <div className="flex items-center gap-2 mt-1">
           <Checkbox
             id="terms"
@@ -85,6 +121,7 @@ const Register = () => {
           </Label>
         </div>
 
+        {/* Tombol Daftar */}
         <Button
           type="submit"
           className="w-full bg-[#F59E0B] enabled:hover:bg-amber-600 rounded-full mt-2"
@@ -100,11 +137,17 @@ const Register = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition">
+        <button
+          type="button"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition"
+        >
           <IconGoogle />
           <span className="text-sm text-gray-700 font-medium">Google</span>
         </button>
-        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition">
+        <button
+          type="button"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition"
+        >
           <IconFacebook />
           <span className="text-sm text-white font-medium">Facebook</span>
         </button>
