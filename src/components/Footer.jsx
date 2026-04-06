@@ -1,5 +1,4 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
 const IconInstagram = () => (
@@ -99,65 +98,71 @@ const IconSend = () => (
 
 export default function FooterComponent() {
   return (
-    <footer className="border-t px-3 md:px-20 lg:px-42 border-dashed border-blue-200 mt-20">
-      <div className="w-full mx-auto px-6 md:px-10 py-10">
+    <footer className="w-full">
+      {/* Bagian Konten Utama */}
+      <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Kolom 1: Logo & Social Media */}
           <div className="flex flex-col gap-4">
-            <img src={LogoFuntasya} alt="Logo Funtasya" className="w-72" />
+            <img src={LogoFuntasya} alt="Logo Funtasya" className="w-64" />
             <div className="flex items-center gap-3 mt-2">
               <a
                 href="#"
-                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center"
+                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center hover:bg-purple-600 transition"
               >
                 <IconInstagram />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center"
+                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center hover:bg-purple-600 transition"
               >
                 <IconTiktok />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center"
+                className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center hover:bg-purple-600 transition"
               >
                 <IconYoutube />
               </a>
             </div>
           </div>
 
+          {/* Kolom 2: Contact Details */}
           <div className="flex flex-col gap-3">
             <h4 className="font-semibold text-purple-500 mb-1">
               Contact Details
             </h4>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-3 text-sm text-gray-600">
               <IconTime /> 9 AM - 5 PM
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-3 text-sm text-gray-600">
               <IconPhone /> 0851 3875 3141
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <IconLocation /> Jl. Quality Garden No.24, Sidoarjo
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <IconLocation />
+              <span>
+                Jl. Quality Garden No.24, <br /> Sidoarjo
+              </span>
             </div>
           </div>
 
-          {/* Kolom 3: About Us + Newsletter */}
+          {/* Kolom 3: About Us & Newsletter */}
           <div className="flex flex-col gap-4">
             <div>
               <h4 className="font-semibold text-purple-500 mb-1">About Us</h4>
             </div>
             <div>
               <p className="font-semibold text-sm text-gray-700">Newsletter</p>
-              <p className="text-xs text-gray-400 mb-2">
+              <p className="text-xs text-gray-400 mb-3">
                 Subscribe to our newsletter
               </p>
               <div className="flex items-center gap-2">
                 <input
                   type="email"
                   placeholder="Enter your Email"
-                  className="flex-1 px-4 py-2 text-sm rounded-full border border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-300"
+                  className="flex-1 px-4 py-2.5 text-sm rounded-full border border-purple-300 focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-400 transition shadow-sm"
                 />
-                <button className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center hover:bg-purple-600 transition shrink-0">
+                <button className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center hover:bg-purple-600 transition shrink-0 shadow-sm">
                   <IconSend />
                 </button>
               </div>
@@ -166,9 +171,10 @@ export default function FooterComponent() {
         </div>
       </div>
 
-      {/* Copyright */}
-      <div className="border-t border-dashed border-blue-200 py-4 text-center text-sm text-gray-500">
-        © Funtasya World 2026 - PT. Digital Leap Technologies
+      <div className="w-full bg-[#F0EDFF] py-4">
+        <div className="text-center text-sm font-semibold text-[#8b7de4]">
+          © Funtasya World 2026 - PT. Digital Leap Technologies
+        </div>
       </div>
     </footer>
   );
