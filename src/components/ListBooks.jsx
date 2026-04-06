@@ -57,14 +57,20 @@ const CategorySection = ({ category }) => (
     {/* Flex Container untuk Banner (Sticky) dan Swiper */}
     <div className="flex gap-[20px] items-start h-full">
       {/* Category Banner (Ukuran fix: 133x255) */}
+      {/* Category Banner (Ukuran fix: 133x255) */}
       <Link
         to={`/categories/${category.id}`}
-        className="hidden lg:block w-[133px] h-[255px] shrink-0 relative group overflow-hidden rounded-2xl shadow-sm"
+        className="hidden lg:block w-[133px] h-[255px] shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
       >
         <img
           src={`/images/category/banner_${category.image}`}
           alt={category.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          // Fallback jika nama file salah atau gambar belum ada
+          onError={(e) => {
+            e.target.src =
+              "https://via.placeholder.com/133x255?text=Banner+Kategori";
+          }}
         />
         {/* Overlay tombol "Lihat Semua >" */}
         <div className="absolute bottom-3 left-0 right-0 flex justify-center px-2">
