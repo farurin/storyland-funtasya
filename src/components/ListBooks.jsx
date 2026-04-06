@@ -6,12 +6,13 @@ import "swiper/css/pagination";
 import Card from "./Card";
 import { Button } from "flowbite-react";
 import bannerImg from "../assets/banner.png";
+import { Link } from "react-router-dom";
 
 const BANNER_AFTER_INDEX = 2;
 
 const BannerIklan = () => (
-  <section className="w-full my-10">
-    <div className="flex flex-col-reverse lg:flex-row items-center gap-10 ">
+  <section className="w-full my-16">
+    <div className="flex flex-col-reverse lg:flex-row items-center gap-10 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
       <div className="w-full lg:w-1/2 text-center lg:text-left">
         <h1 className="text-black font-bold text-3xl md:text-4xl leading-tight">
           Pengumuman
@@ -21,7 +22,7 @@ const BannerIklan = () => (
           favoritmu sekarang.
         </p>
         <div className="mt-6 flex justify-center lg:justify-start">
-          <Button className="capitalize bg-[#A454FF] text-white font-semibold rounded-full px-10 shadow-md hover:shadow-lg transition">
+          <Button className="capitalize bg-[#A454FF] text-white font-semibold rounded-full px-10 shadow-md hover:bg-purple-700 transition border-none focus:ring-0">
             cek sekarang
           </Button>
         </div>
@@ -30,66 +31,80 @@ const BannerIklan = () => (
         <img
           src={bannerImg}
           alt="Banner Illustration"
-          className="w-full rounded-xl max-w-sm md:max-w-md lg:max-w-xl object-contain"
+          className="w-full max-w-sm md:max-w-md lg:max-w-xl object-contain"
         />
       </div>
     </div>
   </section>
 );
 
-const CategoryCard = ({ category }) => (
-  <div className="w-40 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
-    {category.image && (
-      <img
-        src={`/images/category/banner_${category.image}`}
-        alt={category.name}
-        className="w-full h-56 object-cover"
-      />
-    )}
-  </div>
-);
-
 const CategorySection = ({ category }) => (
-  <div className="mt-16">
-    <div className="flex items-start justify-between mb-1">
-      <h3 className="text-xl font-bold">{category.name}</h3>
-      <a href="#" className="text-purple-500 text-sm hover:underline">
+  <div className="mt-12">
+    {/* Header Section */}
+    <div className="flex items-end justify-between mb-4">
+      <div>
+        <h3 className="text-2xl font-bold text-gray-900">{category.name}</h3>
+        <p className="text-gray-500 text-sm mt-1">{category.description}</p>
+      </div>
+      <Link
+        to={`/categories/${category.id}`}
+        className="text-purple-500 text-sm font-semibold hover:underline mb-1"
+      >
         Lihat Semua
-      </a>
+      </Link>
     </div>
 
-    <p className="text-gray-500 text-sm mb-4">{category.description}</p>
-
-    {category.books.length > 0 ? (
-      <Swiper
-        modules={[Pagination, Autoplay]}
-        slidesPerView={2}
-        spaceBetween={12}
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 3000, disableOnInteraction: false }}
-        loop={category.books.length > 4}
-        breakpoints={{
-          640: { slidesPerView: 3 },
-          1024: { slidesPerView: 6 },
-        }}
-        className="w-full pb-10"
+    {/* Flex Container untuk Banner (Sticky) dan Swiper */}
+    <div className="flex gap-[20px] items-start h-full">
+      {/* Category Banner (Ukuran fix: 133x255) */}
+      <Link
+        to={`/categories/${category.id}`}
+        className="hidden lg:block w-[133px] h-[255px] shrink-0 relative group overflow-hidden rounded-2xl shadow-sm"
       >
-        <SwiperSlide>
-          <CategoryCard category={category} />
-        </SwiperSlide>
+        <img
+          src={`/images/category/banner_${category.image}`}
+          alt={category.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        {/* Overlay tombol "Lihat Semua >" */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center px-2">
+          <div className="bg-white/90 backdrop-blur-sm text-[#F59E0B] text-[10px] font-bold py-1.5 px-3 rounded-full shadow-sm whitespace-nowrap">
+            Lihat Semua &gt;
+          </div>
+        </div>
+      </Link>
 
-        {category.books.map((book) => (
-          <SwiperSlide key={book.id}>
-            {/* Class aspect-[3/4] diganti jadi aspect-3/4 */}
-            <div className="cursor-pointer hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden aspect-3/4">
-              <Card book={book} />
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    ) : (
-      <p className="text-gray-400 text-sm">Belum ada buku di kategori ini.</p>
-    )}
+      {/* Swiper List */}
+      {/* min-w-0 penting agar flex item tidak overflow ke kanan layar */}
+      <div className="flex-1 min-w-0 custom-list-swiper relative">
+        {category.books.length > 0 ? (
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            // Menggunakan "auto" agar Swiper menghormati ukuran spesifik (179px) di SwiperSlide
+            slidesPerView="auto"
+            spaceBetween={20} // Sesuai gap Figma: 20px
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            // Tambahkan pb-12 agar ada ruang untuk titik-titik pagination
+            className="pb-12"
+          >
+            {category.books.map((book) => (
+              // Set ukuran fix slide: 179px
+              <SwiperSlide key={book.id} style={{ width: "179px" }}>
+                {/* Pastikan container Card juga berukuran 179x255 */}
+                <div className="w-[179px] h-[255px] transition-transform duration-300 hover:scale-105">
+                  <Card book={book} />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <div className="flex items-center justify-center h-[255px] text-gray-400 italic">
+            Belum ada buku di kategori ini.
+          </div>
+        )}
+      </div>
+    </div>
   </div>
 );
 
@@ -97,13 +112,30 @@ const ListBooks = ({ data }) => {
   const filtered = data.filter((c) => c.image !== null);
 
   return (
-    <section className="mx-3 md:mx-20 lg:mx-42 px-6 md:px-10">
+    <section className="mx-3 md:mx-20 lg:mx-42 px-6">
       {filtered.map((category, index) => (
         <React.Fragment key={category.id}>
           <CategorySection category={category} />
           {index === BANNER_AFTER_INDEX && <BannerIklan />}
         </React.Fragment>
       ))}
+
+      {/* CSS untuk titik pagination yang hilang */}
+      <style jsx global>{`
+        .custom-list-swiper .swiper-pagination {
+          bottom: 0px !important;
+        }
+        .custom-list-swiper .swiper-pagination-bullet {
+          width: 12px;
+          height: 12px;
+          background: #a454ff !important;
+          opacity: 0.3;
+          margin: 0 5px !important;
+        }
+        .custom-list-swiper .swiper-pagination-bullet-active {
+          opacity: 1;
+        }
+      `}</style>
     </section>
   );
 };
