@@ -1,0 +1,531 @@
+{
+  "categories": [
+    { "id": 1, "name": "Rekomendasi", "image": null },
+    { "id": 2, "name": "Populer", "image": null },
+    { "id": 3, "name": "Terbaru", "image": null },
+    {
+      "id": 4,
+      "name": "Nusantara",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "1ceritanusantara.png"
+    },
+    {
+      "id": 5,
+      "name": "Cerita Hewan",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "2ceritahewan.png"
+    },
+    {
+      "id": 6,
+      "name": "Cerita Manca Negara",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "3ceritamancanegara.png"
+    },
+    {
+      "id": 7,
+      "name": "Kisah Nabi",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "4kisahnabi.png"
+    },
+    {
+      "id": 8,
+      "name": "Anak Tauladan",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "5anaktauladan.png"
+    },
+    {
+      "id": 9,
+      "name": "Cerita 1001 Malam",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "6cerita1001malam.png"
+    },
+    {
+      "id": 10,
+      "name": "Cerita Anak Muslim",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "7ceritaanakmuslim.png"
+    },
+    {
+      "id": 11,
+      "name": "Pahlawan Nusantara",
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, blanditiis.",
+      "image": "8pahlawannusantara.png"
+    }
+  ],
+  "books": [
+    {
+      "id": 1,
+      "id_categories": 1,
+      "title": "Laskar Pelangi",
+      "image": "mulan.png"
+    },
+    {
+      "id": 2,
+      "id_categories": 1,
+      "title": "Bumi Manusia",
+      "image": "mulan.png"
+    },
+    {
+      "id": 3,
+      "id_categories": 1,
+      "title": "Negeri 5 Menara",
+      "image": "mulan.png"
+    },
+    {
+      "id": 4,
+      "id_categories": 1,
+      "title": "Sang Pemimpi",
+      "image": "mulan.png"
+    },
+    {
+      "id": 5,
+      "id_categories": 1,
+      "title": "Perahu Kertas",
+      "image": "mulan.png"
+    },
+    {
+      "id": 6,
+      "id_categories": 1,
+      "title": "Filosofi Kopi",
+      "image": "mulan.png"
+    },
+    { "id": 7, "id_categories": 1, "title": "Hujan", "image": "mulan.png" },
+    { "id": 8, "id_categories": 1, "title": "Pulang", "image": "mulan.png" },
+    {
+      "id": 9,
+      "id_categories": 1,
+      "title": "Laut Bercerita",
+      "image": "mulan.png"
+    },
+    {
+      "id": 10,
+      "id_categories": 1,
+      "title": "Ronggeng Dukuh Paruk",
+      "image": "mulan.png"
+    },
+    {
+      "id": 11,
+      "id_categories": 1,
+      "title": "Cantik Itu Luka",
+      "image": "mulan.png"
+    },
+    {
+      "id": 12,
+      "id_categories": 1,
+      "title": "Tetralogi Buru",
+      "image": "mulan.png"
+    },
+    {
+      "id": 13,
+      "id_categories": 1,
+      "title": "Garis Waktu",
+      "image": "mulan.png"
+    },
+    {
+      "id": 14,
+      "id_categories": 1,
+      "title": "Dilan 1990",
+      "image": "mulan.png"
+    },
+    {
+      "id": 15,
+      "id_categories": 1,
+      "title": "Ayat-Ayat Cinta",
+      "image": "mulan.png"
+    },
+    {
+      "id": 16,
+      "id_categories": 2,
+      "title": "Harry Potter 1",
+      "image": "mulan.png"
+    },
+    {
+      "id": 17,
+      "id_categories": 2,
+      "title": "The Hobbit",
+      "image": "mulan.png"
+    },
+    {
+      "id": 18,
+      "id_categories": 2,
+      "title": "Sherlock Holmes",
+      "image": "mulan.png"
+    },
+    {
+      "id": 19,
+      "id_categories": 2,
+      "title": "Naruto Vol 1",
+      "image": "mulan.png"
+    },
+    {
+      "id": 20,
+      "id_categories": 2,
+      "title": "One Piece Vol 1",
+      "image": "mulan.png"
+    },
+    {
+      "id": 21,
+      "id_categories": 2,
+      "title": "Attack on Titan",
+      "image": "mulan.png"
+    },
+    {
+      "id": 22,
+      "id_categories": 2,
+      "title": "Demon Slayer",
+      "image": "mulan.png"
+    },
+    {
+      "id": 23,
+      "id_categories": 2,
+      "title": "Jujutsu Kaisen",
+      "image": "mulan.png"
+    },
+    {
+      "id": 24,
+      "id_categories": 2,
+      "title": "Solo Leveling",
+      "image": "mulan.png"
+    },
+    {
+      "id": 25,
+      "id_categories": 2,
+      "title": "The Alchemist",
+      "image": "mulan.png"
+    },
+    {
+      "id": 26,
+      "id_categories": 2,
+      "title": "Da Vinci Code",
+      "image": "mulan.png"
+    },
+    {
+      "id": 27,
+      "id_categories": 2,
+      "title": "Twilight",
+      "image": "mulan.png"
+    },
+    {
+      "id": 28,
+      "id_categories": 2,
+      "title": "The Hunger Games",
+      "image": "mulan.png"
+    },
+    {
+      "id": 29,
+      "id_categories": 2,
+      "title": "Percy Jackson",
+      "image": "mulan.png"
+    },
+    {
+      "id": 30,
+      "id_categories": 2,
+      "title": "Game of Thrones",
+      "image": "mulan.png"
+    },
+    {
+      "id": 31,
+      "id_categories": 3,
+      "title": "Teknologi AI 2024",
+      "image": "mulan.png"
+    },
+    {
+      "id": 32,
+      "id_categories": 3,
+      "title": "Masak Modern",
+      "image": "mulan.png"
+    },
+    {
+      "id": 33,
+      "id_categories": 3,
+      "title": "Panduan Investasi",
+      "image": "mulan.png"
+    },
+    {
+      "id": 34,
+      "id_categories": 3,
+      "title": "Kesehatan Mental",
+      "image": "mulan.png"
+    },
+    {
+      "id": 35,
+      "id_categories": 3,
+      "title": "Self Improvement",
+      "image": "mulan.png"
+    },
+    {
+      "id": 36,
+      "id_categories": 3,
+      "title": "Dunia Kripto",
+      "image": "mulan.png"
+    },
+    {
+      "id": 37,
+      "id_categories": 3,
+      "title": "Desain UI/UX",
+      "image": "mulan.png"
+    },
+    {
+      "id": 38,
+      "id_categories": 3,
+      "title": "Belajar Python",
+      "image": "mulan.png"
+    },
+    {
+      "id": 39,
+      "id_categories": 3,
+      "title": "Strategi Marketing",
+      "image": "mulan.png"
+    },
+    {
+      "id": 40,
+      "id_categories": 3,
+      "title": "Seni Hidup Minimalis",
+      "image": "mulan.png"
+    },
+    {
+      "id": 41,
+      "id_categories": 3,
+      "title": "Filosofi Teras",
+      "image": "mulan.png"
+    },
+    {
+      "id": 42,
+      "id_categories": 3,
+      "title": "Rahasia Sukses",
+      "image": "mulan.png"
+    },
+    {
+      "id": 43,
+      "id_categories": 3,
+      "title": "Metode Diet Sehat",
+      "image": "mulan.png"
+    },
+    {
+      "id": 44,
+      "id_categories": 3,
+      "title": "Traveling Hemat",
+      "image": "mulan.png"
+    },
+    {
+      "id": 45,
+      "id_categories": 3,
+      "title": "Membangun Startup",
+      "image": "mulan.png"
+    },
+    {
+      "id": 46,
+      "id_categories": 4,
+      "title": "Romeo and Juliet",
+      "image": "mulan.png"
+    },
+    {
+      "id": 47,
+      "id_categories": 4,
+      "title": "To Kill a Mockingbird",
+      "image": "mulan.png"
+    },
+    {
+      "id": 48,
+      "id_categories": 4,
+      "title": "The Great Gatsby",
+      "image": "mulan.png"
+    },
+    {
+      "id": 49,
+      "id_categories": 4,
+      "title": "Little Women",
+      "image": "mulan.png"
+    },
+    {
+      "id": 50,
+      "id_categories": 4,
+      "title": "Pride and Prejudice",
+      "image": "mulan.png"
+    },
+    {
+      "id": 51,
+      "id_categories": 4,
+      "title": "Wuthering Heights",
+      "image": "mulan.png"
+    },
+    {
+      "id": 52,
+      "id_categories": 4,
+      "title": "Frankenstein",
+      "image": "mulan.png"
+    },
+    {
+      "id": 53,
+      "id_categories": 4,
+      "title": "Dracula",
+      "image": "mulan.png"
+    },
+    {
+      "id": 54,
+      "id_categories": 4,
+      "title": "Les Misérables",
+      "image": "mulan.png"
+    },
+    {
+      "id": 55,
+      "id_categories": 4,
+      "title": "War and Peace",
+      "image": "mulan.png"
+    },
+    {
+      "id": 56,
+      "id_categories": 4,
+      "title": "Don Quixote",
+      "image": "mulan.png"
+    },
+    {
+      "id": 57,
+      "id_categories": 4,
+      "title": "The Odyssey",
+      "image": "mulan.png"
+    },
+    {
+      "id": 58,
+      "id_categories": 4,
+      "title": "Moby Dick",
+      "image": "mulan.png"
+    },
+    {
+      "id": 59,
+      "id_categories": 4,
+      "title": "Crime and Punishment",
+      "image": "mulan.png"
+    },
+    {
+      "id": 60,
+      "id_categories": 4,
+      "title": "Anna Karenina",
+      "image": "mulan.png"
+    },
+    {
+      "id": 61,
+      "id_categories": 5,
+      "title": "Si Kancil dan Buaya",
+      "image": "mulan.png"
+    },
+    {
+      "id": 62,
+      "id_categories": 5,
+      "title": "Kelinci dan Kura-Kura",
+      "image": "mulan.png"
+    },
+    {
+      "id": 63,
+      "id_categories": 5,
+      "title": "Singa yang Bijak",
+      "image": "mulan.png"
+    },
+    {
+      "id": 64,
+      "id_categories": 5,
+      "title": "Semut dan Belalang",
+      "image": "mulan.png"
+    },
+    {
+      "id": 65,
+      "id_categories": 5,
+      "title": "Gajah yang Baik Hati",
+      "image": "mulan.png"
+    },
+    {
+      "id": 66,
+      "id_categories": 5,
+      "title": "Kancil Mencuri Timun",
+      "image": "mulan.png"
+    },
+    {
+      "id": 67,
+      "id_categories": 5,
+      "title": "Serigala dan Domba",
+      "image": "mulan.png"
+    },
+    {
+      "id": 68,
+      "id_categories": 5,
+      "title": "Kucing yang Pintar",
+      "image": "mulan.png"
+    },
+    {
+      "id": 69,
+      "id_categories": 5,
+      "title": "Burung Merpati Setia",
+      "image": "mulan.png"
+    },
+    {
+      "id": 70,
+      "id_categories": 5,
+      "title": "Kura-Kura Ninja",
+      "image": "mulan.png"
+    },
+    {
+      "id": 71,
+      "id_categories": 5,
+      "title": "Zebra si Pelari Cepat",
+      "image": "mulan.png"
+    },
+    {
+      "id": 72,
+      "id_categories": 5,
+      "title": "Monyet dan Pisang",
+      "image": "mulan.png"
+    },
+    {
+      "id": 73,
+      "id_categories": 5,
+      "title": "Beruang Madu",
+      "image": "mulan.png"
+    },
+    {
+      "id": 74,
+      "id_categories": 5,
+      "title": "Ikan Mas Ajaib",
+      "image": "mulan.png"
+    },
+    {
+      "id": 75,
+      "id_categories": 5,
+      "title": "Harimau dan Kancil",
+      "image": "mulan.png"
+    }
+  ],
+
+  "progress": [
+    {
+      "id": 1,
+      "id_book": 1,
+      "reading_progress": 85,
+      "status": "reading",
+      "last_read_at": "2026-04-03T08:00:00Z",
+      "saved": true
+    },
+    {
+      "id": 2,
+      "id_book": 2,
+      "reading_progress": 59,
+      "status": "reading",
+      "last_read_at": "2026-04-03T09:00:00Z",
+      "saved": false
+    },
+    {
+      "id": 3,
+      "id_book": 3,
+      "reading_progress": 50,
+      "status": "reading",
+      "last_read_at": "2026-04-02T10:00:00Z",
+      "saved": true
+    }
+  ],
+
+  "favorite": [
+    {
+      "id": 1,
+      "id_book": 1
+    }
+  ]
+}
