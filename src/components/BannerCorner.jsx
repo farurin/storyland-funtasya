@@ -1,25 +1,29 @@
 import React from "react";
-import bgBanner from "../assets/banner_corner.png";
+import defaultBg from "../assets/banner_corner.png";
 
-const BannerCorner = () => {
+const BannerCorner = ({
+  title = "Corner",
+  description = "Ayo lihat riwayat bacaanmu, buku favorit dan yang sudah kamu simpan disini",
+  bgImage = defaultBg,
+}) => {
   return (
     <div
-      className="w-full overflow-hidden relative h-80 flex items-center justify-center px-10 md:px-16 py-10"
+      className="w-full overflow-hidden relative h-80 flex items-center justify-center"
       style={{
-        backgroundImage: `url(${bgBanner})`,
+        backgroundImage: `url(${bgImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
       <div className="absolute inset-0" />
 
-      <div className="relative z-10 text-center">
-        <h2 className="text-black text-2xl md:text-3xl font-bold leading-tight">
-          Corner
+      {/* Teks di tengah banner */}
+      <div className="relative z-10 text-center px-6">
+        <h2 className="text-black text-3xl md:text-4xl font-bold leading-tight">
+          {title}
         </h2>
-        <p className="text-black mt-3 text-sm md:text-base mx-auto">
-          Ayo lihat riwayat bacaanmu, buku favorit dan yang sudah kamu simpan
-          disini
+        <p className="text-black mt-3 text-sm md:text-base mx-auto max-w-lg">
+          {description}
         </p>
       </div>
     </div>

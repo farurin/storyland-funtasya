@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Corner from "./pages/Corner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Categories from "./pages/Categories"; // <-- Tambahkan Import Ini
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -17,6 +18,9 @@ export default function App() {
       {/* Main Layout Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+
+        {/* Rute Kategori yang baru */}
+        <Route path="/categories" element={<Categories />} />
 
         {/* Rute yang dijaga satpam */}
         <Route element={<ProtectedRoute />}>

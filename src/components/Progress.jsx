@@ -14,27 +14,36 @@ const Progress = ({ data, search }) => {
     ([, items]) => filterBySearch(items).length > 0,
   );
 
+  // Jika kosong, margin tetap konsisten
   if (!hasResults) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-6 md:px-10 py-10 text-center text-gray-400">
+      <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center text-gray-400 font-medium">
         Tidak ada buku ditemukan.
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-10/12 mx-auto md:px-10 mb-20">
+    // Margin disamakan dengan global: mx-3 md:mx-20 lg:mx-42 px-6
+    <div className="mx-3 md:mx-20 lg:mx-42 px-6 mb-20">
       {groups.map(([label, items]) => {
         const filtered = filterBySearch(items);
         if (filtered.length === 0) return null;
 
         return (
-          <div key={label} className="mt-10">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">{label}</h3>
+          <div key={label} className="mt-12">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">{label}</h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 md:gap-4">
+            {/* Menggunakan flex-wrap dengan gap 20px seperti di Home */}
+            <div className="flex flex-wrap gap-[20px]">
               {filtered.map((item) => (
-                <ProgressCard key={item.id} progress={item} />
+                // Mengunci ukuran Card sebesar 179x255
+                <div
+                  key={item.id}
+                  className="w-[179px] shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
+                >
+                  <ProgressCard progress={item} />
+                </div>
               ))}
             </div>
           </div>
