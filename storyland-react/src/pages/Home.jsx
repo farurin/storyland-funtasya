@@ -4,48 +4,50 @@ import Carousel from "../components/Carousel";
 import Category from "../components/Category";
 import ListBooks from "../components/ListBooks";
 import HeroBanner from "../components/HeroBanner";
-// Sementara import data.json untuk mengambil daftar BUKU saja
-import jsonData from "../../data.json";
 
 const Home = () => {
-  // state untuk menyimpan data dari API
   const [categories, setCategories] = useState([]);
-  const [books, setBooks] = useState(jsonData.books); // Buku masih statis
+  // 1. Sekarang state books dimulai dari array kosong, bukan lagi dari data.json
+  const [books, setBooks] = useState([]);
 
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect untuk ambil data saat halaman pertama kali dimuat
+  // 2. Mengambil Kategori dan Buku secara bersamaan dari API Express
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        // panggil API Express yang berjalan di port 5000
-        const response = await fetch("http://localhost:5000/api/categories");
+        // Promise.all agar fetch berjalan paralel (lebih cepat)
+        const [catRes, bookRes] = await Promise.all([
+          fetch("http://localhost:5000/api/categories"),
+          fetch("http://localhost:5000/api/books"),
+        ]);
 
-        if (!response.ok) {
+        if (!catRes.ok || !bookRes.ok) {
           throw new Error("Gagal mengambil data dari server");
         }
 
-        const data = await response.json();
-        setCategories(data); // Simpan data ke dalam state
-        setIsLoading(false); // Matikan loading
+        const catData = await catRes.json();
+        const bookData = await bookRes.json();
+
+        setCategories(catData);
+        setBooks(bookData);
+        setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching data:", error);
         setIsLoading(false);
       }
     };
 
-    fetchCategories();
-  }, []); // Array kosong [] memastikan fetch hanya berjalan 1x saat render awal
+    fetchData();
+  }, []);
 
-  // Logika untuk menggabungkan Buku ke dalam Kategori (Dibutuhkan oleh ListBooks)
   const categoriesWithBooks = categories.map((cat) => ({
     ...cat,
     books: books.filter((b) => b.id_categories === cat.id),
   }));
 
-  // Jika data masih dimuat, tampilkan layar loading sederhana
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">

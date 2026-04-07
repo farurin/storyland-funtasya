@@ -30,12 +30,26 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to Funtasya StoryLand API" });
 });
 
+// API kategori
 app.get("/api/categories", (req, res) => {
   const sql = "SELECT * FROM categories";
 
   db.query(sql, (err, results) => {
     if (err) {
       console.error("Gagal mengambil kategori:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan pada server" });
+    }
+    res.json(results);
+  });
+});
+
+// API ambil semua data buku
+app.get("/api/books", (req, res) => {
+  const sql = "SELECT * FROM books";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Gagal mengambil buku:", err);
       return res.status(500).json({ error: "Terjadi kesalahan pada server" });
     }
     res.json(results);

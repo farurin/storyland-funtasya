@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import BannerCorner from "../components/BannerCorner";
 import HeroBanner from "../components/HeroBanner";
 import Card from "../components/Card";
-import Category from "../components/Category"; // Memanggil reusable component Category
-import data from "../../data.json";
+import Category from "../components/Category";
 
 // Ikon untuk tombol Grid & List
 const IconGrid = () => (
@@ -51,39 +50,79 @@ const IconSearch = () => (
 const CategoryDetail = () => {
   const { id } = useParams();
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState("grid"); // Default tampilan grid
+  const [viewMode, setViewMode] = useState("grid");
 
-  // Mencari data kategori berdasarkan ID dari URL
-  const category = data.categories.find((c) => c.id === parseInt(id));
+  // 1. State untuk menampung data API
+  const [categories, setCategories] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Memfilter buku yang id_categories-nya cocok dengan URL DAN cocok dengan pencarian
-  const filteredBooks = data.books.filter((b) => {
+  // 2. Fetch data dari API Express
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catRes, bookRes] = await Promise.all([
+          fetch("http://localhost:5000/api/categories"),
+          fetch("http://localhost:5000/api/books"),
+        ]);
+
+        if (!catRes.ok || !bookRes.ok) {
+          throw new Error("Gagal mengambil data dari server");
+        }
+
+        const catData = await catRes.json();
+        const bookData = await bookRes.json();
+
+        setCategories(catData);
+        setBooks(bookData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Array kosong berarti fetch 1x saja, biarkan React yang memfilter secara dinamis
+
+  // 3. Logika Filter Data
+  const category = categories.find((c) => c.id === parseInt(id));
+
+  const filteredBooks = books.filter((b) => {
     const matchCat = b.id_categories === parseInt(id);
     const matchSearch = b.title.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
+  // Tampilan Loading
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
+        Menyiapkan Koleksi Buku...
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
-      {/* 2. Banner Category Dinamis */}
+      {/* Banner Category Dinamis */}
       <BannerCorner
         title={category ? category.name : "Kategori"}
         description={
           category
             ? category.description
-            : "Jelajahi kisah tradisional dari berbagai daerah di Indonesia."
+            : "Jelajahi kisah dari berbagai kategori."
         }
       />
 
-      {/* 3. Reusable Component Category */}
+      {/* Slider Category */}
       <div className="mt-10">
-        <Category categories={data.categories} activeCategoryId={id} />
+        <Category categories={categories} activeCategoryId={id} />
       </div>
 
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 mb-20">
-        {/* 4 & 5. Filter Search & View Toggle */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-          {/* Kolom Pencarian Kiri */}
+          {/* Kolom Pencarian */}
           <div className="relative w-full sm:w-80">
             <input
               type="text"
@@ -96,7 +135,7 @@ const CategoryDetail = () => {
             </div>
           </div>
 
-          {/* Toggle Grid / List View Kanan */}
+          {/* Toggle Grid / List View */}
           <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
             <button
               onClick={() => setViewMode("grid")}
@@ -128,10 +167,10 @@ const CategoryDetail = () => {
           </h2>
         )}
 
-        {/* 6. Daftar Buku */}
+        {/* Daftar Buku */}
         {filteredBooks.length > 0 ? (
           viewMode === "grid" ? (
-            /* ================= GRID VIEW ================= */
+            /* GRID VIEW */
             <div className="flex flex-wrap gap-[20px]">
               {filteredBooks.map((book) => (
                 <div
@@ -143,7 +182,7 @@ const CategoryDetail = () => {
               ))}
             </div>
           ) : (
-            /* ================= LIST VIEW (Tanpa Progress Bar) ================= */
+            /* LIST VIEW */
             <div className="flex flex-col gap-5">
               {filteredBooks.map((book) => (
                 <div
@@ -171,10 +210,8 @@ const CategoryDetail = () => {
                       {book.title}
                     </h3>
                     <p className="text-sm text-gray-500 mt-2 line-clamp-3 md:line-clamp-4 max-w-4xl leading-relaxed">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                      {book.description ||
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
                     </p>
                   </div>
                 </div>
@@ -188,7 +225,7 @@ const CategoryDetail = () => {
         )}
       </section>
 
-      {/* 7. CTA Download App */}
+      {/* CTA Download App */}
       <HeroBanner />
     </div>
   );
