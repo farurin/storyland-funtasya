@@ -4,7 +4,7 @@ import { Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
 import "swiper/css";
 
-const Category = ({ categories, activeCategoryId }) => {
+const CategorySlider = ({ categories, activeCategoryId }) => {
   const filtered = categories.filter((c) => c.image_icon);
   const isDetailPage = activeCategoryId !== undefined;
 
@@ -67,4 +67,4 @@ const Category = ({ categories, activeCategoryId }) => {
   );
 };
 
-export default Category;
+export default CategorySlider;

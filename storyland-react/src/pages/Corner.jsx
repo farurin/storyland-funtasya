@@ -7,7 +7,7 @@ import {
 import BannerCorner from "../components/BannerCorner";
 import FilterCorner from "../components/FilterCorner";
 import Progress from "../components/Progress";
-import HeroBanner from "../components/HeroBanner";
+import CtaDownload from "../components/CtaDownload";
 
 const Corner = () => {
   const [activeFilter, setActiveFilter] = useState("riwayat");
@@ -32,7 +32,7 @@ const Corner = () => {
         onSearch={setSearch}
       />
       <Progress data={progressData} search={search} />
-      <HeroBanner />
+      <CtaDownload />
     </div>
   );
 };

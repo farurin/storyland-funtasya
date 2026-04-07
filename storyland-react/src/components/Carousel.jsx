@@ -134,7 +134,7 @@ const Carousel = ({ books, onSearch }) => {
         >
           {categoriesData[activeTab].items.map((book) => (
             <SwiperSlide key={book.id} style={{ width: "179px" }}>
-              <div className="w-[179px] h-[255px] transition-transform duration-300 hover:scale-105 cursor-pointer">
+              <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105 cursor-pointer">
                 <Card book={book} />
               </div>
             </SwiperSlide>

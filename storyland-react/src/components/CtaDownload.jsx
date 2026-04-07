@@ -1,7 +1,7 @@
 import React from "react";
 import loveCat from "../assets/lovecat.png";
 
-const HeroBanner = () => {
+const CtaDownload = () => {
   return (
     <section className="bg-[#F0EDFF] mt-20 w-full py-12">
       {/* Margin disamakan dengan global, tanpa tambahan px-10 yang merusak alignment */}
@@ -44,4 +44,4 @@ const HeroBanner = () => {
   );
 };
 
-export default HeroBanner;
+export default CtaDownload;

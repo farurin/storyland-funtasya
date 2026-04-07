@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import BannerCorner from "../components/BannerCorner";
-import HeroBanner from "../components/HeroBanner";
+import CtaDownload from "../components/CtaDownload";
 import Card from "../components/Card";
-import Category from "../components/Category";
+import CategorySlider from "../components/CategorySlider";
 
 // Ikon untuk tombol Grid & List
 const IconGrid = () => (
@@ -117,7 +117,7 @@ const CategoryDetail = () => {
 
       {/* Slider Category */}
       <div className="mt-10">
-        <Category categories={categories} activeCategoryId={id} />
+        <CategorySlider categories={categories} activeCategoryId={id} />
       </div>
 
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 mb-20">
@@ -171,11 +171,11 @@ const CategoryDetail = () => {
         {filteredBooks.length > 0 ? (
           viewMode === "grid" ? (
             /* GRID VIEW */
-            <div className="flex flex-wrap gap-[20px]">
+            <div className="flex flex-wrap gap-5">
               {filteredBooks.map((book) => (
                 <div
                   key={book.id}
-                  className="w-[179px] shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
+                  className="w-44.75 shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
                 >
                   <Card book={book} />
                 </div>
@@ -191,7 +191,7 @@ const CategoryDetail = () => {
                 >
                   {/* Cover Buku Kiri */}
                   <div className="w-24 md:w-32 shrink-0">
-                    <div className="w-full aspect-[2/3] rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                    <div className="w-full aspect-2/3 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                       <img
                         src={`/images/books/${book.image}`}
                         alt={book.title}
@@ -226,7 +226,7 @@ const CategoryDetail = () => {
       </section>
 
       {/* CTA Download App */}
-      <HeroBanner />
+      <CtaDownload />
     </div>
   );
 };

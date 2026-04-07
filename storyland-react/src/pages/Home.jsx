@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Hero from "../components/Hero";
+import HeroSection from "../components/HeroSection";
 import Carousel from "../components/Carousel";
-import Category from "../components/Category";
-import ListBooks from "../components/ListBooks";
-import HeroBanner from "../components/HeroBanner";
+import CategorySlider from "../components/CategorySlider";
+import BookListSection from "../components/BookListSection";
+import CtaDownload from "../components/CtaDownload";
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -58,15 +58,15 @@ const Home = () => {
 
   return (
     <div>
-      <Hero />
+      <HeroSection />
       <Carousel
         books={books}
         onChangeCategory={setActiveCategory}
         onSearch={setSearch}
       />
-      <Category categories={categories} />
-      <ListBooks data={categoriesWithBooks} />
-      <HeroBanner />
+      <CategorySlider categories={categories} />
+      <BookListSection data={categoriesWithBooks} />
+      <CtaDownload />
     </div>
   );
 };

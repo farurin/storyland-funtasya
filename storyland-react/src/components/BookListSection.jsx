@@ -113,7 +113,7 @@ const CategorySection = ({ category }) => (
   </div>
 );
 
-const ListBooks = ({ data }) => {
+const BookListSection = ({ data }) => {
   const filtered = data.filter((c) => c.image !== null);
 
   return (
@@ -145,4 +145,4 @@ const ListBooks = ({ data }) => {
   );
 };
 
-export default ListBooks;
+export default BookListSection;

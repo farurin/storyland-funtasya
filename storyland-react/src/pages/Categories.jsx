@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import HeroBanner from "../components/HeroBanner";
+import CtaDownload from "../components/CtaDownload";
 
 // Ikon panah ungu lingkaran sesuai desain Figma
 const IconArrowCircle = () => (
@@ -23,52 +23,46 @@ const IconArrowCircle = () => (
 );
 
 const Categories = () => {
-  // Data disesuaikan persis dengan nama file di folder public/images/category/
-  const categoriesList = [
-    {
-      id: 1,
-      title: "Cerita Nusantara",
-      count: 12,
-      image: "cat1-cerita-nusantara.png",
-    },
-    { id: 2, title: "Cerita Hewan", count: 12, image: "cat2-cerita-hewan.png" },
-    {
-      id: 3,
-      title: "Cerita Pahlawan Nusantara",
-      count: 12,
-      image: "cat3-cerita-pahlawan-nusantara.png",
-    },
-    {
-      id: 4,
-      title: "Cerita Anak Muslim",
-      count: 12,
-      image: "cat4-cerita anak muslim.png",
-    },
-    {
-      id: 5,
-      title: "Cerita 1001 Malam",
-      count: 12,
-      image: "cat5-cerita-1001-malam.png",
-    },
-    {
-      id: 6,
-      title: "Cerita Anak Tauladan",
-      count: 12,
-      image: "cat6-cerita-anak-tauladan.png",
-    },
-    {
-      id: 7,
-      title: "Cerita Mancanegara",
-      count: 12,
-      image: "cat7-cerita-mancanegara.png",
-    },
-    {
-      id: 8,
-      title: "Kisah Nabi & Rosul",
-      count: 12,
-      image: "cat8-kisah-nabi-dan-rosul.png",
-    },
-  ];
+  // State untuk menyimpan data dari API
+  const [categories, setCategories] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch data kategori dan buku dari API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catRes, bookRes] = await Promise.all([
+          fetch("http://localhost:5000/api/categories"),
+          fetch("http://localhost:5000/api/books"),
+        ]);
+
+        if (!catRes.ok || !bookRes.ok) {
+          throw new Error("Gagal mengambil data dari server");
+        }
+
+        const catData = await catRes.json();
+        const bookData = await bookRes.json();
+
+        setCategories(catData);
+        setBooks(bookData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
+        Memuat Daftar Kategori...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -85,44 +79,52 @@ const Categories = () => {
       {/* Grid Categories */}
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {categoriesList.map((cat) => (
-            <Link
-              to={`/categories/${cat.id}`}
-              key={cat.id}
-              className="group block bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
-            >
-              {/* Bagian Atas: Gambar Ilustrasi */}
-              <div className="w-full aspect-[2/1] bg-gray-50 overflow-hidden relative">
-                <img
-                  src={`/images/category/${cat.image}`}
-                  alt={cat.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/600x300?text=Ilustrasi+Kategori";
-                  }}
-                />
-              </div>
+          {categories.map((cat) => {
+            // Menghitung jumlah cerita riil berdasarkan data di tabel books
+            const storyCount = books.filter(
+              (b) => b.id_categories === cat.id,
+            ).length;
 
-              {/* Bagian Bawah: Teks & Ikon */}
-              <div className="p-5 flex items-center justify-between">
-                <h2 className="text-lg md:text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                  {cat.title}
-                </h2>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-600">
-                    {cat.count} cerita
-                  </span>
-                  <IconArrowCircle />
+            return (
+              <Link
+                to={`/categories/${cat.id}`}
+                key={cat.id}
+                className="group block bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
+                {/* Bagian Atas: Gambar Ilustrasi */}
+                <div className="w-full aspect-2/1 bg-gray-50 overflow-hidden relative">
+                  <img
+                    // Menggunakan image_card dari MySQL
+                    src={`/images/category/${cat.image_card}`}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/600x300?text=Ilustrasi+Kategori";
+                    }}
+                  />
                 </div>
-              </div>
-            </Link>
-          ))}
+
+                {/* Bagian Bawah: Teks & Ikon */}
+                <div className="p-5 flex items-center justify-between">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+                    {cat.name}
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-600">
+                      {storyCount} cerita
+                    </span>
+                    <IconArrowCircle />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA Download App */}
-      <HeroBanner />
+      <CtaDownload />
     </div>
   );
 };
