@@ -55,18 +55,17 @@ const CategorySection = ({ category }) => (
     </div>
 
     {/* Flex Container untuk Banner (Sticky) dan Swiper */}
-    <div className="flex gap-[20px] items-start h-full">
+    <div className="flex gap-5 items-start h-full">
       {/* Category Banner (Ukuran fix: 133x255) */}
       {/* Category Banner (Ukuran fix: 133x255) */}
       <Link
         to={`/categories/${category.id}`}
-        className="hidden lg:block w-[133px] h-[255px] shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
+        className="hidden lg:block w-33.25 h-63.75 shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
       >
         <img
-          src={`/images/category/banner_${category.image}`}
+          src={`/images/category/${category.image_banner}`}
           alt={category.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          // Fallback jika nama file salah atau gambar belum ada
           onError={(e) => {
             e.target.src =
               "https://via.placeholder.com/133x255?text=Banner+Kategori";
@@ -98,14 +97,14 @@ const CategorySection = ({ category }) => (
               // Set ukuran fix slide: 179px
               <SwiperSlide key={book.id} style={{ width: "179px" }}>
                 {/* Pastikan container Card juga berukuran 179x255 */}
-                <div className="w-[179px] h-[255px] transition-transform duration-300 hover:scale-105">
+                <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105">
                   <Card book={book} />
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
         ) : (
-          <div className="flex items-center justify-center h-[255px] text-gray-400 italic">
+          <div className="flex items-center justify-center h-63.75 text-gray-400 italic">
             Belum ada buku di kategori ini.
           </div>
         )}

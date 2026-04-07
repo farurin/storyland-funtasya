@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import "swiper/css";
 
 const Category = ({ categories, activeCategoryId }) => {
-  const filtered = categories.filter((c) => c.image !== null);
+  const filtered = categories.filter((c) => c.image_icon);
   const isDetailPage = activeCategoryId !== undefined;
 
   return (
@@ -48,7 +48,7 @@ const Category = ({ categories, activeCategoryId }) => {
                   }`}
                 >
                   <img
-                    src={`/images/category/${category.image}`}
+                    src={`/images/category/${category.image_icon}`}
                     alt={category.name}
                     draggable="false"
                     className="w-full h-auto object-cover rounded-2xl select-none"
