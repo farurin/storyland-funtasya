@@ -77,7 +77,7 @@ const CategoryDetail = () => {
 
       {/* 3. Reusable Component Category */}
       <div className="mt-10">
-        <Category categories={data.categories} />
+        <Category categories={data.categories} activeCategoryId={id} />
       </div>
 
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 mb-20">
