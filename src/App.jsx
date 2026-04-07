@@ -5,7 +5,8 @@ import Home from "./pages/Home";
 import Corner from "./pages/Corner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Categories from "./pages/Categories"; // <-- Tambahkan Import Ini
+import Categories from "./pages/Categories";
+import CategoryDetail from "./pages/CategoryDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -19,8 +20,11 @@ export default function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
 
-        {/* Rute Kategori yang baru */}
+        {/* Kategori */}
         <Route path="/categories" element={<Categories />} />
+
+        {/* Detail Kategori */}
+        <Route path="/categories/:id" element={<CategoryDetail />} />
 
         {/* Rute yang dijaga satpam */}
         <Route element={<ProtectedRoute />}>
