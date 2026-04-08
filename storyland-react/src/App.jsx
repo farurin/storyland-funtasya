@@ -8,29 +8,39 @@ import Register from "./pages/Register";
 import Categories from "./pages/Categories";
 import CategoryDetail from "./pages/CategoryDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BookDetail from "./pages/BookDetail";
+import BookPreviewModal from "./components/BookPreviewModal";
 
 export default function App() {
   return (
-    <Routes>
-      {/* Auth Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <>
+      <Routes>
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* Main Layout Routes */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
+        {/* Main Layout Routes */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
 
-        {/* Kategori */}
-        <Route path="/categories" element={<Categories />} />
+          {/* Kategori */}
+          <Route path="/categories" element={<Categories />} />
 
-        {/* Detail Kategori */}
-        <Route path="/categories/:id" element={<CategoryDetail />} />
+          {/* Detail Kategori */}
+          <Route path="/categories/:id" element={<CategoryDetail />} />
 
-        {/* Rute yang dijaga satpam */}
-        <Route element={<ProtectedRoute />}>
+          {/* Detail Baca Buku */}
+          <Route path="/book/:id" element={<BookDetail />} />
+
+          {/* Corner */}
           <Route path="/corner" element={<Corner />} />
+
+          {/* Rute yang dijaga satpam */}
+          <Route element={<ProtectedRoute />}></Route>
         </Route>
-      </Route>
-    </Routes>
+      </Routes>
+
+      <BookPreviewModal />
+    </>
   );
 }

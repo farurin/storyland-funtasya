@@ -38,13 +38,19 @@ const BannerIklan = () => (
   </section>
 );
 
-const CategorySection = ({ category }) => (
+export const CategorySection = ({ category, customTitle }) => (
   <div className="mt-12 mb-20">
     {/* Header Section */}
     <div className="flex items-end justify-between mb-4">
       <div>
-        <h3 className="text-2xl font-bold text-gray-900">{category.name}</h3>
-        <p className="text-gray-500 text-sm mt-1">{category.description}</p>
+        {/* Jika ada customTitle, gunakan itu. Jika tidak, gunakan nama kategori bawaan */}
+        <h3 className="text-2xl font-bold text-gray-900">
+          {customTitle ? customTitle : category.name}
+        </h3>
+        {/* Sembunyikan deskripsi jika sedang menggunakan customTitle (di halaman detail buku) */}
+        {!customTitle && (
+          <p className="text-gray-500 text-sm mt-1">{category.description}</p>
+        )}
       </div>
       <Link
         to={`/categories/${category.id}`}
@@ -54,10 +60,7 @@ const CategorySection = ({ category }) => (
       </Link>
     </div>
 
-    {/* Flex Container untuk Banner (Sticky) dan Swiper */}
     <div className="flex gap-5 items-start h-full">
-      {/* Category Banner (Ukuran fix: 133x255) */}
-      {/* Category Banner (Ukuran fix: 133x255) */}
       <Link
         to={`/categories/${category.id}`}
         className="hidden lg:block w-33.25 h-63.75 shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
@@ -71,7 +74,6 @@ const CategorySection = ({ category }) => (
               "https://via.placeholder.com/133x255?text=Banner+Kategori";
           }}
         />
-        {/* Overlay tombol "Lihat Semua >" */}
         <div className="absolute bottom-3 left-0 right-0 flex justify-center px-2">
           <div className="bg-white/90 backdrop-blur-sm text-[#F59E0B] text-[10px] font-bold py-1.5 px-3 rounded-full shadow-sm whitespace-nowrap">
             Lihat Semua &gt;
@@ -79,24 +81,18 @@ const CategorySection = ({ category }) => (
         </div>
       </Link>
 
-      {/* Swiper List */}
-      {/* min-w-0 penting agar flex item tidak overflow ke kanan layar */}
       <div className="flex-1 min-w-0 custom-list-swiper relative">
-        {category.books.length > 0 ? (
+        {category.books && category.books.length > 0 ? (
           <Swiper
             modules={[Pagination, Autoplay]}
-            // Menggunakan "auto" agar Swiper menghormati ukuran spesifik (179px) di SwiperSlide
             slidesPerView="auto"
-            spaceBetween={20} // Sesuai gap Figma: 20px
+            spaceBetween={20}
             pagination={{ clickable: true }}
             autoplay={{ delay: 4000, disableOnInteraction: false }}
-            // Tambahkan pb-12 agar ada ruang untuk titik-titik pagination
             className="pb-12"
           >
             {category.books.map((book) => (
-              // Set ukuran fix slide: 179px
               <SwiperSlide key={book.id} style={{ width: "179px" }}>
-                {/* Pastikan container Card juga berukuran 179x255 */}
                 <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105">
                   <Card book={book} />
                 </div>
@@ -112,6 +108,8 @@ const CategorySection = ({ category }) => (
     </div>
   </div>
 );
+
+// ... (KODE BookListSection DI BAWAHNYA TETAP SAMA) ...
 
 const BookListSection = ({ data }) => {
   const filtered = data.filter((c) => c.image !== null);
