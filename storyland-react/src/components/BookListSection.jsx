@@ -39,7 +39,7 @@ const BannerIklan = () => (
 );
 
 const CategorySection = ({ category }) => (
-  <div className="mt-12">
+  <div className="mt-12 mb-20">
     {/* Header Section */}
     <div className="flex items-end justify-between mb-4">
       <div>

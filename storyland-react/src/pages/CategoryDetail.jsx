@@ -120,8 +120,9 @@ const CategoryDetail = () => {
         <CategorySlider categories={categories} activeCategoryId={id} />
       </div>
 
-      <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 mb-20">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+      {/* Tombol Cari dan toggle */}
+      <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-10 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Kolom Pencarian */}
           <div className="relative w-full sm:w-80">
             <input
@@ -159,71 +160,76 @@ const CategoryDetail = () => {
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Judul Kategori */}
-        {category && (
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-            {category.name}
-          </h2>
-        )}
+      {/* Judul & daftar buku */}
+      <div className="w-full bg-[#F7F5FF] pt-12 pb-20">
+        <section className="mx-3 md:mx-20 lg:mx-42 px-6">
+          {/* Judul Kategori */}
+          {category && (
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
+              {category.name}
+            </h2>
+          )}
 
-        {/* Daftar Buku */}
-        {filteredBooks.length > 0 ? (
-          viewMode === "grid" ? (
-            /* GRID VIEW */
-            <div className="flex flex-wrap gap-5">
-              {filteredBooks.map((book) => (
-                <div
-                  key={book.id}
-                  className="w-44.75 shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
-                >
-                  <Card book={book} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* LIST VIEW */
-            <div className="flex flex-col gap-5">
-              {filteredBooks.map((book) => (
-                <div
-                  key={book.id}
-                  className="flex bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden p-4 md:p-5 gap-5 md:gap-8 hover:shadow-md transition cursor-pointer"
-                >
-                  {/* Cover Buku Kiri */}
-                  <div className="w-24 md:w-32 shrink-0">
-                    <div className="w-full aspect-2/3 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
-                      <img
-                        src={`/images/books/${book.image}`}
-                        alt={book.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/150x220?text=Cover";
-                        }}
-                      />
+          {/* Daftar Buku */}
+          {filteredBooks.length > 0 ? (
+            viewMode === "grid" ? (
+              /* GRID VIEW */
+              <div className="flex flex-wrap gap-5">
+                {filteredBooks.map((book) => (
+                  <div
+                    key={book.id}
+                    className="w-44.75 shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
+                  >
+                    <Card book={book} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* LIST VIEW */
+              <div className="flex flex-col gap-5">
+                {filteredBooks.map((book) => (
+                  <div
+                    key={book.id}
+                    className="flex bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden p-4 md:p-5 gap-5 md:gap-8 hover:shadow-md transition cursor-pointer"
+                  >
+                    {/* Cover Buku Kiri */}
+                    <div className="w-24 md:w-32 shrink-0">
+                      <div className="w-full aspect-2/3 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                        <img
+                          src={`/images/books/${book.image}`}
+                          alt={book.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/150x220?text=Cover";
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Info Buku Kanan */}
+                    <div className="flex flex-col justify-center flex-1 py-1">
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900">
+                        {book.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-2 line-clamp-3 md:line-clamp-4 max-w-4xl leading-relaxed">
+                        {book.description ||
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Info Buku Kanan */}
-                  <div className="flex flex-col justify-center flex-1 py-1">
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900">
-                      {book.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-3 md:line-clamp-4 max-w-4xl leading-relaxed">
-                      {book.description ||
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="text-center py-20 text-gray-400 font-medium bg-white rounded-2xl border border-dashed border-gray-200">
+              Tidak ada buku yang sesuai dengan pencarian di kategori ini.
             </div>
-          )
-        ) : (
-          <div className="text-center py-20 text-gray-400 font-medium bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-            Tidak ada buku yang sesuai dengan pencarian di kategori ini.
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
 
       {/* CTA Download App */}
       <CtaDownload />

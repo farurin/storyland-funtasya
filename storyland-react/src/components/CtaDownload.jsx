@@ -3,7 +3,7 @@ import loveCat from "../assets/lovecat.png";
 
 const CtaDownload = () => {
   return (
-    <section className="bg-[#F0EDFF] mt-20 w-full py-12">
+    <section className="bg-[#F0EDFF] w-full py-12">
       {/* Margin disamakan dengan global, tanpa tambahan px-10 yang merusak alignment */}
       <div className="mx-3 md:mx-20 lg:mx-42 px-6 flex flex-col lg:flex-row items-center justify-between gap-10">
         {/* Left Content */}

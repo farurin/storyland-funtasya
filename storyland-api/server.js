@@ -56,6 +56,53 @@ app.get("/api/books", (req, res) => {
   });
 });
 
+// API halaman Corner
+
+// Karena belum ada sistem login betulan (JWT/Session),
+// kita asumsikan yang sedang login adalah user ID 1
+const ID_USER_AKTIF = 1;
+
+// [API] 1. Mengambil Buku Favorit
+app.get("/api/corner/favorites", (req, res) => {
+  const sql = `
+    SELECT b.* FROM user_favorites uf
+    JOIN books b ON uf.id_book = b.id
+    WHERE uf.id_user = ?
+  `;
+  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
+// [API] 2. Mengambil Buku Disimpan
+app.get("/api/corner/saved", (req, res) => {
+  const sql = `
+    SELECT b.* FROM user_saved us
+    JOIN books b ON us.id_book = b.id
+    WHERE us.id_user = ?
+  `;
+  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
+// [API] 3. Mengambil Riwayat Bacaan (Progress)
+app.get("/api/corner/history", (req, res) => {
+  const sql = `
+    SELECT b.*, up.reading_progress, up.last_read_at 
+    FROM user_progress up
+    JOIN books b ON up.id_book = b.id
+    WHERE up.id_user = ?
+    ORDER BY up.last_read_at DESC
+  `;
+  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
 // Jalankan server di port 5000
 const PORT = 5000;
 app.listen(PORT, () => {
