@@ -149,38 +149,60 @@ app.get("/api/books", (req, res) => {
 
 // API halaman Corner
 
-// Karena belum ada sistem login betulan (JWT/Session),
-// kita asumsikan yang sedang login adalah user ID 1
-const ID_USER_AKTIF = 1;
+// 1. Middleware untuk mengecek Token JWT
+const verifyToken = (req, res, next) => {
+  // Mengambil token dari header (Format: "Bearer <token>")
+  const token = req.headers.authorization?.split(" ")[1];
 
-// [API] 1. Mengambil Buku Favorit
-app.get("/api/corner/favorites", (req, res) => {
+  if (!token)
+    return res.status(401).json({ message: "Akses ditolak. Silakan login." });
+
+  try {
+    // Membuka token menggunakan kunci rahasia
+    const verified = jwt.verify(token, JWT_SECRET);
+    req.user = verified; // Menyimpan data user (id, email) dari token ke request
+    next(); // Lolos, silakan lanjut ke API
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Token tidak valid atau sudah kedaluwarsa." });
+  }
+};
+
+// [API] 1. Mengambil Buku Favorit (Sekarang dilindungi verifyToken)
+app.get("/api/corner/favorites", verifyToken, (req, res) => {
+  const userId = req.user.id; // Mengambil ID dari token yang valid
+
   const sql = `
     SELECT b.* FROM user_favorites uf
     JOIN books b ON uf.id_book = b.id
     WHERE uf.id_user = ?
   `;
-  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+  db.query(sql, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
 
-// [API] 2. Mengambil Buku Disimpan
-app.get("/api/corner/saved", (req, res) => {
+// [API] 2. Mengambil Buku Disimpan (Dilindungi verifyToken)
+app.get("/api/corner/saved", verifyToken, (req, res) => {
+  const userId = req.user.id;
+
   const sql = `
     SELECT b.* FROM user_saved us
     JOIN books b ON us.id_book = b.id
     WHERE us.id_user = ?
   `;
-  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+  db.query(sql, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
 
-// [API] 3. Mengambil Riwayat Bacaan (Progress)
-app.get("/api/corner/history", (req, res) => {
+// [API] 3. Mengambil Riwayat Bacaan (Dilindungi verifyToken)
+app.get("/api/corner/history", verifyToken, (req, res) => {
+  const userId = req.user.id;
+
   const sql = `
     SELECT b.*, up.reading_progress, up.last_read_at 
     FROM user_progress up
@@ -188,7 +210,7 @@ app.get("/api/corner/history", (req, res) => {
     WHERE up.id_user = ?
     ORDER BY up.last_read_at DESC
   `;
-  db.query(sql, [ID_USER_AKTIF], (err, results) => {
+  db.query(sql, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
