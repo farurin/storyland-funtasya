@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom"; // 1. Tambahkan import ini
 
 // Ikon Hati Merah
 const IconHeart = () => (
@@ -18,12 +19,19 @@ const IconHeart = () => (
 );
 
 const ProgressCard = ({ progress, type }) => {
+  const location = useLocation();
+
   // Antisipasi format data dummy yang berbeda-beda
   const book = progress.book || progress;
   const reading_progress = progress.reading_progress ?? 0;
 
+  if (!book) return null;
+
   return (
-    <div className="w-full bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer border border-gray-50 relative group">
+    <Link
+      to={`${location.pathname}?preview=${book.id}`}
+      className="block w-full bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer border border-gray-50 relative group"
+    >
       {/* Ikon Hati Khusus Tab Favorit */}
       {type === "favorit" && (
         <div className="absolute top-3 right-3 z-10 bg-white/50 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition">
@@ -65,7 +73,7 @@ const ProgressCard = ({ progress, type }) => {
           </div>
         )}
       </div>
-    </div>
+    </Link>
   );
 };
 
