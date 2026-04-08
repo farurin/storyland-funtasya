@@ -20,7 +20,7 @@ const Register = () => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // 1. Cek field kosong
@@ -40,14 +40,33 @@ const Register = () => {
       return;
     }
 
-    // 3. Simulasi Pendaftaran Berhasil
-    setIsError(false);
-    setErrorMessage("");
+    try {
+      // Mengirim data ke API Backend
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Di dunia nyata, di sini kita akan mengirim data ke database Laragon.
-    // Untuk sekarang, kita buat user otomatis login setelah daftar.
-    login();
-    navigate("/");
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Menampilkan pesan error asli dari server (misal: Email sudah terdaftar)
+        setIsError(true);
+        setErrorMessage(`*${data.message}`);
+        return;
+      }
+
+      setIsError(false);
+      setErrorMessage("");
+
+      // Menyimpan token & user ke Context, lalu masuk ke Home
+      login(data.token, data.user);
+      navigate("/");
+    } catch (error) {
+      setIsError(true);
+      setErrorMessage("*Gagal terhubung ke server. Pastikan backend berjalan.");
+    }
   };
 
   return (

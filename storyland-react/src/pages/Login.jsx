@@ -19,7 +19,7 @@ const Login = () => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -35,9 +35,31 @@ const Login = () => {
       return;
     }
 
-    setIsError(false);
-    login(); // Simpan status login
-    navigate("/"); // Pindah ke Beranda
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setIsError(true);
+        setErrorMessage(`*${data.message}`);
+        return;
+      }
+
+      setIsError(false);
+      setErrorMessage("");
+
+      // Simpan tiket dan pindah halaman
+      login(data.token, data.user);
+      navigate("/");
+    } catch (error) {
+      setIsError(true);
+      setErrorMessage("*Gagal terhubung ke server. Pastikan backend berjalan.");
+    }
   };
 
   return (

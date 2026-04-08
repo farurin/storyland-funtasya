@@ -4,6 +4,11 @@ const cors = require("cors");
 
 const app = express();
 
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "rahasia_funtasya_super_aman_123";
+
 // Middleware
 app.use(cors()); // Mengizinkan React mengakses API ini
 app.use(express.json()); // Agar bisa menerima data format JSON dari React
@@ -28,6 +33,92 @@ db.connect((err) => {
 // Route sederhana untuk mengetes API
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to Funtasya StoryLand API" });
+});
+
+// --- API AUTENTIKASI ---
+
+// [API] 1. Register Akun Baru
+app.post("/api/auth/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Cek apakah email sudah dipakai
+    db.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email],
+      async (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length > 0)
+          return res.status(400).json({ message: "Email sudah terdaftar!" });
+
+        // Hash password (Mengacak password jadi karakter rahasia)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Ambil kata depan email sebagai username default (misal: fiyana@gmail.com -> fiyana)
+        const username = email.split("@")[0];
+
+        // Simpan ke database
+        const insertSql =
+          "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+        db.query(
+          insertSql,
+          [username, email, hashedPassword],
+          (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Buatkan tiket (Token JWT) agar setelah daftar langsung login
+            const token = jwt.sign({ id: result.insertId, email }, JWT_SECRET, {
+              expiresIn: "1d",
+            });
+
+            res.status(201).json({
+              message: "Pendaftaran sukses!",
+              token,
+              user: { id: result.insertId, username, email },
+            });
+          },
+        );
+      },
+    );
+  } catch (error) {
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
+  }
+});
+
+// [API] 2. Login
+app.post("/api/auth/login", (req, res) => {
+  const { email, password } = req.body;
+
+  db.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    async (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      // Jika email tidak ditemukan
+      if (results.length === 0)
+        return res.status(401).json({ message: "Email atau password salah!" });
+
+      const user = results[0];
+
+      // Bandingkan password yang diketik dengan password acak di database
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        return res.status(401).json({ message: "Email atau password salah!" });
+
+      // Jika cocok, buatkan tiket JWT
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      res.json({
+        message: "Login sukses!",
+        token,
+        user: { id: user.id, username: user.username, email: user.email },
+      });
+    },
+  );
 });
 
 // API kategori
