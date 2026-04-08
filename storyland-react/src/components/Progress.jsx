@@ -1,5 +1,6 @@
 import React from "react";
 import ProgressCard from "./ProgressCard";
+import SavedCard from "./SavedCard";
 
 const Progress = ({ data, search, type }) => {
   const filterBySearch = (items) => {
@@ -15,13 +16,7 @@ const Progress = ({ data, search, type }) => {
     ([, items]) => filterBySearch(items).length > 0,
   );
 
-  if (!hasResults) {
-    return (
-      <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center text-gray-400 font-medium">
-        Tidak ada buku ditemukan.
-      </div>
-    );
-  }
+  if (!hasResults) return null;
 
   return (
     <div className="mx-3 md:mx-20 lg:mx-42 px-6 mb-20">
@@ -29,7 +24,7 @@ const Progress = ({ data, search, type }) => {
         const filtered = filterBySearch(items);
         if (filtered.length === 0) return null;
 
-        // Hanya tampilkan label ("Hari Ini", "Kemarin") jika di tab Riwayat
+        // Label Hari ini/Kemarin hanya muncul di tab riwayat
         const showLabel = type === "riwayat";
 
         return (
@@ -38,16 +33,24 @@ const Progress = ({ data, search, type }) => {
               <h3 className="text-2xl font-bold text-gray-800 mb-6">{label}</h3>
             )}
 
-            <div className="flex flex-wrap gap-5">
-              {filtered.map((item) => (
-                <div
-                  key={item.id}
-                  className="w-44.75 shrink-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
-                >
-                  <ProgressCard progress={item} type={type} />
-                </div>
-              ))}
-            </div>
+            {/* --- LOGIKA PERCABANGAN TAMPILAN --- */}
+            {type === "disimpan" ? (
+              // JIKA TAB DISIMPAN: Tampilkan Grid 2 Kolom dengan SavedCard
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-6">
+                {filtered.map((item) => (
+                  <SavedCard key={item.id} book={item.book || item} />
+                ))}
+              </div>
+            ) : (
+              // JIKA TAB RIWAYAT/FAVORIT: Tampilkan Flex Menyamping dengan ProgressCard
+              <div className="flex flex-wrap gap-5">
+                {filtered.map((item) => (
+                  <div key={item.id} className="w-44.75 shrink-0">
+                    <ProgressCard progress={item} type={type} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
