@@ -83,7 +83,7 @@ const BookDetail = () => {
       <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-10">
         {/* Judul Buku di atas StoryReader */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
             {book.title}
           </h1>
         </div>
