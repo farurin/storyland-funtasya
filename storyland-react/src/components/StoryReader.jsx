@@ -158,7 +158,7 @@ const StoryReader = ({ book }) => {
   };
 
   return (
-    <div className="relative w-full aspect-video mx-auto bg-black rounded-4xl overflow-hidden shadow-2xl group transition-all duration-500">
+    <div className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500">
       <img
         src={pages[currentPage].image}
         alt={`Halaman ${currentPage + 1}`}
