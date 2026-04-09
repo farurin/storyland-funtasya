@@ -3,6 +3,7 @@ import CtaDownload from "../components/CtaDownload";
 import ProfileStatus from "../components/ProfileStatus";
 import ProfileAchievement from "../components/ProfileAchievement";
 import ProfileLeaderboard from "../components/ProfileLeaderboard";
+import ProfileMission from "../components/ProfileMission";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Status");
@@ -46,11 +47,8 @@ const Profile = () => {
           {/* ProfileLeaderboard */}
           {activeTab === "Papan Ranking" && <ProfileLeaderboard />}
 
-          {activeTab === "Misi" && (
-            <div className="text-center text-gray-500 py-20 font-bold">
-              Halaman Misi Segera Hadir!
-            </div>
-          )}
+          {/* ProfileMission */}
+          {activeTab === "Misi" && <ProfileMission />}
         </div>
       </div>
 
