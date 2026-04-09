@@ -147,6 +147,21 @@ app.get("/api/books", (req, res) => {
   });
 });
 
+// API ambil halaman cerita berdasarkan ID Buku
+app.get("/api/books/:id/pages", (req, res) => {
+  const bookId = req.params.id;
+  const sql =
+    "SELECT * FROM book_pages WHERE id_book = ? ORDER BY page_number ASC";
+
+  db.query(sql, [bookId], (err, results) => {
+    if (err) {
+      console.error(`Gagal mengambil halaman untuk buku ${bookId}:`, err);
+      return res.status(500).json({ error: "Terjadi kesalahan pada server" });
+    }
+    res.json(results);
+  });
+});
+
 // API halaman Corner
 
 // 1. Middleware untuk mengecek Token JWT

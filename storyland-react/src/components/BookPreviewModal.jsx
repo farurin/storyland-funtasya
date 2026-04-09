@@ -122,22 +122,30 @@ const BookPreviewModal = () => {
     navigate(`/book/${book.id}`);
   };
 
+  // Mengambil gambar scene-01 jika ada, jika tidak fallback ke gambar cover/default.
+  const folderName = book.title.toLowerCase().replace(/\s+/g, "-");
+  const bgImage = `/images/book-scene/${folderName}/scene-01.png`;
+
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/70 backdrop-blur-sm cursor-pointer"
+      className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-10 bg-black/70 cursor-pointer"
       onClick={closeModal}
     >
       <div
-        className="relative w-full max-w-4xl min-h-[450px] md:h-[480px] bg-black rounded-3xl overflow-hidden shadow-2xl flex cursor-default"
+        className="relative w-full max-w-4xl min-h-112.5 md:h-120 bg-black rounded-3xl overflow-hidden shadow-2xl flex cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         <img
-          src={`/images/books/${book.image}`}
+          src={bgImage}
           alt={book.title}
           className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => {
+            // Fallback ke cover buku jika scene-01 tidak ditemukan
+            e.target.src = `/images/books/${book.image}`;
+          }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
+        <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight line-clamp-2 pr-4">
             {book.title}
           </h1>
@@ -173,24 +181,27 @@ const BookPreviewModal = () => {
             </p>
           </div>
 
-          <div className="mt-6 md:mt-8 flex flex-col gap-2.5 max-w-[180px] md:max-w-[200px] shrink-0">
-            <div className="flex gap-2.5 h-9 md:h-10">
-              <button className="w-10 md:w-11 h-full bg-[#FFF3C7] text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg">
+          {/* Tombol Aksi */}
+          <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
+            {/* Baris BACA */}
+            <div className="flex gap-2.5 h-8.75">
+              <button className="w-8.75 h-full bg-[#FDECA2] text-gray-900 flex items-center justify-center rounded-full hover:bg-yellow-200 hover:scale-105 transition shadow-lg cursor-pointer">
                 <IconBookmark />
               </button>
               <button
                 onClick={handleReadClick}
-                className="flex-1 bg-[#FFF3C7] text-gray-900 font-bold rounded-full hover:bg-yellow-100 transition shadow-lg text-sm"
+                className="w-23.75 h-full bg-[#FDECA2] text-gray-900 font-bold rounded-full hover:bg-yellow-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer"
               >
                 Baca
               </button>
             </div>
 
-            <div className="flex gap-2.5 h-9 md:h-10">
-              <button className="w-10 md:w-11 h-full bg-[#A5F3FF] text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg">
+            {/* Baris TONTON */}
+            <div className="flex gap-2.5 h-8.75">
+              <button className="w-8.75 h-full bg-[#9AF2FF] text-gray-900 flex items-center justify-center rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg cursor-pointer">
                 <IconHeart />
               </button>
-              <button className="flex-1 bg-[#A5F3FF] text-gray-900 font-bold rounded-full hover:bg-cyan-100 transition shadow-lg text-sm">
+              <button className="w-23.75 h-full bg-[#9AF2FF] text-gray-900 font-bold rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer">
                 Tonton
               </button>
             </div>
