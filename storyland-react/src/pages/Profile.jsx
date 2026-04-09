@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import CtaDownload from "../components/CtaDownload";
 import ProfileStatus from "../components/ProfileStatus";
+import ProfileAchievement from "../components/ProfileAchievement";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Status");
@@ -15,8 +16,8 @@ const Profile = () => {
         </h1>
 
         {/* TAB MENU */}
-        <div className="flex justify-center mb-16">
-          <div className="bg-[#6B4EFF] flex items-center p-1.5 rounded-full overflow-x-auto max-w-full">
+        <div className="flex justify-center mb-12 md:mb-16">
+          <div className="bg-[#6B4EFF] flex items-center p-1.5 rounded-full overflow-x-auto max-w-full shadow-md">
             {tabs.map((tab) => (
               <button
                 key={tab}
@@ -33,16 +34,14 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Render konten tab aktif */}
+        {/* RENDER KONTEN BERDASARKAN TAB AKTIF */}
         <div className="transition-all duration-300">
+          {/* ProfileStatus */}
           {activeTab === "Status" && <ProfileStatus />}
 
-          {/* Another components */}
-          {activeTab === "Pencapaian" && (
-            <div className="text-center text-gray-500 py-20 font-bold">
-              Halaman Pencapaian Segera Hadir!
-            </div>
-          )}
+          {/* ProfileAchievement */}
+          {activeTab === "Pencapaian" && <ProfileAchievement />}
+
           {activeTab === "Papan Ranking" && (
             <div className="text-center text-gray-500 py-20 font-bold">
               Halaman Papan Ranking Segera Hadir!
