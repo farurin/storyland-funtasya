@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -6,11 +6,11 @@ import {
   NavbarToggle,
   Button,
 } from "flowbite-react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
-// Ikon SVG
+// --- KUMPULAN IKON SVG ---
 const IconProfile = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +41,7 @@ const IconLanguage = () => (
     <path
       fill="currentColor"
       d="M8.125 21.213q-1.825-.788-3.187-2.15t-2.15-3.188T2 11.988t.788-3.875t2.15-3.175t3.187-2.15T12.013 2t3.875.788t3.175 2.15t2.15 3.175t.787 3.875t-.787 3.887t-2.15 3.188t-3.175 2.15t-3.875.787t-3.888-.787M12 19.95q.65-.9 1.125-1.875T13.9 16h-3.8q.3 1.1.775 2.075T12 19.95m-2.6-.4q-.45-.825-.787-1.713T8.05 16H5.1q.725 1.25 1.813 2.175T9.4 19.55m5.2 0q1.4-.45 2.488-1.375T18.9 16h-2.95q-.225.95-.562 1.838T14.6 19.55M4.25 14h3.4q-.075-.5-.112-.987T7.5 12t.038-1.012T7.65 10h-3.4q-.125.5-.187.988T4 12t.063 1.013t.187.987m5.4 0h4.7q.075-.5.113-.987T14.5 12t-.038-1.012T14.35 10h-4.7q-.075.5-.112.988T9.5 12t.038 1.013t.112.987m6.7 0h3.4q.125-.5.188-.987T20 12t-.062-1.012T19.75 10h-3.4q.075.5.113.988T16.5 12t-.038 1.013t-.112.987m-.4-6h2.95q-.725-1.25-1.812-2.175T14.6 4.45q.45.825.788 1.713T15.95 8M10.1 8h3.8q-.3-1.1-.775-2.075T12 4.05q-.65.9-1.125 1.875T10.1 8m-5 0h2.95q.225-.95.563-1.838T9.4 4.45Q8 4.9 6.912 5.825T5.1 8"
-    ></path>
+    />
   </svg>
 );
 
@@ -68,19 +68,7 @@ const navLinks = [
 ];
 
 export default function Navigation() {
-  const { isLoggedIn, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // Fungsi Logout
-  const handleLogout = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDropdownOpen(false);
-    logout();
-    navigate("/login");
-  };
+  const { isLoggedIn } = useAuth();
 
   return (
     <Navbar fluid className="px-3 md:px-20 lg:px-42 shadow relative z-50">
@@ -90,70 +78,13 @@ export default function Navigation() {
 
       <div className="flex items-center gap-2 md:order-2">
         {isLoggedIn ? (
-          <div className="relative flex items-center gap-2">
-            {/* Tombol Profil (Link langsung, tanpa button pembungkus) */}
-            <Link
-              to="/profile"
-              className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-bold rounded-full px-5 py-2 gap-2 transition shadow-sm border border-[#F59E0B]/50"
-            >
-              <IconProfile /> Profile
-            </Link>
-
-            {/* Menu Dropdown Toggle (Terpisah dari tombol profil) */}
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full w-10 h-10 transition focus:outline-none focus:ring-2 focus:ring-gray-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-
-            {/* Isi Dropdown */}
-            {isDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setIsDropdownOpen(false)}
-                ></div>
-
-                <div className="absolute right-0 top-12 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <span className="block text-sm font-semibold text-gray-900 truncate">
-                      Pengguna Storyland
-                    </span>
-                  </div>
-                  <ul className="py-1">
-                    <li>
-                      <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
-                        Pengaturan Akun
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50 transition"
-                      >
-                        Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </>
-            )}
-          </div>
+          // Tombol Profil
+          <Link
+            to="/profile"
+            className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-bold rounded-full px-6 py-2 gap-2 transition shadow-sm border border-[#F59E0B]/50"
+          >
+            <IconProfile /> Profile
+          </Link>
         ) : (
           <Button
             as={Link}
@@ -169,8 +100,7 @@ export default function Navigation() {
           color="blue"
           className="opacity-70 rounded-full px-6 gap-2 hidden md:flex"
         >
-          <IconLanguage />
-          Indonesia
+          <IconLanguage /> Indonesia
         </Button>
         <NavbarToggle />
       </div>
