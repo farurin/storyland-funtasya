@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import StoryReader from "../components/StoryReader";
 import StoryActions from "../components/StoryActions";
 import BookInfoBanner from "../components/BookInfoBanner";
-import { CategorySection } from "../components/BookListSection"; // Import dari komponen yang sudah ada!
+import { CategorySection } from "../components/BookListSection";
 import CtaDownload from "../components/CtaDownload";
 
 const BookDetail = () => {
@@ -13,14 +13,12 @@ const BookDetail = () => {
   const [categoryData, setCategoryData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // State tiruan untuk tombol (Nanti disambung ke API betulan)
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const fetchBookData = async () => {
       try {
-        // Fetch semua buku dan kategori (Untuk sekarang kita filter di frontend)
         const [booksRes, catsRes] = await Promise.all([
           fetch("http://localhost:5000/api/books"),
           fetch("http://localhost:5000/api/categories"),
@@ -29,18 +27,15 @@ const BookDetail = () => {
         const books = await booksRes.json();
         const categories = await catsRes.json();
 
-        // Cari buku yang sedang dibuka
         const currentBook = books.find((b) => b.id === parseInt(id));
 
         if (currentBook) {
           setBook(currentBook);
 
-          // Cari data kategori dari buku ini
           const cat = categories.find(
             (c) => c.id === currentBook.id_categories,
           );
           if (cat) {
-            // Masukkan daftar buku yang memiliki kategori sama untuk Swiper di bawah
             cat.books = books.filter((b) => b.id_categories === cat.id);
             setCategoryData(cat);
           }
@@ -53,13 +48,11 @@ const BookDetail = () => {
     };
 
     fetchBookData();
-    // Scroll ke atas setiap kali buka buku baru
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Fungsi untuk fitur Layar Penuh (Fullscreen API HTML5)
   const handleFullscreen = () => {
-    const elem = document.documentElement; // Buat seluruh halaman jadi fullscreen
+    const elem = document.documentElement;
     if (!document.fullscreenElement) {
       elem.requestFullscreen().catch((err) => {
         console.error(`Gagal masuk mode layar penuh: ${err.message}`);
@@ -88,10 +81,17 @@ const BookDetail = () => {
   return (
     <div className="w-full">
       <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-10">
-        {/* 1. Pembaca Cerita */}
+        {/* Judul Buku di atas StoryReader */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+            {book.title}
+          </h1>
+        </div>
+
+        {/* Pembaca Cerita */}
         <StoryReader book={book} />
 
-        {/* 2. Tombol Aksi Interaktif */}
+        {/* Tombol Aksi */}
         <StoryActions
           isFavorite={isFavorite}
           isSaved={isSaved}
@@ -100,10 +100,10 @@ const BookDetail = () => {
           onToggleFullscreen={handleFullscreen}
         />
 
-        {/* 3. Banner Info Buku */}
+        {/* Banner Info Buku */}
         <BookInfoBanner book={book} />
 
-        {/* 4. Rekomendasi Kategori Terkait */}
+        {/* Rekomendasi Kategori Terkait */}
         {categoryData && (
           <CategorySection
             category={categoryData}
@@ -112,7 +112,6 @@ const BookDetail = () => {
         )}
       </div>
 
-      {/* 5. CTA App */}
       <CtaDownload />
     </div>
   );

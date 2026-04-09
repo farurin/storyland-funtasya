@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Tambahkan untuk tombol kembali
+import { useNavigate } from "react-router-dom";
 
 // Icon SVG
 const IconBack = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -20,8 +20,8 @@ const IconBack = () => (
 const IconGlobe = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -37,8 +37,8 @@ const IconGlobe = () => (
 const IconPlay = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="currentColor"
   >
@@ -48,8 +48,8 @@ const IconPlay = () => (
 const IconClose = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -69,7 +69,6 @@ const StoryReader = ({ book }) => {
   const [showNarration, setShowNarration] = useState(true);
   const [language, setLanguage] = useState("id");
 
-  // Nanti diganti API sesungguhnya
   const storyPages = [
     {
       image: "/images/books/1-cerita-nusantara/1malinkundang.png",
@@ -110,92 +109,84 @@ const StoryReader = ({ book }) => {
 
   if (!book) {
     return (
-      <div className="w-full aspect-video md:aspect-21/9 bg-gray-100 rounded-3xl animate-pulse shadow-lg border border-gray-200"></div>
+      <div className="w-full aspect-video bg-gray-100 rounded-3xl animate-pulse shadow-lg border border-gray-200"></div>
     );
   }
 
   return (
-    // Pastikan tidak ada class "isReading" lagi, langsung ke tampilan
-    <div className="relative w-full aspect-video md:aspect-21/9 bg-black rounded-3xl overflow-hidden shadow-2xl group transition-all duration-500">
-      {/* Background Gambar */}
+    <div className="relative w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl group transition-all duration-500">
       <img
         src={storyPages[currentPage].image}
         alt={`Halaman ${currentPage + 1}`}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
       />
 
-      {/* TOP BAR: Navigasi & Progress */}
-      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between bg-linear-to-b from-black/50 to-transparent z-10">
-        {/* Tombol Kembali (Bukan mematikan isReading, tapi kembali ke URL sebelumnya) */}
+      <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/50 to-transparent z-10">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md text-gray-900"
+          className="w-8 h-8 md:w-10 md:h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md text-gray-900"
         >
           <IconBack />
         </button>
 
-        {/* Dash Progress Indicator */}
-        <div className="flex-1 mx-6 flex gap-2">
+        <div className="flex-1 mx-4 md:mx-6 flex gap-1.5 md:gap-2">
           {storyPages.map((_, index) => (
             <div
               key={index}
-              className={`h-1.5 rounded-full flex-1 transition-all duration-300 ${
+              className={`h-1 md:h-1.5 rounded-full flex-1 transition-all duration-300 ${
                 index <= currentPage ? "bg-[#FFF3C7]" : "bg-white/30"
               }`}
             />
           ))}
         </div>
 
-        {/* Toggle Bahasa */}
         <button
           onClick={() => setLanguage((lang) => (lang === "id" ? "en" : "id"))}
-          className="w-10 h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md font-bold text-xs text-gray-900"
+          className="w-8 h-8 md:w-10 md:h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md font-bold text-gray-900"
           title="Ganti Bahasa Cerita"
         >
           <IconGlobe />
         </button>
       </div>
 
-      {/* BOTTOM BAR: Narasi & Kontrol */}
       <div
-        className={`absolute bottom-6 left-0 right-0 px-6 md:px-16 transition-transform duration-500 ${
+        className={`absolute bottom-4 md:bottom-6 left-0 right-0 px-4 md:px-12 lg:px-24 transition-transform duration-500 ${
           showNarration
             ? "translate-y-0"
             : "translate-y-32 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
-            className="w-10 md:w-12 h-10 md:h-12 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
+            className="w-8 md:w-10 h-8 md:h-10 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
           >
             <div className="rotate-180">
               <IconPlay />
             </div>
           </button>
-
-          <div className="flex-1 bg-[#FFF3C7] rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-xl relative min-h-25 flex items-center justify-center">
-            <div className="absolute -top-4 right-6 flex gap-2">
+          <div className="flex-1 bg-[#FFF3C7] rounded-2xl md:rounded-3xl p-3 md:p-5 shadow-xl relative min-h-17.5 md:min-h-22.5 flex items-center justify-center">
+            <div className="absolute -top-3 right-4 flex gap-1.5 md:gap-2">
               <button
                 onClick={() => setIsAutoPlay(!isAutoPlay)}
-                className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-md transition ${
+                className={`px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1 shadow-md transition ${
                   isAutoPlay
                     ? "bg-purple-500 text-white"
                     : "bg-white text-gray-800"
                 }`}
               >
-                Auto <IconPlay className="w-3 h-3" />
+                Auto <IconPlay />
               </button>
               <button
                 onClick={() => setShowNarration(false)}
-                className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-gray-800 shadow-md hover:bg-red-100"
+                className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full flex items-center justify-center text-gray-800 shadow-md hover:bg-red-100"
               >
                 <IconClose />
               </button>
             </div>
 
-            <p className="text-gray-900 font-medium text-xs md:text-base lg:text-lg text-center leading-relaxed">
+            <p className="text-gray-900 font-medium text-xs md:text-sm lg:text-base text-center leading-relaxed">
               {language === "id"
                 ? storyPages[currentPage].textId
                 : storyPages[currentPage].textEn}
@@ -209,18 +200,17 @@ const StoryReader = ({ book }) => {
               )
             }
             disabled={currentPage === storyPages.length - 1}
-            className="w-10 md:w-12 h-10 md:h-12 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
+            className="w-8 md:w-10 h-8 md:h-10 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
           >
             <IconPlay />
           </button>
         </div>
       </div>
 
-      {/* Tombol panggil kembali Narasi */}
       {!showNarration && (
         <button
           onClick={() => setShowNarration(true)}
-          className="absolute bottom-6 right-6 px-4 py-2 bg-[#FFF3C7] text-gray-900 rounded-full font-bold text-xs shadow-xl hover:scale-105 transition"
+          className="absolute bottom-4 right-4 md:bottom-6 md:right-6 px-3 py-1.5 md:px-4 md:py-2 bg-[#FFF3C7] text-gray-900 rounded-full font-bold text-[10px] md:text-xs shadow-xl hover:scale-105 transition"
         >
           Munculkan Teks
         </button>
