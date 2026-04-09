@@ -10,6 +10,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
+// Ikon SVG
 const IconProfile = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -72,10 +73,10 @@ export default function Navigation() {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Fungsi Logout yang sudah diperbaiki
+  // Fungsi Logout
   const handleLogout = (e) => {
-    e.preventDefault(); // Hindari aksi default link/button
-    e.stopPropagation(); // Pastikan event tidak bocor ke elemen lain
+    e.preventDefault();
+    e.stopPropagation();
     setIsDropdownOpen(false);
     logout();
     navigate("/login");
@@ -89,27 +90,45 @@ export default function Navigation() {
 
       <div className="flex items-center gap-2 md:order-2">
         {isLoggedIn ? (
-          <div className="relative">
-            {/* Tombol Profil */}
+          <div className="relative flex items-center gap-2">
+            {/* Tombol Profil (Link langsung, tanpa button pembungkus) */}
+            <Link
+              to="/profile"
+              className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-bold rounded-full px-5 py-2 gap-2 transition shadow-sm border border-[#F59E0B]/50"
+            >
+              <IconProfile /> Profile
+            </Link>
+
+            {/* Menu Dropdown Toggle (Terpisah dari tombol profil) */}
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-medium rounded-full px-6 py-2 gap-2 cursor-pointer transition focus:outline-none"
+              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full w-10 h-10 transition focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
-              <IconProfile />
-              Profile
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
             </button>
 
-            {/* Menu Dropdown */}
+            {/* Isi Dropdown */}
             {isDropdownOpen && (
               <>
-                {/* Overlay transparan untuk menutup dropdown jika klik di luar */}
                 <div
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
 
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
+                <div className="absolute right-0 top-12 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
                     <span className="block text-sm font-semibold text-gray-900 truncate">
                       Pengguna Storyland
@@ -124,7 +143,7 @@ export default function Navigation() {
                     <li>
                       <button
                         type="button"
-                        onClick={handleLogout} // Memanggil fungsi logout yang diperbaiki
+                        onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50 transition"
                       >
                         Logout

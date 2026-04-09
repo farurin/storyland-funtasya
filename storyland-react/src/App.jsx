@@ -10,6 +10,7 @@ import CategoryDetail from "./pages/CategoryDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BookDetail from "./pages/BookDetail";
 import BookPreviewModal from "./components/BookPreviewModal";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -34,6 +35,9 @@ export default function App() {
 
           {/* Corner */}
           <Route path="/corner" element={<Corner />} />
+
+          {/* Profile */}
+          <Route path="/profile" element={<Profile />} />
 
           {/* Rute yang dijaga satpam */}
           <Route element={<ProtectedRoute />}></Route>

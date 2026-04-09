@@ -94,20 +94,41 @@ const BookPreviewModal = () => {
   const navigate = useNavigate();
 
   const [book, setBook] = useState(null);
+  const [firstPageImage, setFirstPageImage] = useState(null);
 
   useEffect(() => {
     if (!previewId) {
-      if (book !== null) setBook(null);
+      setBook(null);
+      setFirstPageImage(null);
       return;
     }
 
-    fetch("http://localhost:5000/api/books")
-      .then((res) => res.json())
-      .then((data) => {
-        const foundBook = data.find((b) => b.id === parseInt(previewId));
-        setBook(foundBook);
-      })
-      .catch((err) => console.error(err));
+    const fetchModalData = async () => {
+      try {
+        const booksRes = await fetch("http://localhost:5000/api/books");
+        const booksData = await booksRes.json();
+        const foundBook = booksData.find((b) => b.id === parseInt(previewId));
+
+        if (foundBook) {
+          setBook(foundBook);
+
+          const pagesRes = await fetch(
+            `http://localhost:5000/api/books/${foundBook.id}/pages`,
+          );
+          const pagesData = await pagesRes.json();
+
+          if (pagesData && pagesData.length > 0) {
+            setFirstPageImage(pagesData[0].image);
+          } else {
+            setFirstPageImage(null);
+          }
+        }
+      } catch (err) {
+        console.error("Gagal memuat data modal:", err);
+      }
+    };
+
+    fetchModalData();
   }, [previewId]);
 
   if (!previewId || !book) return null;
@@ -122,9 +143,9 @@ const BookPreviewModal = () => {
     navigate(`/book/${book.id}`);
   };
 
-  // Mengambil gambar scene-01 jika ada, jika tidak fallback ke gambar cover/default.
-  const folderName = book.title.toLowerCase().replace(/\s+/g, "-");
-  const bgImage = `/images/book-scene/${folderName}/scene-01.png`;
+  const bgImageToUse = firstPageImage
+    ? firstPageImage
+    : `/images/books/${book.image}`;
 
   return (
     <div
@@ -136,15 +157,16 @@ const BookPreviewModal = () => {
         onClick={(e) => e.stopPropagation()}
       >
         <img
-          src={bgImage}
+          src={bgImageToUse}
           alt={book.title}
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
-            // Fallback ke cover buku jika scene-01 tidak ditemukan
-            e.target.src = `/images/books/${book.image}`;
+            e.target.src =
+              "https://via.placeholder.com/800x480?text=Preview+Cerita";
           }}
         />
 
+        {/* KEMBALI MENGGUNAKAN justify-center DI SINI */}
         <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight line-clamp-2 pr-4">
             {book.title}
@@ -176,12 +198,12 @@ const BookPreviewModal = () => {
             <h3 className="text-white font-semibold text-sm md:text-base">
               Sinopsis
             </h3>
-            <p className="text-white/80 mt-1 md:mt-2 text-xs md:text-sm max-w-xl leading-relaxed line-clamp-3">
+            <p className="text-white/80 mt-1 md:mt-2 text-xs md:text-sm max-w-xl leading-relaxed line-clamp-4 md:line-clamp-5">
               {book.description || "Sinopsis cerita belum tersedia."}
             </p>
           </div>
 
-          {/* Tombol Aksi */}
+          {/* Tombol aksi kembali merapat mengikuti alur elemen di atasnya */}
           <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
             {/* Baris BACA */}
             <div className="flex gap-2.5 h-8.75">
