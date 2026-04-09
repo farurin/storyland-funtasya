@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CtaDownload from "../components/CtaDownload";
 import ProfileStatus from "../components/ProfileStatus";
 import ProfileAchievement from "../components/ProfileAchievement";
+import ProfileLeaderboard from "../components/ProfileLeaderboard";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Status");
@@ -42,11 +43,9 @@ const Profile = () => {
           {/* ProfileAchievement */}
           {activeTab === "Pencapaian" && <ProfileAchievement />}
 
-          {activeTab === "Papan Ranking" && (
-            <div className="text-center text-gray-500 py-20 font-bold">
-              Halaman Papan Ranking Segera Hadir!
-            </div>
-          )}
+          {/* ProfileLeaderboard */}
+          {activeTab === "Papan Ranking" && <ProfileLeaderboard />}
+
           {activeTab === "Misi" && (
             <div className="text-center text-gray-500 py-20 font-bold">
               Halaman Misi Segera Hadir!
