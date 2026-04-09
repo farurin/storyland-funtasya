@@ -1,27 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Icon SVG
-const IconBack = () => (
+// --- IKON SVG ---
+const IconBackCurved = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    fill="currentColor"
   >
-    <path d="M19 12H5M12 19l-7-7 7-7" />
+    <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
   </svg>
 );
+
 const IconGlobe = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -34,17 +31,36 @@ const IconGlobe = () => (
     <path d="M2 12h20" />
   </svg>
 );
-const IconPlay = () => (
+
+const IconTriangle = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="currentColor"
   >
-    <path d="M5 3l14 9-14 9V3z" />
+    <path d="M8 5v14l11-7z" />
   </svg>
 );
+
+const IconAutoPlay = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 4 15 12 5 20 5 4" fill="currentColor" />
+    <line x1="19" y1="5" x2="19" y2="19" />
+  </svg>
+);
+
 const IconClose = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +69,7 @@ const IconClose = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2.5"
+    strokeWidth="3"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -67,29 +83,87 @@ const StoryReader = ({ book }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [showNarration, setShowNarration] = useState(true);
+
   const [language, setLanguage] = useState("id");
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   const storyPages = [
     {
-      image: "/images/books/1-cerita-nusantara/1malinkundang.png",
+      image: "/images/book-scene/malin-kundang/scene-01.png",
       textId:
-        "Di sebuah desa kecil di pesisir pantai Sumatera, hiduplah seorang ibu dan anaknya bernama Malin Kundang. Ibu Malin adalah seorang janda yang sangat menyayangi anaknya.",
+        "Dahulu kala di perkampungan nelayan Pantai Air Manis, Padang, hiduplah seorang janda bernama Mande Rubayah bersama anak laki-lakinya, Malin Kundang.",
       textEn:
-        "In a small village on the coast of Sumatra, lived a mother and her son named Malin Kundang. Malin's mother was a widow who loved her son very much.",
+        "A long time ago in the fishing village of Air Manis Beach, Padang, lived a widow named Mande Rubayah with her son, Malin Kundang.",
     },
     {
-      image: "/images/books/1-cerita-nusantara/1malinkundang.png",
+      image: "/images/book-scene/malin-kundang/scene-02.png",
       textId:
-        "Malin tumbuh menjadi pemuda yang kuat, namun ia merasa bosan dengan kemiskinan di desanya dan meminta izin untuk merantau.",
+        "Mande Rubayah sangat menyayangi dan memanjakan Malin. Malin pun tumbuh menjadi pemuda yang rajin, kuat, dan selalu membantu ibunya.",
       textEn:
-        "Malin grew into a strong young man, but he felt bored with the poverty in his village and asked permission to wander.",
+        "Mande Rubayah loved and spoiled Malin very much. Malin grew up to be a diligent, strong young man who always helped his mother.",
     },
     {
-      image: "/images/books/1-cerita-nusantara/1malinkundang.png",
+      image: "/images/book-scene/malin-kundang/scene-03.png",
       textId:
-        "Bertahun-tahun berlalu, Malin berhasil menjadi saudagar kaya raya dan menikah dengan seorang putri bangsawan.",
+        "Suatu hari, sebuah kapal besar merapat di pantai. Malin meminta izin kepada ibunya untuk pergi merantau mencari kekayaan agar bisa membahagiakan ibunya.",
       textEn:
-        "Years passed, Malin succeeded in becoming a wealthy merchant and married a noble princess.",
+        "One day, a large ship docked at the beach. Malin asked his mother for permission to go wandering to seek wealth so he could make her happy.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-04.png",
+      textId:
+        "Dengan berat hati, Mande Rubayah mengizinkan. Ia membekali Malin dengan nasi bungkus daun pisang kesukaannya dan melepasnya dengan air mata.",
+      textEn:
+        "With a heavy heart, Mande Rubayah agreed. She packed his favorite rice wrapped in banana leaves and saw him off with tears.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-05.png",
+      textId:
+        "Tahun demi tahun berlalu. Malin bekerja keras di kapal dan beruntung dinikahkan dengan putri saudagar kaya. Ia pun menjadi saudagar sukses dengan banyak kapal dagang.",
+      textEn:
+        "Years passed. Malin worked hard on the ship and was lucky to marry the daughter of a wealthy merchant. He became a successful merchant with many trading ships.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-06.png",
+      textId:
+        "Sementara itu, sang ibu setiap hari menatap ke laut menunggu kepulangan anaknya sambil terus berdoa untuk keselamatan Malin.",
+      textEn:
+        "Meanwhile, his mother stared at the sea every day waiting for her son's return while constantly praying for Malin's safety.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-07.png",
+      textId:
+        "Suatu hari, kapal mewah Malin berlabuh di Pantai Air Manis. Penduduk desa mengenali pemuda tampan berpakaian mewah itu adalah Malin Kundang.",
+      textEn:
+        "One day, Malin's luxurious ship anchored at Air Manis Beach. The villagers recognized the handsome, lavishly dressed young man as Malin Kundang.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-08.png",
+      textId:
+        "Mendengar kabar itu, Mande Rubayah berlari ke pantai dan memeluk Malin erat-erat. 'Malin, anakku! Kau sudah pulang,' ucapnya penuh kerinduan.",
+      textEn:
+        "Hearing the news, Mande Rubayah ran to the beach and hugged Malin tightly. 'Malin, my son! You are home,' she said full of longing.",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-09.png",
+      textId:
+        "Namun, melihat ibunya yang berpakaian lusuh, Malin merasa malu pada istri cantiknya. Ia mendorong ibunya dan berkata, 'Wanita gila! Aku tidak punya ibu miskin sepertimu!'",
+      textEn:
+        "However, seeing his mother in shabby clothes, Malin felt ashamed in front of his beautiful wife. He pushed his mother and said, 'Crazy woman! I don't have a poor mother like you!'",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-10.png",
+      textId:
+        "Hati Mande Rubayah hancur lebur. Sambil menangis, ia menengadahkan tangan ke langit dan berdoa, 'Ya Tuhan, jika ia benar anakku Malin, kutuklah ia menjadi batu!'",
+      textEn:
+        "Mande Rubayah's heart was shattered. Crying, she raised her hands to the sky and prayed, 'Oh God, if he is truly my son Malin, curse him into a stone!'",
+    },
+    {
+      image: "/images/book-scene/malin-kundang/scene-11.png",
+      textId:
+        "Tiba-tiba badai besar datang menghancurkan kapal Malin. Tubuh Malin perlahan kaku dan akhirnya berubah menjadi bongkahan batu yang bersujud di tepi pantai.",
+      textEn:
+        "Suddenly a huge storm came and destroyed Malin's ship. Malin's body slowly stiffened and eventually turned into a boulder kneeling on the beach.",
     },
   ];
 
@@ -109,90 +183,130 @@ const StoryReader = ({ book }) => {
 
   if (!book) {
     return (
-      <div className="w-full aspect-video bg-gray-100 rounded-3xl animate-pulse shadow-lg border border-gray-200"></div>
+      <div className="w-full aspect-video bg-gray-100 rounded-none animate-pulse shadow-lg border border-gray-200"></div>
     );
   }
 
+  const changeLanguage = (lang) => {
+    setLanguage(lang);
+    setIsLangMenuOpen(false);
+  };
+
   return (
-    <div className="relative w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl group transition-all duration-500">
+    // container
+    <div className="relative w-full aspect-video mx-auto bg-black rounded-none overflow-hidden shadow-2xl group transition-all duration-500">
       <img
         src={storyPages[currentPage].image}
         alt={`Halaman ${currentPage + 1}`}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        onError={(e) => {
+          e.target.src =
+            "https://via.placeholder.com/1280x720?text=Scene+Cerita";
+        }}
       />
 
-      <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/50 to-transparent z-10">
+      {/* navigasi & progres atas */}
+      <div className="absolute top-0 left-0 right-0 p-5 md:p-8 flex items-center justify-between bg-linear-to-b from-black/40 to-transparent z-10">
+        {/* tombol back kiri atas */}
         <button
           onClick={() => navigate(-1)}
-          className="w-8 h-8 md:w-10 md:h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md text-gray-900"
+          className="w-10 h-10 md:w-12.5 md:h-12.5 bg-[#FDECA2] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md text-gray-900"
         >
-          <IconBack />
+          <IconBackCurved />
         </button>
 
-        <div className="flex-1 mx-4 md:mx-6 flex gap-1.5 md:gap-2">
+        <div className="flex-1 mx-5 md:mx-8 flex gap-1.5 md:gap-2">
           {storyPages.map((_, index) => (
             <div
               key={index}
-              className={`h-1 md:h-1.5 rounded-full flex-1 transition-all duration-300 ${
-                index <= currentPage ? "bg-[#FFF3C7]" : "bg-white/30"
+              className={`h-1.5 md:h-2 rounded-full flex-1 transition-all duration-300 ${
+                index <= currentPage ? "bg-[#FFF8E1]" : "bg-white/40"
               }`}
             />
           ))}
         </div>
 
-        <button
-          onClick={() => setLanguage((lang) => (lang === "id" ? "en" : "id"))}
-          className="w-8 h-8 md:w-10 md:h-10 bg-[#FFF3C7] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md font-bold text-gray-900"
-          title="Ganti Bahasa Cerita"
-        >
-          <IconGlobe />
-        </button>
+        <div className="relative">
+          {/* tombol globe/bahasa */}
+          <button
+            onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+            className="w-10 h-10 md:w-12.5 md:h-12.5 bg-[#FDECA2] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md font-bold text-gray-900 border-2 border-white/20"
+          >
+            <IconGlobe />
+          </button>
+
+          {/* Menu Dropdown */}
+          {isLangMenuOpen && (
+            <div className="absolute right-0 mt-3 w-40 bg-[#FFF9E5] rounded-2xl shadow-xl overflow-hidden border border-yellow-200 z-50">
+              <button
+                onClick={() => changeLanguage("id")}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-yellow-100 transition text-gray-800 font-semibold border-b border-yellow-200/50"
+              >
+                <span className="text-xl">🇮🇩</span> Indonesia
+              </button>
+              <button
+                onClick={() => changeLanguage("en")}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-yellow-100 transition text-gray-800 font-semibold"
+              >
+                <span className="text-xl">🇬🇧</span> English
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* narasi dan kontrol */}
       <div
-        className={`absolute bottom-4 md:bottom-6 left-0 right-0 px-4 md:px-12 lg:px-24 transition-transform duration-500 ${
+        className={`absolute bottom-6 md:bottom-10 left-0 right-0 px-4 md:px-10 transition-transform duration-500 ${
           showNarration
             ? "translate-y-0"
-            : "translate-y-32 opacity-0 pointer-events-none"
+            : "translate-y-40 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="flex items-center gap-3 md:gap-4">
+        {/* Kontainer Flex, Items Center */}
+        <div className="flex items-center justify-center mx-auto w-full max-w-345">
+          {/* 4. tombol prev */}
           <button
             onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
-            className="w-8 md:w-10 h-8 md:h-10 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
+            className="w-11.25 h-11.25 md:w-[58.38px] md:h-[56.47px] shrink-0 bg-[#FDECA2] text-black rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg relative z-10 -mr-6 md:-mr-8"
           >
             <div className="rotate-180">
-              <IconPlay />
+              <IconTriangle />
             </div>
           </button>
-          <div className="flex-1 bg-[#FFF3C7] rounded-2xl md:rounded-3xl p-3 md:p-5 shadow-xl relative min-h-17.5 md:min-h-22.5 flex items-center justify-center">
-            <div className="absolute -top-3 right-4 flex gap-1.5 md:gap-2">
+
+          {/* kotak narasi */}
+          <div className="w-full max-w-315.5 bg-[#FFF8E1] rounded-[40px] px-12 py-4 md:px-24 md:py-5 shadow-xl relative flex items-center justify-center min-h-17.5 md:min-h-21.25 z-0">
+            {/* Tombol Auto & Close */}
+            <div className="absolute -top-4 right-8 md:right-10 flex gap-2 z-20">
               <button
                 onClick={() => setIsAutoPlay(!isAutoPlay)}
-                className={`px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1 shadow-md transition ${
+                className={`px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-md transition ${
                   isAutoPlay
-                    ? "bg-purple-500 text-white"
-                    : "bg-white text-gray-800"
+                    ? "bg-[#FDECA2] text-black border border-yellow-400"
+                    : "bg-[#FDECA2] text-black"
                 }`}
               >
-                Auto <IconPlay />
+                Auto <IconAutoPlay />
               </button>
               <button
                 onClick={() => setShowNarration(false)}
-                className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-full flex items-center justify-center text-gray-800 shadow-md hover:bg-red-100"
+                className="w-8 h-8 bg-[#FDECA2] rounded-full flex items-center justify-center text-black shadow-md hover:bg-yellow-200"
               >
                 <IconClose />
               </button>
             </div>
 
-            <p className="text-gray-900 font-medium text-xs md:text-sm lg:text-base text-center leading-relaxed">
+            {/* teks narasi */}
+            <p className="text-black font-semibold text-sm md:text-[20px] text-center leading-relaxed md:leading-normal">
               {language === "id"
                 ? storyPages[currentPage].textId
                 : storyPages[currentPage].textEn}
             </p>
           </div>
 
+          {/* tombol next */}
           <button
             onClick={() =>
               setCurrentPage((prev) =>
@@ -200,9 +314,9 @@ const StoryReader = ({ book }) => {
               )
             }
             disabled={currentPage === storyPages.length - 1}
-            className="w-8 md:w-10 h-8 md:h-10 shrink-0 bg-[#FFF3C7] text-gray-900 rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg"
+            className="w-11.25 h-11.25 md:w-[58.38px] md:h-[56.47px] shrink-0 bg-[#FDECA2] text-black rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg relative z-10 -ml-6 md:-ml-8"
           >
-            <IconPlay />
+            <IconTriangle />
           </button>
         </div>
       </div>
@@ -210,7 +324,7 @@ const StoryReader = ({ book }) => {
       {!showNarration && (
         <button
           onClick={() => setShowNarration(true)}
-          className="absolute bottom-4 right-4 md:bottom-6 md:right-6 px-3 py-1.5 md:px-4 md:py-2 bg-[#FFF3C7] text-gray-900 rounded-full font-bold text-[10px] md:text-xs shadow-xl hover:scale-105 transition"
+          className="absolute bottom-6 right-8 px-4 py-2 bg-[#FDECA2] text-gray-900 rounded-full font-bold text-xs md:text-sm shadow-xl hover:scale-105 transition"
         >
           Munculkan Teks
         </button>
