@@ -100,4 +100,35 @@ const getUserProfile = (req, res) => {
   });
 };
 
-module.exports = { getCharacters, updateActiveCharacter, getUserProfile };
+const getLeaderboard = (req, res) => {
+  // Query ambil 30 user teratas
+  const sql = `
+    SELECT 
+      u.id, 
+      u.username AS name, 
+      u.avatar_url AS avatar, 
+      u.current_streak AS streak, 
+      u.total_pages AS pages,
+      (SELECT COUNT(*) FROM user_characters uc WHERE uc.id_user = u.id AND uc.id_character > 7) AS awards
+    FROM users u
+    ORDER BY u.total_points DESC, u.current_streak DESC
+    LIMIT 30
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    const leaderboard = results.map((user, index) => ({
+      ...user,
+      rank: index + 1,
+    }));
+
+    res.json(leaderboard);
+  });
+};
+
+module.exports = {
+  getCharacters,
+  updateActiveCharacter,
+  getUserProfile,
+  getLeaderboard,
+};
