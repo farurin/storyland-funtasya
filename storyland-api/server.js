@@ -292,13 +292,13 @@ app.put("/api/user/characters/active", verifyToken, (req, res) => {
   });
 });
 
-// [API] Mengambil Data Profil & Statistik User
+// [API] Mengambil Data Profil, Statistik & Kalender User
 app.get("/api/user/profile", verifyToken, (req, res) => {
   const userId = req.user.id;
 
-  // Mengambil data user
+  // ambil data dasar user
   const sqlUser =
-    "SELECT username, email, age, avatar_url, current_streak, total_points FROM users WHERE id = ?";
+    "SELECT username, email, age, avatar_url, current_streak, total_points, current_rank FROM users WHERE id = ?";
 
   db.query(sqlUser, [userId], (err, userResults) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -307,8 +307,7 @@ app.get("/api/user/profile", verifyToken, (req, res) => {
 
     const user = userResults[0];
 
-    // Mengambil jumlah pencapaian (badge/karakter yang di-unlock dari misi)
-    // Untuk saat ini hitung dari berapa banyak karakter yang dimiliki di luar karakter default (id > 7)
+    // ambil total pencapaian (contoh: karakter selain default)
     const sqlAchievements =
       "SELECT COUNT(*) AS total_achievements FROM user_characters WHERE id_user = ? AND id_character > 7";
 
@@ -317,10 +316,51 @@ app.get("/api/user/profile", verifyToken, (req, res) => {
         ? 0
         : achievementResults[0].total_achievements;
 
-      res.json({
-        ...user,
-        total_achievements: totalAchievements,
-        rank: 12, // Data sementara untuk peringkat (Logika ranking butuh query tersendiri)
+      // ambil aktivitas absensi 7 hari terakhir (6 hari lalu + hari ini)
+      const sqlActivity =
+        "SELECT activity_date FROM user_activity_logs WHERE id_user = ? AND activity_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)";
+
+      db.query(sqlActivity, [userId], (err, activityResults) => {
+        // kumpulan tanggal aktif Format YYYY-MM-DD
+        const activeDates = activityResults
+          ? activityResults.map((row) => {
+              const d = new Date(row.activity_date);
+              const year = d.getFullYear();
+              const month = String(d.getMonth() + 1).padStart(2, "0");
+              const day = String(d.getDate()).padStart(2, "0");
+              return `${year}-${month}-${day}`;
+            })
+          : [];
+
+        // array kalender 7 hari
+        const daysName = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+        const calendar = [];
+        const today = new Date();
+
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(today.getDate() - i);
+
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          const dateString = `${year}-${month}-${day}`;
+
+          calendar.push({
+            day: daysName[d.getDay()],
+            date: d.getDate(),
+            isActive: activeDates.includes(dateString), // true jika tanggal ini ada di tabel absensi
+            isToday: i === 0, // true jika ini adalah perulangan hari ini
+          });
+        }
+
+        // kirim semua data ke React
+        res.json({
+          ...user,
+          rank: user.current_rank || 0,
+          total_achievements: totalAchievements,
+          calendar: calendar,
+        });
       });
     });
   });

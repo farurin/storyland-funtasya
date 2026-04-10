@@ -71,31 +71,9 @@ const ProfileInfoCard = () => {
   const { token } = useAuth();
   const [profileData, setProfileData] = useState(null);
 
-  // Generate 7 hari kalender dinamis (berdasarkan hari ini)
-  const getWeekDays = () => {
-    const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-    let result = [];
-    let today = new Date();
-
-    // Tarik mundur 3 hari ke belakang, lalu 3 hari ke depan
-    for (let i = -3; i <= 3; i++) {
-      let d = new Date(today);
-      d.setDate(today.getDate() + i);
-      result.push({
-        day: days[d.getDay()],
-        date: d.getDate(),
-        isToday: i === 0,
-        // Logika dummy: jika hari ini atau sblmnya, dianggap aktif
-        isActive: i <= 0,
-      });
-    }
-    return result;
-  };
-
-  const streakDays = getWeekDays();
-
   useEffect(() => {
     if (!token) return;
+
     fetch("http://localhost:5000/api/user/profile", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -106,15 +84,17 @@ const ProfileInfoCard = () => {
 
   if (!profileData) {
     return (
-      <div className="w-full bg-[#F4F3FF] rounded-[40px] p-8 flex justify-center items-center h-100 animate-pulse">
-        Memuat Data...
+      <div className="w-full bg-[#F4F3FF] rounded-[40px] p-8 flex flex-col justify-center items-center min-h-100 border border-white/50 shadow-sm">
+        <div className="w-10 h-10 border-4 border-purple-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-purple-600 font-bold animate-pulse">
+          Memuat Data Status...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="w-full bg-[#F4F3FF] rounded-[40px] p-6 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between min-h-100">
-      {/* Tombol Ubah Profil (Nantinya memanggil Modal Edit) */}
       <button
         onClick={() => alert("Fitur Edit Profil akan segera dibuat!")}
         className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm"
@@ -122,14 +102,18 @@ const ProfileInfoCard = () => {
         <IconEdit /> Ubah
       </button>
 
-      {/* Info Dasar */}
+      {/* Info Dasar User */}
       <div className="flex items-center gap-5 md:gap-6 mb-10 mt-2">
         <div className="relative">
           <div className="w-20 h-20 md:w-24 md:h-24 bg-pink-100 rounded-full border-4 border-white overflow-hidden shadow-sm">
             <img
-              src={profileData.avatar_url}
+              src={profileData.avatar_url || "/images/avatars/cat-avatar.png"}
               alt="Avatar"
               className="w-full h-full object-cover"
+              onError={(e) =>
+                (e.target.src =
+                  "https://via.placeholder.com/100x100?text=Avatar")
+              }
             />
           </div>
           <div className="absolute top-0 right-0 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md">
@@ -137,7 +121,7 @@ const ProfileInfoCard = () => {
           </div>
         </div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight truncate max-w-50">
             {profileData.username}
           </h2>
           <p className="text-sm md:text-base font-semibold text-gray-600 mt-1">
@@ -191,26 +175,29 @@ const ProfileInfoCard = () => {
         </div>
       </div>
 
-      {/* Kalender */}
+      {/* Kalender Absensi (Di-generate langsung dari Backend) */}
       <div className="flex justify-between items-center bg-white/40 p-2 rounded-3xl">
-        {streakDays.map((item, index) => (
-          <div
-            key={index}
-            className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"}`}
-          >
-            <div className="h-2 mb-1">
-              {item.isToday && (
-                <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
-              )}
+        {profileData.calendar &&
+          profileData.calendar.map((item, index) => (
+            <div
+              key={index}
+              className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${
+                item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"
+              }`}
+            >
+              <div className="h-2 mb-1">
+                {item.isToday && (
+                  <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
+                )}
+              </div>
+              <span className="text-[10px] md:text-xs font-bold text-gray-600 mb-1">
+                {item.day}
+              </span>
+              <span className="text-sm md:text-lg font-extrabold text-gray-900">
+                {item.date}
+              </span>
             </div>
-            <span className="text-[10px] md:text-xs font-bold text-gray-600 mb-1">
-              {item.day}
-            </span>
-            <span className="text-sm md:text-lg font-extrabold text-gray-900">
-              {item.date}
-            </span>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
