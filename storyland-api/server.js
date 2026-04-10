@@ -231,6 +231,67 @@ app.get("/api/corner/history", verifyToken, (req, res) => {
   });
 });
 
+// [API] 1. Mengambil Semua Karakter & Status Unlocked User
+app.get("/api/user/characters", verifyToken, (req, res) => {
+  const userId = req.user.id;
+
+  // SQL yang lebih aman dan terhindar dari duplikasi data
+  const sql = `
+    SELECT 
+        c.id, 
+        c.name, 
+        c.image_url AS image, 
+        EXISTS(SELECT 1 FROM user_characters uc WHERE uc.id_character = c.id AND uc.id_user = ?) AS isUnlocked,
+        (u.active_character_id = c.id) AS isActive
+    FROM characters c
+    JOIN users u ON u.id = ?
+    ORDER BY c.id ASC
+  `;
+
+  db.query(sql, [userId, userId], (err, results) => {
+    if (err) {
+      console.error("Gagal mengambil data karakter:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan pada server" });
+    }
+
+    const formattedResults = results.map((char) => ({
+      ...char,
+      isUnlocked: char.isUnlocked === 1,
+      isActive: char.isActive === 1,
+    }));
+
+    res.json(formattedResults);
+  });
+});
+
+// [API] 2. Menyimpan/Mengubah Karakter Aktif
+app.put("/api/user/characters/active", verifyToken, (req, res) => {
+  const userId = req.user.id;
+  const { characterId } = req.body;
+
+  if (!characterId) {
+    return res.status(400).json({ message: "ID Karakter wajib dikirim" });
+  }
+
+  const checkSql =
+    "SELECT * FROM user_characters WHERE id_user = ? AND id_character = ?";
+  db.query(checkSql, [userId, characterId], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (results.length === 0) {
+      return res
+        .status(403)
+        .json({ message: "Akses ditolak: Karakter ini masih terkunci!" });
+    }
+
+    const updateSql = "UPDATE users SET active_character_id = ? WHERE id = ?";
+    db.query(updateSql, [characterId, userId], (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Karakter berhasil diubah!" });
+    });
+  });
+});
+
 // Jalankan server di port 5000
 const PORT = 5000;
 app.listen(PORT, () => {

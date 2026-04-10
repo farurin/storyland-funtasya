@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import ProfileCharacterSelect from "./ProfileCharacterSelect"; // Import komponen baru
+import React, { useState, useEffect } from "react";
+import ProfileCharacterSelect from "./ProfileCharacterSelect";
+import { useAuth } from "../context/AuthContext";
 
-// --- IKON SVG ---
+// icon svg
 const IconEdit = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -67,67 +68,25 @@ const IconPodium = () => (
   </svg>
 );
 
-// --- DAFTAR KARAKTER ---
-const characterList = [
+// Data Cadangan jika API belum siap
+const fallbackCharacters = [
   {
-    id: "astronaut",
-    name: "Astronaut",
-    image: "/images/character/character-astronaut.png",
-    isUnlocked: true,
-  },
-  {
-    id: "professor",
-    name: "Professor",
-    image: "/images/character/character-professor.png",
-    isUnlocked: true,
-  },
-  {
-    id: "gamer",
-    name: "Gamer",
-    image: "/images/character/character-gamer.png",
-    isUnlocked: true,
-  },
-  {
-    id: "chef",
-    name: "Chef",
-    image: "/images/character/character-chef.png",
-    isUnlocked: true,
-  },
-  {
-    id: "student",
+    id: 1,
     name: "Student",
     image: "/images/character/character-student.png",
     isUnlocked: true,
-  },
-  {
-    id: "detective",
-    name: "Detective",
-    image: "/images/character/character-detective.png",
-    isUnlocked: true,
-  },
-  {
-    id: "king",
-    name: "King",
-    image: "/images/character/character-king.png",
-    isUnlocked: true,
-  },
-  {
-    id: "musician",
-    name: "Locked",
-    image: "/images/character/character-mucisian.png",
-    isUnlocked: false,
+    isActive: true,
   },
 ];
 
 const ProfileStatus = () => {
-  // STATE KONTROL TAMPILAN
-  const [isEditingCharacter, setIsEditingCharacter] = useState(false);
+  const { token } = useAuth();
 
-  // STATE KARAKTER
-  const [selectedCharacter, setSelectedCharacter] = useState(
-    characterList.find((c) => c.id === "student"),
-  );
-  const [tempCharacter, setTempCharacter] = useState(selectedCharacter);
+  const [isEditingCharacter, setIsEditingCharacter] = useState(false);
+  const [characterList, setCharacterList] = useState([]);
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [tempCharacter, setTempCharacter] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const streakDays = [
     { day: "Min", date: 10, isActive: true, isToday: true },
@@ -139,26 +98,93 @@ const ProfileStatus = () => {
     { day: "Sab", date: 16, isActive: false, isToday: false },
   ];
 
-  // Fungsi saat tombol Ubah/Simpan diklik
-  const handleButtonClick = () => {
+  useEffect(() => {
+    // Abaikan jika token belum di-load oleh AuthContext
+    if (token === undefined) return;
+
+    const fetchCharacters = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/user/characters",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setCharacterList(data);
+            const activeChar = data.find((c) => c.isActive) || data[0];
+            setSelectedCharacter(activeChar);
+            setTempCharacter(activeChar);
+          } else {
+            throw new Error("Data kosong");
+          }
+        } else {
+          throw new Error("Gagal mengambil data");
+        }
+      } catch (error) {
+        console.error("Error fetching characters:", error);
+        // fallback
+        setCharacterList(fallbackCharacters);
+        setSelectedCharacter(fallbackCharacters[0]);
+        setTempCharacter(fallbackCharacters[0]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCharacters();
+  }, [token]);
+
+  const handleButtonClick = async () => {
     if (isEditingCharacter) {
-      // Jika sedang edit, berarti tombol ini bertindak sebagai "Simpan"
-      setSelectedCharacter(tempCharacter);
-      setIsEditingCharacter(false);
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/user/characters/active",
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ characterId: tempCharacter.id }),
+          },
+        );
+
+        if (response.ok) {
+          setSelectedCharacter(tempCharacter);
+          setIsEditingCharacter(false);
+        } else {
+          alert("Gagal menyimpan karakter. Pastikan koneksi aman!");
+        }
+      } catch (error) {
+        console.error("Error saving character:", error);
+      }
     } else {
-      // Jika tidak sedang edit, berarti tombol ini bertindak sebagai "Ubah"
-      setTempCharacter(selectedCharacter); // Samakan state sementara dengan yang aktif
+      setTempCharacter(selectedCharacter);
       setIsEditingCharacter(true);
     }
   };
 
+  // Loading Screen
+  if (isLoading || !selectedCharacter) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 w-full h-full min-h-100">
+        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-purple-600 font-bold animate-pulse">
+          Memuat Karakter...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-stretch justify-center h-full">
-      {/* kiri: ilustrasi & tombol ubah/simpan */}
       <div className="flex flex-col items-center shrink-0 justify-center">
         <div className="w-64 h-64 md:w-80 md:h-80 relative mb-6">
           <img
-            // Jika sedang edit, tampilkan yang sementara dipilih. Jika tidak, tampilkan yang sudah disave.
             src={
               isEditingCharacter ? tempCharacter.image : selectedCharacter.image
             }
@@ -170,7 +196,6 @@ const ProfileStatus = () => {
           />
         </div>
 
-        {/* Tombol Berubah Teks Sesuai State */}
         <button
           onClick={handleButtonClick}
           className="bg-[#8B5CF6] text-white font-bold py-2.5 px-12 rounded-full hover:bg-purple-700 hover:scale-105 transition shadow-lg min-w-40"
@@ -179,17 +204,14 @@ const ProfileStatus = () => {
         </button>
       </div>
 
-      {/* kanan: kartu status atau pilih karakter */}
       <div className="flex-1 max-w-xl w-full flex">
         {isEditingCharacter ? (
-          // show komponen pilih karakter
           <ProfileCharacterSelect
             characterList={characterList}
             tempCharacter={tempCharacter}
             setTempCharacter={setTempCharacter}
           />
         ) : (
-          // show kartu status
           <div className="w-full bg-[#F4F3FF] rounded-[40px] p-6 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between">
             <button
               onClick={() => setIsEditingCharacter(true)}
@@ -205,10 +227,6 @@ const ProfileStatus = () => {
                     src="/images/avatars/cat-avatar.png"
                     alt="Avatar"
                     className="w-full h-full object-cover"
-                    onError={(e) =>
-                      (e.target.src =
-                        "https://via.placeholder.com/100x100?text=Avatar")
-                    }
                   />
                 </div>
                 <div className="absolute top-0 right-0 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md">
@@ -271,9 +289,7 @@ const ProfileStatus = () => {
               {streakDays.map((item, index) => (
                 <div
                   key={index}
-                  className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${
-                    item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"
-                  }`}
+                  className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"}`}
                 >
                   <div className="h-2 mb-1">
                     {item.isToday && (
