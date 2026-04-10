@@ -292,6 +292,40 @@ app.put("/api/user/characters/active", verifyToken, (req, res) => {
   });
 });
 
+// [API] Mengambil Data Profil & Statistik User
+app.get("/api/user/profile", verifyToken, (req, res) => {
+  const userId = req.user.id;
+
+  // Mengambil data user
+  const sqlUser =
+    "SELECT username, email, age, avatar_url, current_streak, total_points FROM users WHERE id = ?";
+
+  db.query(sqlUser, [userId], (err, userResults) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (userResults.length === 0)
+      return res.status(404).json({ message: "User tidak ditemukan" });
+
+    const user = userResults[0];
+
+    // Mengambil jumlah pencapaian (badge/karakter yang di-unlock dari misi)
+    // Untuk saat ini hitung dari berapa banyak karakter yang dimiliki di luar karakter default (id > 7)
+    const sqlAchievements =
+      "SELECT COUNT(*) AS total_achievements FROM user_characters WHERE id_user = ? AND id_character > 7";
+
+    db.query(sqlAchievements, [userId], (err, achievementResults) => {
+      const totalAchievements = err
+        ? 0
+        : achievementResults[0].total_achievements;
+
+      res.json({
+        ...user,
+        total_achievements: totalAchievements,
+        rank: 12, // Data sementara untuk peringkat (Logika ranking butuh query tersendiri)
+      });
+    });
+  });
+});
+
 // Jalankan server di port 5000
 const PORT = 5000;
 app.listen(PORT, () => {
