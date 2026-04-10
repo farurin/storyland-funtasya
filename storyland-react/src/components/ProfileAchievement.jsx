@@ -1,86 +1,114 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const ProfileAchievement = () => {
-  // Data tiruan (Dummy Data) untuk Rekor Pribadi
-  const personalRecords = [
-    { title: "Bergabung Sejak", value: "27 Febfuary 2025" },
-    { title: "Total Halaman", value: "88 Halaman (1 Bulan)" },
-    { title: "Streaks Terlama", value: "9 Streaks berjalan" },
-  ];
+  const { token } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Data tiruan untuk Badge Penghargaan
-  // isUnlocked: true (berwarna), false (abu-abu/terkunci)
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("http://localhost:5000/api/user/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Gagal ambil data rekor:", err);
+        setIsLoading(false);
+      });
+  }, [token]);
+
+  // Menggunakan file statis lokal
   const badges = [
     {
       id: 1,
       name: "Good Job",
-      image: "/images/badges/badge-1.png",
+      image: "/images/badges/badge-goodjob.png",
       isUnlocked: true,
     },
     {
       id: 2,
       name: "Excellent",
-      image: "/images/badges/badge-2.png",
+      image: "/images/badges/badge-exellent.png",
       isUnlocked: true,
     },
     {
       id: 3,
       name: "Outstanding",
-      image: "/images/badges/badge-3.png",
+      image: "/images/badges/badge-outstanding.png",
       isUnlocked: true,
     },
     {
       id: 4,
       name: "Brilliant",
-      image: "/images/badges/badge-4.png",
-      isUnlocked: true,
+      image: "/images/badges/badge-brilliant.png",
+      isUnlocked: false,
     },
     {
       id: 5,
       name: "Well Done",
-      image: "/images/badges/badge-5.png",
+      image: "/images/badges/badge-welldone.png",
       isUnlocked: false,
-    }, // Mode grayscale
+    },
     {
       id: 6,
       name: "Superb",
-      image: "/images/badges/badge-6.png",
+      image: "/images/badges/badge-superb.png",
       isUnlocked: false,
-    }, // Mode grayscale
-    // Badge kosong/terkunci murni (abu-abu polos)
-    { id: 7, name: "Locked", image: "", isUnlocked: false },
-    { id: 8, name: "Locked", image: "", isUnlocked: false },
-    { id: 9, name: "Locked", image: "", isUnlocked: false },
-    { id: 10, name: "Locked", image: "", isUnlocked: false },
-    { id: 11, name: "Locked", image: "", isUnlocked: false },
-    { id: 12, name: "Locked", image: "", isUnlocked: false },
+    },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-20 animate-pulse text-purple-600 font-bold">
+        Memuat Rekor Pribadi...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto animate-fade-in">
-      {/* 1. SECTION REKOR PRIBADI */}
+      {/* section personal rekor */}
       <div className="mb-12">
         <h2 className="text-2xl font-extrabold text-gray-900 mb-6 text-left">
           Rekor Pribadi
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {personalRecords.map((record, index) => (
-            <div
-              key={index}
-              className="bg-[#EAE8F0] border-[1.5px] border-[#A898FF] rounded-2xl p-6 md:p-8 flex flex-col justify-end min-h-35 md:min-h-40 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-xl md:text-2xl font-bold text-black mb-1">
-                {record.title}
-              </h3>
-              <p className="text-xs md:text-sm text-gray-600 font-medium">
-                {record.value}
-              </p>
-            </div>
-          ))}
+          <div className="bg-[#EAE8F0] border-[1.5px] border-[#A898FF] rounded-2xl p-6 md:p-8 flex flex-col justify-end min-h-35 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-xl md:text-2xl font-bold text-black mb-1">
+              Bergabung Sejak
+            </h3>
+            <p className="text-xs md:text-sm text-gray-600 font-medium">
+              10 April 2026
+            </p>
+          </div>
+
+          <div className="bg-[#EAE8F0] border-[1.5px] border-[#A898FF] rounded-2xl p-6 md:p-8 flex flex-col justify-end min-h-35 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-xl md:text-2xl font-bold text-black mb-1">
+              Total Poin
+            </h3>
+            <p className="text-xs md:text-sm text-gray-600 font-medium">
+              {stats?.total_points || 0} XP Terkumpul
+            </p>
+          </div>
+
+          <div className="bg-[#EAE8F0] border-[1.5px] border-[#A898FF] rounded-2xl p-6 md:p-8 flex flex-col justify-end min-h-35 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-xl md:text-2xl font-bold text-black mb-1">
+              Streaks Saat Ini
+            </h3>
+            <p className="text-xs md:text-sm text-gray-600 font-medium">
+              {stats?.current_streak || 0} Hari Aktif
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* 2. SECTION PENGHARGAAN (BADGES) */}
+      {/* section badges */}
       <div>
         <h2 className="text-2xl font-extrabold text-gray-900 mb-6 text-left">
           Penghargaan
@@ -89,29 +117,25 @@ const ProfileAchievement = () => {
           {badges.map((badge) => (
             <div key={badge.id} className="aspect-square">
               {badge.isUnlocked ? (
-                // Badge Terbuka (Berwarna)
-                <div className="w-full h-full rounded-full overflow-hidden shadow-sm hover:scale-105 transition-transform cursor-pointer bg-white">
+                <div className="w-full h-full rounded-full overflow-hidden shadow-sm bg-white border-2 border-purple-100 p-1 hover:scale-105 transition-transform cursor-pointer">
                   <img
                     src={badge.image}
                     alt={badge.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback gambar bulat berwarna jika gambar asli tidak ada
-                      e.target.src = `https://ui-avatars.com/api/?name=${badge.name.replace(" ", "+")}&background=random&color=fff&size=150&font-size=0.33`;
-                    }}
+                    className="w-full h-full object-contain"
+                    onError={(e) =>
+                      (e.target.src =
+                        "https://via.placeholder.com/100?text=Badge")
+                    }
                   />
                 </div>
               ) : (
-                // Badge Terkunci (Abu-abu / Grayscale)
                 <div className="w-full h-full rounded-full bg-[#D1D1D6] overflow-hidden flex items-center justify-center shadow-inner opacity-80">
-                  {badge.image ? (
-                    <img
-                      src={badge.image}
-                      alt={badge.name}
-                      className="w-full h-full object-cover grayscale opacity-50"
-                      onError={(e) => (e.target.style.display = "none")}
-                    />
-                  ) : null}
+                  <img
+                    src={badge.image}
+                    alt={badge.name}
+                    className="w-full h-full object-cover grayscale opacity-40"
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
                 </div>
               )}
             </div>
