@@ -126,9 +126,96 @@ const getLeaderboard = (req, res) => {
   });
 };
 
+// API ambil daftar misi dan progress user
+const getMissions = (req, res) => {
+  const userId = req.user.id;
+
+  const sql = `
+    SELECT 
+      m.id, m.title, m.description AS descr, m.max_progress AS maxProgress, 
+      m.reward_points AS rewardPoints, m.badge_image AS badgeImg,
+      COALESCE(um.progress, 0) AS progress,
+      COALESCE(um.is_claimed, 0) AS isClaimed,
+      (SELECT total_points FROM users WHERE id = ?) AS userTotalPoints
+    FROM missions m
+    LEFT JOIN user_missions um ON m.id = um.id_mission AND um.id_user = ?
+  `;
+
+  db.query(sql, [userId, userId], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const totalPoints = results.length > 0 ? results[0].userTotalPoints : 0;
+
+    res.json({
+      totalPoints: totalPoints,
+      missions: results.map((row) => ({
+        id: row.id,
+        title: row.title,
+        desc: row.descr,
+        maxProgress: row.maxProgress,
+        rewardPoints: row.rewardPoints,
+        badgeImg: row.badgeImg,
+        progress: row.progress,
+        isClaimed: row.isClaimed === 1,
+      })),
+    });
+  });
+};
+
+// [API] Mengambil Hadiah (Claim)
+const claimMission = (req, res) => {
+  const userId = req.user.id;
+  const missionId = req.params.id;
+
+  // cek apakah misi benar-benar sudah selesai (progress >= max_progress) dan belum diklaim
+  const checkSql = `
+    SELECT um.progress, m.max_progress, m.reward_points, um.is_claimed 
+    FROM user_missions um
+    JOIN missions m ON um.id_mission = m.id
+    WHERE um.id_user = ? AND um.id_mission = ?
+  `;
+
+  db.query(checkSql, [userId, missionId], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0)
+      return res.status(404).json({ message: "Misi tidak ditemukan" });
+
+    const mission = results[0];
+    if (mission.is_claimed)
+      return res.status(400).json({ message: "Hadiah sudah pernah diambil!" });
+    if (mission.progress < mission.max_progress)
+      return res.status(400).json({ message: "Misi belum selesai!" });
+
+    // tandai misi sebagai "Telah Diklaim"
+    db.query(
+      "UPDATE user_missions SET is_claimed = TRUE WHERE id_user = ? AND id_mission = ?",
+      [userId, missionId],
+      (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // tambahkan poin/XP ke user
+        db.query(
+          "UPDATE users SET total_points = total_points + ? WHERE id = ?",
+          [mission.reward_points, userId],
+          (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            res.json({
+              message: "Berhasil mengambil hadiah!",
+              addedPoints: mission.reward_points,
+            });
+          },
+        );
+      },
+    );
+  });
+};
+
 module.exports = {
   getCharacters,
   updateActiveCharacter,
   getUserProfile,
   getLeaderboard,
+  getMissions,
+  claimMission,
 };
