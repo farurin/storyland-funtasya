@@ -162,7 +162,7 @@ const getMissions = (req, res) => {
   });
 };
 
-// [API] Mengambil Hadiah (Claim)
+// API ambil hadiah (Claim)
 const claimMission = (req, res) => {
   const userId = req.user.id;
   const missionId = req.params.id;
@@ -211,6 +211,24 @@ const claimMission = (req, res) => {
   });
 };
 
+// API simpan perubahan profil (Nama, Usia, Avatar)
+const updateUserProfile = (req, res) => {
+  const userId = req.user.id;
+  const { username, age, avatar_url } = req.body;
+
+  if (!username || !age || !avatar_url) {
+    return res.status(400).json({ message: "Semua data harus diisi!" });
+  }
+
+  const updateSql =
+    "UPDATE users SET username = ?, age = ?, avatar_url = ? WHERE id = ?";
+
+  db.query(updateSql, [username, age, avatar_url, userId], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Profil berhasil diperbarui!" });
+  });
+};
+
 module.exports = {
   getCharacters,
   updateActiveCharacter,
@@ -218,4 +236,5 @@ module.exports = {
   getLeaderboard,
   getMissions,
   claimMission,
+  updateUserProfile,
 };

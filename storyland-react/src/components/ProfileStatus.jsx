@@ -130,7 +130,7 @@ const ProfileStatus = () => {
 
         <button
           onClick={handleButtonClick}
-          className="bg-[#8B5CF6] text-white font-bold py-2.5 px-12 rounded-full hover:bg-purple-700 hover:scale-105 transition shadow-lg min-w-40"
+          className="bg-[#8B5CF6] text-white font-bold py-2.5 px-12 rounded-full hover:bg-purple-700 hover:scale-105 transition shadow-lg min-w-40 cursor-pointer"
         >
           {isEditingCharacter ? "Simpan" : "Ubah"}
         </button>

@@ -66,21 +66,100 @@ const IconPodium = () => (
     <rect x="16" y="12" width="4" height="8" fill="#FDECA2" />
   </svg>
 );
+const IconClose = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
+// Dummy Avatar Options (Nantinya bisa di-fetch dari API Admin)
+const avatarOptions = Array.from(
+  { length: 12 },
+  (_, i) => `/images/avatars/cat-avatar-${i + 1}.png`,
+);
+// Jika gambarnya belum ada di foldermu, kita gunakan fallback di elemen img nanti
 
 const ProfileInfoCard = () => {
   const { token } = useAuth();
   const [profileData, setProfileData] = useState(null);
 
-  useEffect(() => {
-    if (!token) return;
+  // state modal edit
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    username: "",
+    age: "",
+    avatar_url: "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
-    fetch("http://localhost:5000/api/user/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setProfileData(data))
-      .catch((err) => console.error("Gagal ambil profil:", err));
+  const fetchProfile = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setProfileData(data);
+    } catch (err) {
+      console.error("Gagal ambil profil:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
   }, [token]);
+
+  // Fungsi untuk membuka modal dan mengisi form dengan data saat ini
+  const handleOpenModal = () => {
+    setEditData({
+      username: profileData.username,
+      age: profileData.age || "",
+      avatar_url: profileData.avatar_url || avatarOptions[0],
+    });
+    setIsModalOpen(true);
+  };
+
+  // Fungsi untuk menyimpan perubahan ke Backend
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: editData.username,
+          age: parseInt(editData.age) || 0,
+          avatar_url: editData.avatar_url,
+        }),
+      });
+
+      if (res.ok) {
+        await fetchProfile(); // Refresh data profil
+        setIsModalOpen(false); // Tutup modal
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Gagal menyimpan profil.");
+      }
+    } catch (err) {
+      console.error("Error saving profile:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!profileData) {
     return (
@@ -95,9 +174,10 @@ const ProfileInfoCard = () => {
 
   return (
     <div className="w-full bg-[#F4F3FF] rounded-[40px] p-6 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between min-h-100">
+      {/* Tombol Buka Modal */}
       <button
-        onClick={() => alert("Fitur Edit Profil akan segera dibuat!")}
-        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm"
+        onClick={handleOpenModal}
+        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm cursor-pointer"
       >
         <IconEdit /> Ubah
       </button>
@@ -111,8 +191,7 @@ const ProfileInfoCard = () => {
               alt="Avatar"
               className="w-full h-full object-cover"
               onError={(e) =>
-                (e.target.src =
-                  "https://via.placeholder.com/100x100?text=Avatar")
+                (e.target.src = `https://ui-avatars.com/api/?name=${profileData.username}&background=random`)
               }
             />
           </div>
@@ -175,15 +254,13 @@ const ProfileInfoCard = () => {
         </div>
       </div>
 
-      {/* Kalender Absensi (Di-generate langsung dari Backend) */}
+      {/* Kalender Absensi */}
       <div className="flex justify-between items-center bg-white/40 p-2 rounded-3xl">
         {profileData.calendar &&
           profileData.calendar.map((item, index) => (
             <div
               key={index}
-              className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${
-                item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"
-              }`}
+              className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"}`}
             >
               <div className="h-2 mb-1">
                 {item.isToday && (
@@ -199,6 +276,101 @@ const ProfileInfoCard = () => {
             </div>
           ))}
       </div>
+
+      {/* --- POPUP MODAL EDIT PROFIL --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-4xl w-full max-w-2xl p-6 md:p-10 relative shadow-2xl scale-100 transition-transform">
+            {/* Tombol Close */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 md:top-8 md:right-8 text-black hover:scale-110 transition"
+            >
+              <IconClose />
+            </button>
+
+            <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8 mt-2">
+              Ubah Profile
+            </h2>
+
+            {/* Form Inputs */}
+            <div className="space-y-4 mb-8">
+              <div className="bg-[#F4F3FF] rounded-[20px] px-5 py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
+                <label className="text-xs font-bold text-[#A898FF] block mb-1">
+                  Nama*
+                </label>
+                <input
+                  type="text"
+                  value={editData.username}
+                  onChange={(e) =>
+                    setEditData({ ...editData, username: e.target.value })
+                  }
+                  className="w-full bg-transparent text-gray-900 font-bold outline-none"
+                  placeholder="Masukkan nama"
+                />
+              </div>
+
+              <div className="bg-[#F4F3FF] rounded-[20px] px-5 py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
+                <label className="text-xs font-bold text-[#A898FF] block mb-1">
+                  Usia*
+                </label>
+                <input
+                  type="number"
+                  value={editData.age}
+                  onChange={(e) =>
+                    setEditData({ ...editData, age: e.target.value })
+                  }
+                  className="w-full bg-transparent text-gray-900 font-bold outline-none"
+                  placeholder="Masukkan usia"
+                />
+              </div>
+            </div>
+
+            {/* Pilihan Avatar */}
+            <div className="mb-10">
+              <h3 className="text-[#A898FF] font-bold mb-4">
+                Pilih karakter profile
+              </h3>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                {avatarOptions.map((avatar, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() =>
+                      setEditData({ ...editData, avatar_url: avatar })
+                    }
+                    className={`aspect-square rounded-full overflow-hidden transition-all duration-300 ${
+                      editData.avatar_url === avatar
+                        ? "border-4 border-[#A898FF] scale-110 shadow-md"
+                        : "border-2 border-transparent hover:scale-105"
+                    }`}
+                  >
+                    <img
+                      src={avatar}
+                      alt={`Avatar ${idx}`}
+                      className="w-full h-full object-cover"
+                      // Fallback generator UI Avatars jika gambar cat-avatar belum kamu buat
+                      onError={(e) =>
+                        (e.target.src = `https://ui-avatars.com/api/?name=Cat+${idx}&background=F4F3FF&color=A898FF`)
+                      }
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tombol Simpan */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="bg-[#EAE8F0] text-[#A898FF] hover:bg-[#6B4EFF] hover:text-white px-10 py-3 rounded-2xl font-extrabold transition-colors disabled:opacity-50"
+              >
+                {isSaving ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
