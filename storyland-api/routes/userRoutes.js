@@ -9,6 +9,7 @@ const {
   getMissions,
   claimMission,
   updateUserProfile,
+  getAvatars,
 } = require("../controllers/userController");
 
 router.get("/characters", verifyToken, getCharacters);
@@ -18,5 +19,6 @@ router.get("/leaderboard", verifyToken, getLeaderboard);
 router.get("/missions", verifyToken, getMissions);
 router.post("/missions/:id/claim", verifyToken, claimMission);
 router.put("/profile", verifyToken, updateUserProfile);
+router.get("/avatars", verifyToken, getAvatars);
 
 module.exports = router;

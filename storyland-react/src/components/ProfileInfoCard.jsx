@@ -83,16 +83,11 @@ const IconClose = () => (
   </svg>
 );
 
-// Dummy Avatar Options (Nantinya bisa di-fetch dari API Admin)
-const avatarOptions = Array.from(
-  { length: 12 },
-  (_, i) => `/images/avatars/cat-avatar-${i + 1}.png`,
-);
-// Jika gambarnya belum ada di foldermu, kita gunakan fallback di elemen img nanti
-
 const ProfileInfoCard = () => {
   const { token } = useAuth();
+
   const [profileData, setProfileData] = useState(null);
+  const [avatarList, setAvatarList] = useState([]);
 
   // state modal edit
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,6 +98,7 @@ const ProfileInfoCard = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Fungsi Fetch Profile
   const fetchProfile = async () => {
     if (!token) return;
     try {
@@ -116,21 +112,37 @@ const ProfileInfoCard = () => {
     }
   };
 
+  // Fungsi Fetch Avatar
+  const fetchAvatars = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/user/avatars", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setAvatarList(data);
+    } catch (err) {
+      console.error("Gagal ambil daftar avatar:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchAvatars(); // Panggil API avatar saat halaman dimuat
   }, [token]);
 
-  // Fungsi untuk membuka modal dan mengisi form dengan data saat ini
   const handleOpenModal = () => {
     setEditData({
       username: profileData.username,
       age: profileData.age || "",
-      avatar_url: profileData.avatar_url || avatarOptions[0],
+      // Default ke avatar pertama dari database jika user belum punya
+      avatar_url:
+        profileData.avatar_url ||
+        (avatarList.length > 0 ? avatarList[0].image_url : ""),
     });
     setIsModalOpen(true);
   };
 
-  // Fungsi untuk menyimpan perubahan ke Backend
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
@@ -148,8 +160,8 @@ const ProfileInfoCard = () => {
       });
 
       if (res.ok) {
-        await fetchProfile(); // Refresh data profil
-        setIsModalOpen(false); // Tutup modal
+        await fetchProfile();
+        setIsModalOpen(false);
       } else {
         const errorData = await res.json();
         alert(errorData.message || "Gagal menyimpan profil.");
@@ -185,13 +197,13 @@ const ProfileInfoCard = () => {
       {/* Info Dasar User */}
       <div className="flex items-center gap-5 md:gap-6 mb-10 mt-2">
         <div className="relative">
-          <div className="w-20 h-20 md:w-24 md:h-24 bg-pink-100 rounded-full border-4 border-white overflow-hidden shadow-sm">
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-[#EAE8F0] rounded-full border-4 border-white overflow-hidden shadow-sm">
             <img
               src={profileData.avatar_url || "/images/avatars/cat-avatar.png"}
               alt="Avatar"
               className="w-full h-full object-cover"
               onError={(e) =>
-                (e.target.src = `https://ui-avatars.com/api/?name=${profileData.username}&background=random`)
+                (e.target.src = `https://ui-avatars.com/api/?name=${profileData.username}&background=EAE8F0&color=6B4EFF`)
               }
             />
           </div>
@@ -277,14 +289,13 @@ const ProfileInfoCard = () => {
           ))}
       </div>
 
-      {/* --- POPUP MODAL EDIT PROFIL --- */}
+      {/* pop up modal edit profil */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-4xl w-full max-w-2xl p-6 md:p-10 relative shadow-2xl scale-100 transition-transform">
-            {/* Tombol Close */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-6 right-6 md:top-8 md:right-8 text-black hover:scale-110 transition"
+              className="absolute top-6 right-6 md:top-8 md:right-8 text-black hover:scale-110 transition cursor-pointer"
             >
               <IconClose />
             </button>
@@ -293,7 +304,6 @@ const ProfileInfoCard = () => {
               Ubah Profile
             </h2>
 
-            {/* Form Inputs */}
             <div className="space-y-4 mb-8">
               <div className="bg-[#F4F3FF] rounded-[20px] px-5 py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
                 <label className="text-xs font-bold text-[#A898FF] block mb-1">
@@ -326,44 +336,51 @@ const ProfileInfoCard = () => {
               </div>
             </div>
 
-            {/* Pilihan Avatar */}
+            {/* pilihan avatar dari db */}
             <div className="mb-10">
               <h3 className="text-[#A898FF] font-bold mb-4">
                 Pilih karakter profile
               </h3>
               <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-                {avatarOptions.map((avatar, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() =>
-                      setEditData({ ...editData, avatar_url: avatar })
-                    }
-                    className={`aspect-square rounded-full overflow-hidden transition-all duration-300 ${
-                      editData.avatar_url === avatar
-                        ? "border-4 border-[#A898FF] scale-110 shadow-md"
-                        : "border-2 border-transparent hover:scale-105"
-                    }`}
-                  >
-                    <img
-                      src={avatar}
-                      alt={`Avatar ${idx}`}
-                      className="w-full h-full object-cover"
-                      // Fallback generator UI Avatars jika gambar cat-avatar belum kamu buat
-                      onError={(e) =>
-                        (e.target.src = `https://ui-avatars.com/api/?name=Cat+${idx}&background=F4F3FF&color=A898FF`)
+                {avatarList.length > 0 ? (
+                  avatarList.map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      onClick={() =>
+                        setEditData({
+                          ...editData,
+                          avatar_url: avatar.image_url,
+                        })
                       }
-                    />
-                  </button>
-                ))}
+                      className={`aspect-square rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
+                        editData.avatar_url === avatar.image_url
+                          ? "border-4 border-[#A898FF] scale-110 shadow-md"
+                          : "border-2 border-transparent hover:scale-105"
+                      }`}
+                    >
+                      <img
+                        src={avatar.image_url}
+                        alt={avatar.name}
+                        className="w-full h-full object-cover bg-[#EAE8F0]"
+                        onError={(e) =>
+                          (e.target.src = `https://ui-avatars.com/api/?name=${avatar.name}&background=EAE8F0&color=6B4EFF`)
+                        }
+                      />
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-xs text-gray-400 col-span-full">
+                    Belum ada pilihan avatar.
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Tombol Simpan */}
             <div className="flex justify-center">
               <button
                 onClick={handleSaveProfile}
                 disabled={isSaving}
-                className="bg-[#EAE8F0] text-[#A898FF] hover:bg-[#6B4EFF] hover:text-white px-10 py-3 rounded-2xl font-extrabold transition-colors disabled:opacity-50"
+                className="bg-[#EAE8F0] text-[#A898FF] hover:bg-[#6B4EFF] hover:text-white px-10 py-3 rounded-2xl font-extrabold transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isSaving ? "Menyimpan..." : "Simpan"}
               </button>

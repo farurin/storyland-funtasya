@@ -229,6 +229,14 @@ const updateUserProfile = (req, res) => {
   });
 };
 
+// API ambil daftar pilihan avatar profil
+const getAvatars = (req, res) => {
+  db.query("SELECT * FROM avatars", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+};
+
 module.exports = {
   getCharacters,
   updateActiveCharacter,
@@ -237,4 +245,5 @@ module.exports = {
   getMissions,
   claimMission,
   updateUserProfile,
+  getAvatars,
 };
