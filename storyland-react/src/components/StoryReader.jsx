@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 // icon svg
 const IconBackCurved = () => (
@@ -13,7 +14,6 @@ const IconBackCurved = () => (
     <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
   </svg>
 );
-
 const IconGlobe = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +31,6 @@ const IconGlobe = () => (
     <path d="M2 12h20" />
   </svg>
 );
-
 const IconTriangle = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +42,6 @@ const IconTriangle = () => (
     <path d="M8 5v14l11-7z" />
   </svg>
 );
-
 const IconAutoPlay = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +58,6 @@ const IconAutoPlay = () => (
     <line x1="19" y1="5" x2="19" y2="19" />
   </svg>
 );
-
 const IconClose = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -80,6 +77,8 @@ const IconClose = () => (
 
 const StoryReader = ({ book }) => {
   const navigate = useNavigate();
+  const { token } = useAuth();
+
   const [currentPage, setCurrentPage] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [showNarration, setShowNarration] = useState(true);
@@ -89,6 +88,8 @@ const StoryReader = ({ book }) => {
 
   const [pages, setPages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [hasFinished, setHasFinished] = useState(false);
 
   useEffect(() => {
     if (!book) return;
@@ -102,6 +103,7 @@ const StoryReader = ({ book }) => {
         const data = await res.json();
         setPages(data);
         setCurrentPage(0);
+        setHasFinished(false);
       } catch (err) {
         console.error("Error fetching pages:", err);
       } finally {
@@ -112,6 +114,30 @@ const StoryReader = ({ book }) => {
     fetchPages();
   }, [book]);
 
+  // logika trigger selesai baca
+  useEffect(() => {
+    // Jika halaman sudah dimuat, dan user berada di halaman paling akhir, dan belum pernah dikirim datanya
+    if (
+      pages.length > 0 &&
+      currentPage === pages.length - 1 &&
+      !hasFinished &&
+      token
+    ) {
+      setHasFinished(true);
+
+      fetch(`http://localhost:5000/api/books/${book.id}/finish`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) =>
+          console.log("Silent Trigger: Buku selesai dibaca! Misi di-update."),
+        )
+        .catch((err) => console.error("Silent Trigger Error:", err));
+    }
+  }, [currentPage, pages.length, hasFinished, token, book]);
+
+  // Logika Autoplay
   useEffect(() => {
     let interval;
     if (isAutoPlay && pages.length > 0) {
@@ -158,7 +184,7 @@ const StoryReader = ({ book }) => {
   };
 
   return (
-    <div className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500">
+    <div className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500 rounded-2xl md:rounded-[40px]">
       <img
         src={pages[currentPage].image}
         alt={`Halaman ${currentPage + 1}`}
@@ -181,9 +207,7 @@ const StoryReader = ({ book }) => {
           {pages.map((_, index) => (
             <div
               key={index}
-              className={`h-1.5 md:h-2 rounded-full flex-1 transition-all duration-300 ${
-                index <= currentPage ? "bg-[#FFF8E1]" : "bg-white/40"
-              }`}
+              className={`h-1.5 md:h-2 rounded-full flex-1 transition-all duration-300 ${index <= currentPage ? "bg-[#FFF8E1]" : "bg-white/40"}`}
             />
           ))}
         </div>
@@ -216,11 +240,7 @@ const StoryReader = ({ book }) => {
       </div>
 
       <div
-        className={`absolute bottom-6 md:bottom-10 left-0 right-0 px-4 md:px-10 transition-transform duration-500 ${
-          showNarration
-            ? "translate-y-0"
-            : "translate-y-40 opacity-0 pointer-events-none"
-        }`}
+        className={`absolute bottom-6 md:bottom-10 left-0 right-0 px-4 md:px-10 transition-transform duration-500 ${showNarration ? "translate-y-0" : "translate-y-40 opacity-0 pointer-events-none"}`}
       >
         <div className="flex items-center justify-center mx-auto w-full max-w-345">
           <button
@@ -237,11 +257,7 @@ const StoryReader = ({ book }) => {
             <div className="absolute -top-4 right-8 md:right-10 flex gap-2 z-20">
               <button
                 onClick={() => setIsAutoPlay(!isAutoPlay)}
-                className={`px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-md transition ${
-                  isAutoPlay
-                    ? "bg-[#FDECA2] text-black border border-yellow-400"
-                    : "bg-[#FDECA2] text-black"
-                }`}
+                className={`px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-md transition ${isAutoPlay ? "bg-[#FDECA2] text-black border border-yellow-400" : "bg-[#FDECA2] text-black"}`}
               >
                 Auto <IconAutoPlay />
               </button>
@@ -262,7 +278,9 @@ const StoryReader = ({ book }) => {
 
           <button
             onClick={() =>
-              setCurrentPage((prev) => Math.min(pages.length - 1, prev + 1))
+              setCurrentPage((prev) =>
+                Math.max(0, Math.min(pages.length - 1, prev + 1)),
+              )
             }
             disabled={currentPage === pages.length - 1}
             className="w-11.25 h-11.25 md:w-[58.38px] md:h-[56.47px] shrink-0 bg-[#FDECA2] text-black rounded-full flex items-center justify-center disabled:opacity-50 hover:scale-105 transition shadow-lg relative z-10 -ml-6 md:-ml-8"
