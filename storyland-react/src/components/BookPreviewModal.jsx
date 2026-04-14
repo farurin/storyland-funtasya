@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ActionPopupModal from "./ActionPopupModal";
 
-// Icon SVG
+// icon svg
 const IconBookmark = ({ filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -100,13 +101,10 @@ const BookPreviewModal = () => {
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [popupConfig, setPopupConfig] = useState(null);
 
   useEffect(() => {
-    if (!previewId) {
-      setBook(null);
-      setFirstPageImage(null);
-      return;
-    }
+    if (!previewId) return;
 
     const fetchModalData = async () => {
       try {
@@ -124,7 +122,6 @@ const BookPreviewModal = () => {
             pagesData && pagesData.length > 0 ? pagesData[0].image : null,
           );
 
-          // Cek Status jika Login
           if (isLoggedIn && token) {
             const statusRes = await fetch(
               `http://localhost:5000/api/books/${foundBook.id}/status`,
@@ -143,7 +140,6 @@ const BookPreviewModal = () => {
         console.error("Gagal memuat data modal:", err);
       }
     };
-
     fetchModalData();
   }, [previewId, isLoggedIn, token]);
 
@@ -159,9 +155,8 @@ const BookPreviewModal = () => {
     navigate(`/book/${book.id}`);
   };
 
-  // Toggle API
-  const handleToggleFavorite = async () => {
-    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+  // logic eksekusi api toggle
+  const executeToggleFavAPI = async () => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/books/${book.id}/favorite`,
@@ -173,14 +168,14 @@ const BookPreviewModal = () => {
       if (res.ok) {
         const data = await res.json();
         setIsFavorite(data.isFavorite);
+        window.dispatchEvent(new Event("cornerDataChanged"));
       }
     } catch (error) {
-      console.error("Gagal toggle favorit:", error);
+      console.error(error);
     }
   };
 
-  const handleToggleSave = async () => {
-    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+  const executeToggleSaveAPI = async () => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/books/${book.id}/save`,
@@ -192,9 +187,71 @@ const BookPreviewModal = () => {
       if (res.ok) {
         const data = await res.json();
         setIsSaved(data.isSaved);
+        window.dispatchEvent(new Event("cornerDataChanged"));
       }
     } catch (error) {
-      console.error("Gagal toggle simpan:", error);
+      console.error(error);
+    }
+  };
+
+  // handler toggle
+  const handleToggleFavorite = async () => {
+    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+
+    if (isFavorite) {
+      setPopupConfig({
+        image: "/images/popups/popup-delete-fav.png",
+        title: "Hapus dari Favorit",
+        description:
+          "Setelah dihapus, cerita ini tidak akan ada di daftar favoritmu",
+        primaryBtnText: "Hapus",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Batalkan",
+        onPrimaryClick: () => {
+          executeToggleFavAPI();
+          setPopupConfig(null);
+        },
+        onSecondaryClick: () => setPopupConfig(null), // Batal hapus
+      });
+    } else {
+      await executeToggleFavAPI();
+      setPopupConfig({
+        image: "/images/popups/popup-fav.png",
+        title: "Difavoritkan",
+        description: "Lihat dan baca cerita yang sudah kamu favoritkan yuk!",
+        primaryBtnText: "Lihat",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Tutup",
+        onPrimaryClick: () => {
+          closeModal();
+          navigate("/corner");
+        },
+        onSecondaryClick: () => setPopupConfig(null),
+      });
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+
+    if (isSaved) {
+      await executeToggleSaveAPI();
+    } else {
+      await executeToggleSaveAPI();
+      setPopupConfig({
+        image: "/images/popups/popup-bookmark.png",
+        title: "Berhasil Menyimpan",
+        description:
+          "Kamu bisa melihat cerita yang sudah kamu simpan di halaman Corner",
+        primaryBtnText: "Lihat",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Tutup",
+        onPrimaryClick: () => {
+          closeModal();
+          navigate("/corner");
+        },
+        onSecondaryClick: () => setPopupConfig(null),
+      });
     }
   };
 
@@ -203,93 +260,98 @@ const BookPreviewModal = () => {
     : `/images/books/${book.image}`;
 
   return (
-    <div
-      className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-10 bg-black/70 cursor-pointer"
-      onClick={closeModal}
-    >
+    <>
       <div
-        className="relative w-full max-w-4xl min-h-112.5 md:h-120 bg-black rounded-3xl overflow-hidden shadow-2xl flex cursor-default"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-10 bg-black/70 cursor-pointer"
+        onClick={closeModal}
       >
-        <img
-          src={bgImageToUse}
-          alt={book.title}
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={(e) => {
-            e.target.src =
-              "https://via.placeholder.com/800x480?text=Preview+Cerita";
-          }}
-        />
+        <div
+          className="relative w-full max-w-4xl min-h-112.5 md:h-120 bg-black rounded-3xl overflow-hidden shadow-2xl flex cursor-default"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src={bgImageToUse}
+            alt={book.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src =
+                "https://via.placeholder.com/800x480?text=Preview+Cerita";
+            }}
+          />
 
-        <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight line-clamp-2 pr-4">
-            {book.title}
-          </h1>
+          <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight line-clamp-2 pr-4">
+              {book.title}
+            </h1>
 
-          <div className="flex flex-wrap items-center gap-3 text-white/80 text-xs md:text-sm mt-3 font-medium">
-            <span className="flex items-center gap-1.5">
-              <IconPages /> 11 Halaman
-            </span>
-            <span className="hidden md:inline">|</span>
-            <span className="flex items-center gap-1.5">
-              <IconCategory /> {book.category_name || "Cerita Nusantara"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-5 text-white/70 text-xs md:text-sm mt-2">
-            <span className="flex items-center gap-1.5">
-              <IconViews /> {book.views_count || 0}
-            </span>
-            <span className="flex items-center gap-1.5 text-pink-400">
-              <IconHeart filled={isFavorite} /> 114
-            </span>
-            <span className="flex items-center gap-1.5 text-[#FFF3C7]">
-              <IconBookmark filled={isSaved} /> 105
-            </span>
-          </div>
-
-          <div className="mt-4 md:mt-6">
-            <h3 className="text-white font-semibold text-sm md:text-base">
-              Sinopsis
-            </h3>
-            <p className="text-white/80 mt-1 md:mt-2 text-xs md:text-sm max-w-xl leading-relaxed line-clamp-4 md:line-clamp-5">
-              {book.description || "Sinopsis cerita belum tersedia."}
-            </p>
-          </div>
-
-          <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
-            {/* Baris BACA / SIMPAN */}
-            <div className="flex gap-2.5 h-8.75">
-              <button
-                onClick={handleToggleSave}
-                className={`w-8.75 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isSaved ? "bg-yellow-400" : "bg-[#FDECA2] hover:bg-yellow-200"}`}
-              >
-                <IconBookmark filled={isSaved} />
-              </button>
-              <button
-                onClick={handleReadClick}
-                className="w-23.75 h-full bg-[#FDECA2] text-gray-900 font-bold rounded-full hover:bg-yellow-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer"
-              >
-                Baca
-              </button>
+            <div className="flex flex-wrap items-center gap-3 text-white/80 text-xs md:text-sm mt-3 font-medium">
+              <span className="flex items-center gap-1.5">
+                <IconPages /> 11 Halaman
+              </span>
+              <span className="hidden md:inline">|</span>
+              <span className="flex items-center gap-1.5">
+                <IconCategory /> {book.category_name || "Cerita Nusantara"}
+              </span>
             </div>
 
-            {/* Baris TONTON / FAVORIT */}
-            <div className="flex gap-2.5 h-8.75">
-              <button
-                onClick={handleToggleFavorite}
-                className={`w-8.75 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isFavorite ? "bg-cyan-400 text-pink-600" : "bg-[#9AF2FF] hover:bg-cyan-200 text-gray-900"}`}
-              >
-                <IconHeart filled={isFavorite} />
-              </button>
-              <button className="w-23.75 h-full bg-[#9AF2FF] text-gray-900 font-bold rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer">
-                Tonton
-              </button>
+            <div className="flex items-center gap-5 text-white/70 text-xs md:text-sm mt-2">
+              <span className="flex items-center gap-1.5">
+                <IconViews /> {book.views_count || 0}
+              </span>
+              <span className="flex items-center gap-1.5 text-pink-400">
+                <IconHeart filled={isFavorite} /> 114
+              </span>
+              <span className="flex items-center gap-1.5 text-[#FFF3C7]">
+                <IconBookmark filled={isSaved} /> 105
+              </span>
+            </div>
+
+            <div className="mt-4 md:mt-6">
+              <h3 className="text-white font-semibold text-sm md:text-base">
+                Sinopsis
+              </h3>
+              <p className="text-white/80 mt-1 md:mt-2 text-xs md:text-sm max-w-xl leading-relaxed line-clamp-4 md:line-clamp-5">
+                {book.description || "Sinopsis cerita belum tersedia."}
+              </p>
+            </div>
+
+            <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
+              {/* Baris BACA / SIMPAN */}
+              <div className="flex gap-2.5 h-9">
+                <button
+                  onClick={handleToggleSave}
+                  className={`w-9 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isSaved ? "bg-yellow-400" : "bg-[#FDECA2] hover:bg-yellow-200"}`}
+                >
+                  <IconBookmark filled={isSaved} />
+                </button>
+                <button
+                  onClick={handleReadClick}
+                  className="w-24 h-full bg-[#FDECA2] text-gray-900 font-bold rounded-full hover:bg-yellow-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer"
+                >
+                  Baca
+                </button>
+              </div>
+
+              {/* Baris TONTON / FAVORIT */}
+              <div className="flex gap-2.5 h-9">
+                <button
+                  onClick={handleToggleFavorite}
+                  className={`w-9 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isFavorite ? "bg-cyan-400 text-pink-600" : "bg-[#9AF2FF] hover:bg-cyan-200 text-gray-900"}`}
+                >
+                  <IconHeart filled={isFavorite} />
+                </button>
+                <button className="w-24 h-full bg-[#9AF2FF] text-gray-900 font-bold rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer">
+                  Tonton
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* popup */}
+      <ActionPopupModal isOpen={popupConfig !== null} {...popupConfig} />
+    </>
   );
 };
 

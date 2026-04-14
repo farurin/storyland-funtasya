@@ -18,7 +18,6 @@ const IconClock = () => (
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
-
 const IconBookmark = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +30,6 @@ const IconBookmark = () => (
   </svg>
 );
 
-// Warna berdasarkan nama kategori
 const categoryColors = {
   "Cerita Mancanegara": "#7A5AF8",
   "Cerita Nusantara": "#E37500",
@@ -43,17 +41,41 @@ const categoryColors = {
   "Kisah 1001 Malam": "#EDC095",
 };
 
+// fungsi perhitungan waktu (Time Ago)
+const timeAgo = (dateString) => {
+  if (!dateString) return "Baru saja";
+
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const timeDifference = now.getTime() - date.getTime();
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (seconds < 60) return "Baru saja";
+  if (minutes < 60) return `${minutes} menit lalu`;
+  if (hours < 24) return `${hours} jam lalu`;
+  if (days === 1) return "Kemarin";
+  if (days < 30) return `${days} hari lalu`;
+  if (months < 12) return `${months} bulan lalu`;
+  return `${years} tahun lalu`;
+};
+
 const SavedCard = ({ book }) => {
   const location = useLocation();
   if (!book) return null;
 
-  // Menentukan warna kategori, default ke abu-abu jika tidak ditemukan di daftar
   const catColor = categoryColors[book.category_name] || "#6B4EFF";
 
+  // Ambil data saved_at (dari DB) lalu ubah jadi teks
+  const timeSavedText = timeAgo(book.saved_at);
+
   return (
-    // Kontainer Utama: Flexbox baris (kiri-kanan)
     <div className="w-full bg-[#EBE9FF] rounded-3xl p-5 flex gap-5 transition-transform hover:scale-[1.02] shadow-sm hover:shadow-md border border-white/50">
-      {/* KIRI: Cover Buku */}
       <div className="w-28 md:w-32 shrink-0 aspect-2/3 rounded-2xl overflow-hidden shadow-sm bg-gray-200">
         <img
           src={`/images/books/${book.image}`}
@@ -65,16 +87,12 @@ const SavedCard = ({ book }) => {
         />
       </div>
 
-      {/* KANAN: Container Flexbox Kolom (Atas-Bawah) */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* ATAS: Judul dan Info */}
         <div className="flex-1">
-          {/* Judul: line-clamp-1 untuk mencegah judul panjang merusak layout */}
           <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-3 truncate">
             {book.title}
           </h3>
 
-          {/* Baris 1: Kategori & Views */}
           <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm font-semibold mb-2">
             <span style={{ color: catColor }}>
               # {book.category_name || "Kategori"}
@@ -85,22 +103,20 @@ const SavedCard = ({ book }) => {
             </span>
           </div>
 
-          {/* Baris 2: Waktu & Tanggal Simpan */}
           <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-[#6B4EFF]/80">
             <span className="flex items-center gap-1.5">
-              <IconClock /> 5min
+              <IconClock /> 5min{" "}
+              {/* Catatan: Waktu baca ini masih statis 5min */}
             </span>
             <span className="text-[#6B4EFF]/40">•</span>
             <span className="flex items-center gap-1.5">
-              <IconBookmark /> Disimpan 2 hari lalu
+              <IconBookmark /> Disimpan {timeSavedText}
             </span>
           </div>
         </div>
 
-        {/* TENGAH: Garis Pembatas */}
         <div className="w-full h-px bg-[#6B4EFF]/15 my-3"></div>
 
-        {/* BAWAH: Tombol Baca */}
         <div className="flex justify-end mt-auto">
           <Link
             to={`${location.pathname}?preview=${book.id}`}

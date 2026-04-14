@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import BannerCorner from "../components/BannerCorner";
 import FilterCorner from "../components/FilterCorner";
@@ -6,7 +6,7 @@ import Progress from "../components/Progress";
 import CtaDownload from "../components/CtaDownload";
 
 const Corner = () => {
-  const { isLoggedIn, token } = useAuth(); // token sudah diambil
+  const { isLoggedIn, token } = useAuth();
 
   const [activeFilter, setActiveFilter] = useState("riwayat");
   const [search, setSearch] = useState("");
@@ -33,55 +33,58 @@ const Corner = () => {
     return grouped;
   };
 
+  const fetchCornerData = useCallback(async () => {
+    if (!isLoggedIn && activeFilter !== "riwayat") {
+      setProgressData({});
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      let endpoint = "";
+      if (activeFilter === "favorit") endpoint = "favorites";
+      else if (activeFilter === "disimpan") endpoint = "saved";
+      else endpoint = "history";
+
+      const response = await fetch(
+        `http://localhost:5000/api/corner/${endpoint}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!response.ok) throw new Error("Gagal mengambil data");
+      const data = await response.json();
+
+      if (activeFilter === "favorit") setProgressData({ Favorit: data });
+      else if (activeFilter === "disimpan") setProgressData({ Disimpan: data });
+      else setProgressData(groupHistoryByDate(data));
+    } catch (error) {
+      console.error("Error fetching corner data:", error);
+      setProgressData({});
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeFilter, isLoggedIn, token]);
+
+  // Panggil data saat halaman pertama dimuat
   useEffect(() => {
-    const fetchCornerData = async () => {
-      if (!isLoggedIn && activeFilter !== "riwayat") {
-        setProgressData({});
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        let endpoint = "";
-        if (activeFilter === "favorit") endpoint = "favorites";
-        else if (activeFilter === "disimpan") endpoint = "saved";
-        else endpoint = "history";
-
-        const response = await fetch(
-          `http://localhost:5000/api/corner/${endpoint}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        if (!response.ok) throw new Error("Gagal mengambil data");
-
-        const data = await response.json();
-
-        if (activeFilter === "favorit") {
-          setProgressData({ Favorit: data });
-        } else if (activeFilter === "disimpan") {
-          setProgressData({ Disimpan: data });
-        } else {
-          setProgressData(groupHistoryByDate(data));
-        }
-      } catch (error) {
-        console.error("Error fetching corner data:", error);
-        setProgressData({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchCornerData();
-  }, [activeFilter, isLoggedIn, token]); // <- Warning teratasi, token sudah dimasukkan
+  }, [fetchCornerData]);
+
+  // event listener
+  useEffect(() => {
+    const handleDataChange = () => fetchCornerData();
+    window.addEventListener("cornerDataChanged", handleDataChange);
+    return () =>
+      window.removeEventListener("cornerDataChanged", handleDataChange);
+  }, [fetchCornerData]);
 
   const emptyContent = {
     riwayat: {
       title: "Riwayat Bacamu Masih Kosong",
-      desc: "Daftar buku yang kamu baca akan muncul di sini. Yuk, pilih satu cerita menarik dan mulai baca sekarang!",
+      desc: "Daftar buku yang kamu baca akan muncul di sini.",
     },
     favorit: isLoggedIn
       ? {
@@ -90,16 +93,16 @@ const Corner = () => {
         }
       : {
           title: "Wah, Rak Favoritmu Masih Kosong!",
-          desc: "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
+          desc: "Yuk, buat akunmu sekarang.",
         },
     disimpan: isLoggedIn
       ? {
           title: "Belum Ada Cerita yang Kamu Simpan",
-          desc: "Klik tanda bookmark pada cerita yang ingin kamu simpan agar bisa dilanjutkan kapan saja!",
+          desc: "Klik tanda bookmark pada cerita yang ingin kamu simpan.",
         }
       : {
           title: "Rak Bukumu Masih Menunggu!",
-          desc: "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu dan tidak hilang saat kamu kembali lagi nanti.",
+          desc: "Yuk, buat akunmu sekarang.",
         },
   };
 
@@ -116,16 +119,13 @@ const Corner = () => {
         onSearch={setSearch}
       />
 
-      {/* wrapper for seamless loading */}
       <div className="w-full min-h-100">
-        {/* 1. Kondisi Loading */}
         {isLoading && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center text-gray-400 font-medium animate-pulse bg-white mt-12 mb-20">
             Memuat data {activeFilter}...
           </div>
         )}
 
-        {/* 2. Kondisi Kosong (Empty State) */}
         {!isLoading && hasNoBooks && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-32 text-center bg-white mt-12 mb-20">
             <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
@@ -137,7 +137,6 @@ const Corner = () => {
           </div>
         )}
 
-        {/* 3. Kondisi Ada Data */}
         {!isLoading && !hasNoBooks && (
           <>
             {activeFilter === "favorit" && (

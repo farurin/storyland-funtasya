@@ -11,7 +11,7 @@ const getFavorites = (req, res) => {
 
 const getSaved = (req, res) => {
   const sql =
-    "SELECT b.* FROM user_saved us JOIN books b ON us.id_book = b.id WHERE us.id_user = ?";
+    "SELECT b.*, us.saved_at FROM user_saved us JOIN books b ON us.id_book = b.id WHERE us.id_user = ? ORDER BY us.saved_at DESC";
   db.query(sql, [req.user.id], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
