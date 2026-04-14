@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "./ActionPopupModal";
 
-// icon svg
+// icon SVG
 const IconBookmark = ({ filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +155,7 @@ const BookPreviewModal = () => {
     navigate(`/book/${book.id}`);
   };
 
-  // logic eksekusi api toggle
+  // API trigger
   const executeToggleFavAPI = async () => {
     try {
       const res = await fetch(
@@ -168,7 +168,7 @@ const BookPreviewModal = () => {
       if (res.ok) {
         const data = await res.json();
         setIsFavorite(data.isFavorite);
-        window.dispatchEvent(new Event("cornerDataChanged"));
+        window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
       }
     } catch (error) {
       console.error(error);
@@ -187,18 +187,37 @@ const BookPreviewModal = () => {
       if (res.ok) {
         const data = await res.json();
         setIsSaved(data.isSaved);
-        window.dispatchEvent(new Event("cornerDataChanged"));
+        window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  // handler toggle
+  // handler popup
   const handleToggleFavorite = async () => {
-    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+    // guest mode
+    if (!isLoggedIn) {
+      setPopupConfig({
+        image: "/images/popups/popup-fav-guest.png",
+        title: "Wah, Rak Favoritmu Masih Kosong!",
+        description:
+          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
+        primaryBtnText: "Buat Akun",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Nanti Saja",
+        onPrimaryClick: () => {
+          closeModal();
+          navigate("/register"); // Arahkan ke halaman Register
+        },
+        onSecondaryClick: () => setPopupConfig(null), // Simply close the popup
+      });
+      return; // Stop execution
+    }
 
+    // logged in mode
     if (isFavorite) {
+      // Show confirmation before deleting
       setPopupConfig({
         image: "/images/popups/popup-delete-fav.png",
         title: "Hapus dari Favorit",
@@ -211,9 +230,10 @@ const BookPreviewModal = () => {
           executeToggleFavAPI();
           setPopupConfig(null);
         },
-        onSecondaryClick: () => setPopupConfig(null), // Batal hapus
+        onSecondaryClick: () => setPopupConfig(null),
       });
     } else {
+      // Execute API first, then show success popup
       await executeToggleFavAPI();
       setPopupConfig({
         image: "/images/popups/popup-fav.png",
@@ -232,11 +252,31 @@ const BookPreviewModal = () => {
   };
 
   const handleToggleSave = async () => {
-    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+    // guest mode
+    if (!isLoggedIn) {
+      setPopupConfig({
+        image: "/images/popups/popup-saved-guest.png",
+        title: "Rak Bukumu Masih Menunggu!",
+        description:
+          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu.",
+        primaryBtnText: "Buat Akun",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Nanti Saja",
+        onPrimaryClick: () => {
+          closeModal();
+          navigate("/register"); // Arahkan ke halaman Register
+        },
+        onSecondaryClick: () => setPopupConfig(null), // Simply close the popup
+      });
+      return; // Stop execution
+    }
 
+    // logged in mode
     if (isSaved) {
+      // Execute API directly without popup (no confirmation design)
       await executeToggleSaveAPI();
     } else {
+      // Execute API first, then show success popup
       await executeToggleSaveAPI();
       setPopupConfig({
         image: "/images/popups/popup-bookmark.png",
@@ -349,7 +389,7 @@ const BookPreviewModal = () => {
         </div>
       </div>
 
-      {/* popup */}
+      {/* Render Popup */}
       <ActionPopupModal isOpen={popupConfig !== null} {...popupConfig} />
     </>
   );

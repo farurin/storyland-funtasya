@@ -14,7 +14,7 @@ const ActionPopupModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
       <div className="bg-white rounded-4xl w-full max-w-90 p-8 flex flex-col items-center text-center shadow-2xl scale-100 transition-transform">
         {/* Gambar Ilustrasi */}
         <div className="w-40 h-40 mb-2 shrink-0">
