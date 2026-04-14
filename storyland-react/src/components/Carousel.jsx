@@ -59,21 +59,24 @@ const Carousel = ({ books }) => {
       {
         id: 0,
         label: "Rekomendasi",
-        color: "#FF8D9F",
+        activeColor: "#5179DE",
+        inactiveColor: "#90AFFF",
         icon: <IconLike />,
         items: books.slice(0, 6),
       },
       {
         id: 1,
         label: "Populer",
-        color: "#FFB545",
+        activeColor: "#D9587C",
+        inactiveColor: "#FF8EAE",
         icon: <IconFire />,
         items: books.slice(6, 12),
       },
       {
         id: 2,
         label: "Terbaru",
-        color: "#70A9FF",
+        activeColor: "#D58B09",
+        inactiveColor: "#F8AF2F",
         icon: <IconStar />,
         items: books.slice(12, 18),
       },
@@ -81,7 +84,6 @@ const Carousel = ({ books }) => {
     [books],
   );
 
-  // filteredBooks
   const displayedBooks = categoriesData[activeTab].items;
 
   return (
@@ -89,22 +91,31 @@ const Carousel = ({ books }) => {
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
         {/* TAB BUTTONS */}
         <div className="flex flex-wrap items-center gap-4">
-          {categoriesData.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveTab(cat.id)}
-              style={{ backgroundColor: cat.color }}
-              className={`flex flex-row items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition shadow-sm focus:outline-none 
-                ${activeTab === cat.id ? "ring-4 ring-offset-2 opacity-100 scale-105" : "opacity-60 hover:opacity-80"}
-              `}
-            >
-              {cat.icon}
-              <span className="whitespace-nowrap">{cat.label}</span>
-            </button>
-          ))}
+          {categoriesData.map((cat) => {
+            // Tentukan apakah tab ini sedang aktif
+            const isActive = activeTab === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveTab(cat.id)}
+                style={{
+                  backgroundColor: isActive
+                    ? cat.activeColor
+                    : cat.inactiveColor,
+                }}
+                className={`flex flex-row items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-sm focus:outline-none 
+                  ${isActive ? "ring-4 ring-offset-2 opacity-100 scale-105" : "hover:opacity-90"}
+                `}
+              >
+                {cat.icon}
+                <span className="whitespace-nowrap">{cat.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Search Bar (Dibuat statis/tidak berfungsi sementara) */}
+        {/* Search Bar (statis) */}
         <div className="relative w-full xl:w-96 shrink-0">
           <input
             type="text"
@@ -136,7 +147,7 @@ const Carousel = ({ books }) => {
       <div className="relative min-h-75">
         {displayedBooks.length > 0 ? (
           <Swiper
-            key={activeTab} // Hanya perlu re-render saat tab berubah
+            key={activeTab}
             modules={[Pagination, Autoplay]}
             slidesPerView="auto"
             spaceBetween={20}
