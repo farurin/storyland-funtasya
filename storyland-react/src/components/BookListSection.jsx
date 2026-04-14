@@ -1,12 +1,46 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
 import Card from "./Card";
 import { Button } from "flowbite-react";
 import bannerImg from "../assets/banner.png";
 import { Link } from "react-router-dom";
+
+// Icon SVG
+const IconArrowLeft = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="#852BFA"
+    stroke="#852BFA"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 5 L7 12 L15 19 Z" />
+  </svg>
+);
+
+const IconArrowRight = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="#852BFA"
+    stroke="#852BFA"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 5 L17 12 L9 19 Z" />
+  </svg>
+);
 
 const BANNER_AFTER_INDEX = 2;
 
@@ -38,78 +72,95 @@ const BannerIklan = () => (
   </section>
 );
 
-export const CategorySection = ({ category, customTitle }) => (
-  <div className="mt-12 mb-20">
-    {/* Header Section */}
-    <div className="flex items-end justify-between mb-4">
-      <div>
-        {/* Jika ada customTitle, gunakan itu. Jika tidak, gunakan nama kategori bawaan */}
-        <h3 className="text-2xl font-bold text-gray-900">
-          {customTitle ? customTitle : category.name}
-        </h3>
-        {/* Sembunyikan deskripsi jika sedang menggunakan customTitle (di halaman detail buku) */}
-        {!customTitle && (
-          <p className="text-gray-500 text-sm mt-1">{category.description}</p>
-        )}
-      </div>
-      <Link
-        to={`/categories/${category.id}`}
-        className="text-purple-500 text-sm font-semibold hover:underline mb-1"
-      >
-        Lihat Semua
-      </Link>
-    </div>
+export const CategorySection = ({ category, customTitle }) => {
+  const booksToShow = category.books ? category.books.slice(0, 6) : [];
 
-    <div className="flex gap-5 items-start h-full">
-      <Link
-        to={`/categories/${category.id}`}
-        className="hidden lg:block w-33.25 h-63.75 shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
-      >
-        <img
-          src={`/images/category/${category.image_banner}`}
-          alt={category.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          onError={(e) => {
-            e.target.src =
-              "https://via.placeholder.com/133x255?text=Banner+Kategori";
-          }}
-        />
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center px-2">
-          <div className="bg-white/90 backdrop-blur-sm text-[#F59E0B] text-[10px] font-bold py-1.5 px-3 rounded-full shadow-sm whitespace-nowrap">
-            Lihat Semua &gt;
+  return (
+    <div className="mt-10 mb-6">
+      {/* Header Section */}
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {customTitle ? customTitle : category.name}
+          </h3>
+          {!customTitle && (
+            <p className="text-gray-500 text-sm mt-1">{category.description}</p>
+          )}
+        </div>
+        <Link
+          to={`/categories/${category.id}`}
+          className="text-[#8131F3] text-sm font-semibold hover:underline mb-1"
+        >
+          Lihat Semua
+        </Link>
+      </div>
+
+      {/* Pembungkus Relative */}
+      <div className="relative flex items-start">
+        {/* Tombol Kiri */}
+        <button
+          className={`swiper-prev-${category.id} absolute -left-8 md:-left-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed`}
+        >
+          <IconArrowLeft />
+        </button>
+
+        <div className="flex gap-5 items-start h-full w-full">
+          {/* Banner Sticky Kiri */}
+          <Link
+            to={`/categories/${category.id}`}
+            className="hidden lg:block w-33.25 h-63.75 shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
+          >
+            <img
+              src={`/images/category/${category.image_banner}`}
+              alt={category.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                e.target.src =
+                  "https://via.placeholder.com/133x255?text=Banner+Kategori";
+              }}
+            />
+          </Link>
+
+          {/* Area Swiper */}
+          <div className="flex-1 min-w-0 custom-list-swiper relative">
+            {booksToShow.length > 0 ? (
+              <Swiper
+                modules={[Pagination, Navigation]}
+                navigation={{
+                  prevEl: `.swiper-prev-${category.id}`,
+                  nextEl: `.swiper-next-${category.id}`,
+                }}
+                slidesPerView="auto"
+                spaceBetween={20}
+                pagination={{ clickable: true }}
+                className="pb-10"
+              >
+                {booksToShow.map((book) => (
+                  <SwiperSlide key={book.id} style={{ width: "179px" }}>
+                    <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105">
+                      <Card book={book} />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            ) : (
+              <div className="flex items-center justify-center h-63.75 text-gray-400 italic">
+                Belum ada buku di kategori ini.
+              </div>
+            )}
           </div>
         </div>
-      </Link>
 
-      <div className="flex-1 min-w-0 custom-list-swiper relative">
-        {category.books && category.books.length > 0 ? (
-          <Swiper
-            modules={[Pagination, Autoplay]}
-            slidesPerView="auto"
-            spaceBetween={20}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 4000, disableOnInteraction: false }}
-            className="pb-12"
-          >
-            {category.books.map((book) => (
-              <SwiperSlide key={book.id} style={{ width: "179px" }}>
-                <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105">
-                  <Card book={book} />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <div className="flex items-center justify-center h-63.75 text-gray-400 italic">
-            Belum ada buku di kategori ini.
-          </div>
-        )}
+        {/* Tombol Kanan */}
+        <button
+          className={`swiper-next-${category.id} absolute -right-8 md:-right-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed`}
+        >
+          <IconArrowRight />
+        </button>
       </div>
     </div>
-  </div>
-);
-
-// ... (KODE BookListSection DI BAWAHNYA TETAP SAMA) ...
+  );
+};
 
 const BookListSection = ({ data }) => {
   const filtered = data.filter((c) => c.image !== null);
@@ -123,7 +174,7 @@ const BookListSection = ({ data }) => {
         </React.Fragment>
       ))}
 
-      {/* CSS untuk titik pagination yang hilang */}
+      {/* CSS untuk titik pagination kustom */}
       <style jsx global>{`
         .custom-list-swiper .swiper-pagination {
           bottom: 0px !important;
