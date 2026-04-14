@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import StoryReader from "../components/StoryReader";
 import StoryActions from "../components/StoryActions";
 import BookInfoBanner from "../components/BookInfoBanner";
 import { CategorySection } from "../components/BookListSection";
 import CtaDownload from "../components/CtaDownload";
 import { useAuth } from "../context/AuthContext";
+import ActionPopupModal from "../components/ActionPopupModal";
 
 const BookDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { token, isLoggedIn } = useAuth();
 
   const [book, setBook] = useState(null);
@@ -17,6 +19,7 @@ const BookDetail = () => {
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [popupConfig, setPopupConfig] = useState(null);
 
   useEffect(() => {
     const fetchBookData = async () => {
@@ -66,10 +69,8 @@ const BookDetail = () => {
     window.scrollTo(0, 0);
   }, [id, isLoggedIn, token]);
 
-  // fungsi toggle
-  const handleToggleFavorite = async () => {
-    if (!isLoggedIn)
-      return alert("Silakan login terlebih dahulu untuk menyukai cerita.");
+  // logika eksekusi API & trigger notifikasi corner
+  const executeToggleFavAPI = async () => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/books/${book.id}/favorite`,
@@ -81,15 +82,14 @@ const BookDetail = () => {
       if (res.ok) {
         const data = await res.json();
         setIsFavorite(data.isFavorite);
+        window.dispatchEvent(new Event("cornerDataChanged"));
       }
     } catch (error) {
       console.error("Gagal toggle favorit:", error);
     }
   };
 
-  const handleToggleSave = async () => {
-    if (!isLoggedIn)
-      return alert("Silakan login terlebih dahulu untuk menyimpan cerita.");
+  const executeToggleSaveAPI = async () => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/books/${book.id}/save`,
@@ -101,9 +101,91 @@ const BookDetail = () => {
       if (res.ok) {
         const data = await res.json();
         setIsSaved(data.isSaved);
+        window.dispatchEvent(new Event("cornerDataChanged"));
       }
     } catch (error) {
       console.error("Gagal toggle simpan:", error);
+    }
+  };
+
+  // handler show popup
+  const handleToggleFavorite = async () => {
+    if (!isLoggedIn) {
+      setPopupConfig({
+        image: "/images/popups/popup-fav-guest.png",
+        title: "Wah, Rak Favoritmu Masih Kosong!",
+        description:
+          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
+        primaryBtnText: "Buat Akun",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Nanti Saja",
+        onPrimaryClick: () => navigate("/register"),
+        onSecondaryClick: () => setPopupConfig(null),
+      });
+      return;
+    }
+
+    if (isFavorite) {
+      setPopupConfig({
+        image: "/images/popups/popup-delete-fav.png",
+        title: "Hapus dari Favorit",
+        description:
+          "Setelah dihapus, cerita ini tidak akan ada di daftar favoritmu",
+        primaryBtnText: "Hapus",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Batalkan",
+        onPrimaryClick: () => {
+          executeToggleFavAPI();
+          setPopupConfig(null);
+        },
+        onSecondaryClick: () => setPopupConfig(null),
+      });
+    } else {
+      await executeToggleFavAPI();
+      setPopupConfig({
+        image: "/images/popups/popup-fav.png",
+        title: "Difavoritkan",
+        description: "Lihat dan baca cerita yang sudah kamu favoritkan yuk!",
+        primaryBtnText: "Lihat",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Tutup",
+        onPrimaryClick: () => navigate("/corner"),
+        onSecondaryClick: () => setPopupConfig(null),
+      });
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!isLoggedIn) {
+      setPopupConfig({
+        image: "/images/popups/popup-saved-guest.png",
+        title: "Rak Bukumu Masih Menunggu!",
+        description:
+          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu.",
+        primaryBtnText: "Buat Akun",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Nanti Saja",
+        onPrimaryClick: () => navigate("/register"),
+        onSecondaryClick: () => setPopupConfig(null),
+      });
+      return;
+    }
+
+    if (isSaved) {
+      await executeToggleSaveAPI();
+    } else {
+      await executeToggleSaveAPI();
+      setPopupConfig({
+        image: "/images/popups/popup-bookmark.png",
+        title: "Berhasil Menyimpan",
+        description:
+          "Kamu bisa melihat cerita yang sudah kamu simpan di halaman Corner",
+        primaryBtnText: "Lihat",
+        primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
+        secondaryBtnText: "Tutup",
+        onPrimaryClick: () => navigate("/corner"),
+        onSecondaryClick: () => setPopupConfig(null),
+      });
     }
   };
 
@@ -156,6 +238,9 @@ const BookDetail = () => {
         )}
       </div>
       <CtaDownload />
+
+      {/* Render Popup */}
+      <ActionPopupModal isOpen={popupConfig !== null} {...popupConfig} />
     </div>
   );
 };
