@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
 const IconInstagram = () => (
@@ -99,7 +100,6 @@ const IconSend = () => (
 export default function FooterComponent() {
   return (
     <footer className="w-full">
-      {/* Bagian Konten Utama */}
       <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Kolom 1: Logo & Social Media */}
@@ -149,7 +149,11 @@ export default function FooterComponent() {
           {/* Kolom 3: About Us & Newsletter */}
           <div className="flex flex-col gap-4">
             <div>
-              <h4 className="font-semibold text-purple-500 mb-1">About Us</h4>
+              <Link to="/about" onClick={() => window.scrollTo(0, 0)}>
+                <h4 className="font-semibold text-purple-500 mb-1 hover:underline cursor-pointer inline-block">
+                  About Us
+                </h4>
+              </Link>
             </div>
             <div>
               <p className="font-semibold text-sm text-gray-700">Newsletter</p>

@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BookDetail from "./pages/BookDetail";
 import BookPreviewModal from "./components/BookPreviewModal";
 import Profile from "./pages/Profile";
+import About from "./pages/About"; // 1. Tambahkan import halaman About
 
 export default function App() {
   return (
@@ -38,6 +39,9 @@ export default function App() {
 
           {/* Profile */}
           <Route path="/profile" element={<Profile />} />
+
+          {/* About Us */}
+          <Route path="/about" element={<About />} />
 
           {/* Rute yang dijaga satpam */}
           <Route element={<ProtectedRoute />}></Route>
