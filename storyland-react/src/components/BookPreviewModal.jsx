@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-// --- KUMPULAN IKON SVG ---
-const IconBookmark = () => (
+// Icon SVG
+const IconBookmark = ({ filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
     height="16"
     viewBox="0 0 24 24"
-    fill="none"
+    fill={filled ? "currentColor" : "none"}
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
@@ -17,13 +18,13 @@ const IconBookmark = () => (
     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
   </svg>
 );
-const IconHeart = () => (
+const IconHeart = ({ filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
     height="16"
     viewBox="0 0 24 24"
-    fill="none"
+    fill={filled ? "currentColor" : "none"}
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
@@ -92,9 +93,13 @@ const BookPreviewModal = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const previewId = searchParams.get("preview");
   const navigate = useNavigate();
+  const { token, isLoggedIn } = useAuth();
 
   const [book, setBook] = useState(null);
   const [firstPageImage, setFirstPageImage] = useState(null);
+
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     if (!previewId) {
@@ -111,16 +116,27 @@ const BookPreviewModal = () => {
 
         if (foundBook) {
           setBook(foundBook);
-
           const pagesRes = await fetch(
             `http://localhost:5000/api/books/${foundBook.id}/pages`,
           );
           const pagesData = await pagesRes.json();
+          setFirstPageImage(
+            pagesData && pagesData.length > 0 ? pagesData[0].image : null,
+          );
 
-          if (pagesData && pagesData.length > 0) {
-            setFirstPageImage(pagesData[0].image);
-          } else {
-            setFirstPageImage(null);
+          // Cek Status jika Login
+          if (isLoggedIn && token) {
+            const statusRes = await fetch(
+              `http://localhost:5000/api/books/${foundBook.id}/status`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            if (statusRes.ok) {
+              const statusData = await statusRes.json();
+              setIsFavorite(statusData.isFavorite);
+              setIsSaved(statusData.isSaved);
+            }
           }
         }
       } catch (err) {
@@ -129,7 +145,7 @@ const BookPreviewModal = () => {
     };
 
     fetchModalData();
-  }, [previewId]);
+  }, [previewId, isLoggedIn, token]);
 
   if (!previewId || !book) return null;
 
@@ -141,6 +157,45 @@ const BookPreviewModal = () => {
   const handleReadClick = () => {
     closeModal();
     navigate(`/book/${book.id}`);
+  };
+
+  // Toggle API
+  const handleToggleFavorite = async () => {
+    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/books/${book.id}/favorite`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setIsFavorite(data.isFavorite);
+      }
+    } catch (error) {
+      console.error("Gagal toggle favorit:", error);
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!isLoggedIn) return alert("Silakan login terlebih dahulu.");
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/books/${book.id}/save`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setIsSaved(data.isSaved);
+      }
+    } catch (error) {
+      console.error("Gagal toggle simpan:", error);
+    }
   };
 
   const bgImageToUse = firstPageImage
@@ -166,7 +221,6 @@ const BookPreviewModal = () => {
           }}
         />
 
-        {/* KEMBALI MENGGUNAKAN justify-center DI SINI */}
         <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/80 to-transparent flex flex-col justify-center px-6 md:px-12 w-full md:w-3/4 lg:w-2/3 py-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight line-clamp-2 pr-4">
             {book.title}
@@ -187,10 +241,10 @@ const BookPreviewModal = () => {
               <IconViews /> {book.views_count || 0}
             </span>
             <span className="flex items-center gap-1.5 text-pink-400">
-              <IconHeart /> 114
+              <IconHeart filled={isFavorite} /> 114
             </span>
             <span className="flex items-center gap-1.5 text-[#FFF3C7]">
-              <IconBookmark /> 105
+              <IconBookmark filled={isSaved} /> 105
             </span>
           </div>
 
@@ -203,12 +257,14 @@ const BookPreviewModal = () => {
             </p>
           </div>
 
-          {/* Tombol aksi kembali merapat mengikuti alur elemen di atasnya */}
           <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
-            {/* Baris BACA */}
+            {/* Baris BACA / SIMPAN */}
             <div className="flex gap-2.5 h-8.75">
-              <button className="w-8.75 h-full bg-[#FDECA2] text-gray-900 flex items-center justify-center rounded-full hover:bg-yellow-200 hover:scale-105 transition shadow-lg cursor-pointer">
-                <IconBookmark />
+              <button
+                onClick={handleToggleSave}
+                className={`w-8.75 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isSaved ? "bg-yellow-400" : "bg-[#FDECA2] hover:bg-yellow-200"}`}
+              >
+                <IconBookmark filled={isSaved} />
               </button>
               <button
                 onClick={handleReadClick}
@@ -218,10 +274,13 @@ const BookPreviewModal = () => {
               </button>
             </div>
 
-            {/* Baris TONTON */}
+            {/* Baris TONTON / FAVORIT */}
             <div className="flex gap-2.5 h-8.75">
-              <button className="w-8.75 h-full bg-[#9AF2FF] text-gray-900 flex items-center justify-center rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg cursor-pointer">
-                <IconHeart />
+              <button
+                onClick={handleToggleFavorite}
+                className={`w-8.75 h-full text-gray-900 flex items-center justify-center rounded-full hover:scale-105 transition shadow-lg cursor-pointer ${isFavorite ? "bg-cyan-400 text-pink-600" : "bg-[#9AF2FF] hover:bg-cyan-200 text-gray-900"}`}
+              >
+                <IconHeart filled={isFavorite} />
               </button>
               <button className="w-23.75 h-full bg-[#9AF2FF] text-gray-900 font-bold rounded-full hover:bg-cyan-200 hover:scale-105 transition shadow-lg text-xs md:text-sm cursor-pointer">
                 Tonton
