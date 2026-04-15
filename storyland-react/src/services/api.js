@@ -1,93 +1,76 @@
-import data from "../../data.json";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
-// get all books
-function getAllBooks() {
-  return data.books;
-}
+// helper global
+const fetchAPI = async (endpoint, options = {}, token = null) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
 
-// get books by categories
-function getBookByCategories(catId) {
-  return data.books.filter((book) => book.id_categories === catId);
-}
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-// get all categories
-function getAllCategories() {
-  return data.categories;
-}
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+  const data = await response.json();
 
-// get categories with their books
-function getCategoriesWithBooks() {
-  return data.categories.map((category) => ({
-    ...category,
-    books: data.books.filter((book) => book.id_categories === category.id),
-  }));
-}
-
-// get books by category name
-function getBooksByCategoryName(categoryName) {
-  const category = data.categories.find(
-    (cat) => cat.name.toLowerCase() === categoryName.toLowerCase(),
-  );
-
-  if (!category) {
-    return [];
+  if (!response.ok) {
+    throw new Error(data.message || "Terjadi kesalahan pada server");
   }
 
-  return data.books.filter((book) => book.id_categories === category.id);
-}
-
-// get all progress with book detail
-function getAllProgress() {
-  return data.progress.map((progress) => ({
-    ...progress,
-    book: data.books.find((book) => book.id === progress.id_book) || null,
-  }));
-}
-
-// get progress grouped by date
-function getProgressGroupedByDate() {
-  const progressWithBooks = getAllProgress();
-
-  const today = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-  return progressWithBooks.reduce((groups, item) => {
-    const date = new Date(item.last_read_at).toDateString();
-    const label =
-      date === today ? "Hari ini" : date === yesterday ? "Kemarin" : date;
-
-    if (!groups[label]) groups[label] = [];
-    groups[label].push(item);
-    return groups;
-  }, {});
-}
-
-// get favorite books with book detail
-function getFavoriteBooks() {
-  return data.favorite.map((fav) => ({
-    ...fav,
-    book: data.books.find((book) => book.id === fav.id_book) || null,
-  }));
-}
-
-// get saved books with book detail
-function getSavedBooks() {
-  return data.progress
-    .filter((p) => p.saved === true)
-    .map((progress) => ({
-      ...progress,
-      book: data.books.find((book) => book.id === progress.id_book) || null,
-    }));
-}
-
-export {
-  getAllBooks,
-  getBookByCategories,
-  getAllCategories,
-  getCategoriesWithBooks,
-  getBooksByCategoryName,
-  getAllProgress,
-  getProgressGroupedByDate,
-  getFavoriteBooks,
-  getSavedBooks,
+  return data;
 };
+
+// authentication
+export const loginUser = (credentials) =>
+  fetchAPI("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+export const registerUser = (credentials) =>
+  fetchAPI("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+
+// public data (Buku & Kategori)
+export const getBooks = () => fetchAPI("/books");
+export const getCategories = () => fetchAPI("/categories");
+export const getBookPages = (id) => fetchAPI(`/books/${id}/pages`);
+
+// user action (need tokens)
+export const finishBook = (id, token) =>
+  fetchAPI(`/books/${id}/finish`, { method: "POST" }, token);
+export const getBookStatus = (id, token) =>
+  fetchAPI(`/books/${id}/status`, {}, token);
+export const toggleFavorite = (id, token) =>
+  fetchAPI(`/books/${id}/favorite`, { method: "POST" }, token);
+export const toggleSave = (id, token) =>
+  fetchAPI(`/books/${id}/save`, { method: "POST" }, token);
+
+// corner
+export const getCornerData = (endpoint, token) =>
+  fetchAPI(`/corner/${endpoint}`, {}, token);
+
+// user profile & gamification
+export const getUserProfile = (token) => fetchAPI("/user/profile", {}, token);
+export const updateUserProfile = (data, token) =>
+  fetchAPI(
+    "/user/profile",
+    { method: "PUT", body: JSON.stringify(data) },
+    token,
+  );
+export const getAvatars = (token) => fetchAPI("/user/avatars", {}, token);
+export const getCharacters = (token) => fetchAPI("/user/characters", {}, token);
+export const updateActiveCharacter = (characterId, token) =>
+  fetchAPI(
+    "/user/characters/active",
+    { method: "PUT", body: JSON.stringify({ characterId }) },
+    token,
+  );
+export const getLeaderboard = (token) =>
+  fetchAPI("/user/leaderboard", {}, token);
+export const getMissions = (token) => fetchAPI("/user/missions", {}, token);
+export const claimMission = (id, token) =>
+  fetchAPI(`/user/missions/${id}/claim`, { method: "POST" }, token);

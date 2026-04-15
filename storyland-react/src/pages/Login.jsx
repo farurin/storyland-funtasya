@@ -9,6 +9,7 @@ import AuthLayout, {
 } from "../components/AuthLayout";
 import { validateAuth } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
+import { loginUser } from "../services/api";
 
 const Login = () => {
   const { login } = useAuth();
@@ -36,32 +37,15 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setIsError(true);
-        setErrorMessage(`*${data.message}`);
-        return;
-      }
+      const data = await loginUser({ email, password });
 
       setIsError(false);
       setErrorMessage("");
-
-      // Simpan tiket dan pindah halaman
       login(data.token, data.user);
       navigate("/");
     } catch (error) {
       setIsError(true);
-      setErrorMessage("*Gagal terhubung ke server. Pastikan backend berjalan.");
+      setErrorMessage(`*${error.message}`);
     }
   };
 

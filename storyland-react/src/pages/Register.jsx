@@ -9,6 +9,7 @@ import AuthLayout, {
 } from "../components/AuthLayout";
 import { validateAuth } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
+import { registerUser } from "../services/api";
 
 const Register = () => {
   const { login } = useAuth();
@@ -23,14 +24,12 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Cek field kosong
     if (!email || !password) {
       setIsError(true);
       setErrorMessage("*Harap lengkapi email dan password.");
       return;
     }
 
-    // 2. Jalankan fungsi validasi format
     const validation = validateAuth(email, password);
     if (!validation.isValid) {
       setIsError(true);
@@ -41,34 +40,15 @@ const Register = () => {
     }
 
     try {
-      // Mengirim data ke API Backend
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Menampilkan pesan error asli dari server (misal: Email sudah terdaftar)
-        setIsError(true);
-        setErrorMessage(`*${data.message}`);
-        return;
-      }
+      const data = await registerUser({ email, password });
 
       setIsError(false);
       setErrorMessage("");
-
-      // Menyimpan token & user ke Context, lalu masuk ke Home
       login(data.token, data.user);
       navigate("/");
     } catch (error) {
       setIsError(true);
-      setErrorMessage("*Gagal terhubung ke server. Pastikan backend berjalan.");
+      setErrorMessage(`*${error.message}`);
     }
   };
 
