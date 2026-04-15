@@ -4,6 +4,7 @@ import BannerCorner from "../components/BannerCorner";
 import FilterCorner from "../components/FilterCorner";
 import Progress from "../components/Progress";
 import CtaDownload from "../components/CtaDownload";
+import { getCornerData } from "../services/api";
 
 const Corner = () => {
   const { isLoggedIn, token } = useAuth();
@@ -34,7 +35,7 @@ const Corner = () => {
   };
 
   const fetchCornerData = useCallback(async () => {
-    if (!isLoggedIn && activeFilter !== "riwayat") {
+    if (!isLoggedIn) {
       setProgressData({});
       setIsLoading(false);
       return;
@@ -46,22 +47,13 @@ const Corner = () => {
       if (activeFilter === "favorit") endpoint = "favorites";
       else if (activeFilter === "disimpan") endpoint = "saved";
       else endpoint = "history";
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/corner/${endpoint}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (!response.ok) throw new Error("Gagal mengambil data");
-      const data = await response.json();
+      const data = await getCornerData(endpoint, token);
 
       if (activeFilter === "favorit") setProgressData({ Favorit: data });
       else if (activeFilter === "disimpan") setProgressData({ Disimpan: data });
       else setProgressData(groupHistoryByDate(data));
     } catch (error) {
-      console.error("Error fetching corner data:", error);
+      console.error("Error fetching corner data:", error.message);
       setProgressData({});
     } finally {
       setIsLoading(false);
@@ -82,10 +74,15 @@ const Corner = () => {
   }, [fetchCornerData]);
 
   const emptyContent = {
-    riwayat: {
-      title: "Riwayat Bacamu Masih Kosong",
-      desc: "Daftar buku yang kamu baca akan muncul di sini.",
-    },
+    riwayat: isLoggedIn
+      ? {
+          title: "Riwayat Bacamu Masih Kosong",
+          desc: "Daftar buku yang kamu baca akan muncul di sini.",
+        }
+      : {
+          title: "Riwayat Bacamu Masih Rahasia!",
+          desc: "Yuk, buat akunmu sekarang untuk menyimpan riwayat bacaanmu.",
+        },
     favorit: isLoggedIn
       ? {
           title: "Belum Ada Cerita yang Kamu Sukai",
