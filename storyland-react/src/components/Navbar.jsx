@@ -10,7 +10,7 @@ import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LogoFuntasya from "/images/logo-funtasya.png";
 
-// --- KUMPULAN IKON SVG ---
+// icon svg
 const IconProfile = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -45,6 +45,25 @@ const IconLanguage = () => (
   </svg>
 );
 
+// Ikon Sign Up / Login (Masuk)
+const IconSignUp = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <polyline points="10 17 15 12 10 7" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+  </svg>
+);
+
 const NavItem = ({ to, children }) => (
   <NavLink
     to={to}
@@ -71,41 +90,43 @@ export default function Navigation() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <Navbar fluid className="px-3 md:px-20 lg:px-42 shadow relative z-50">
+    <Navbar
+      fluid
+      className="px-3 md:px-20 lg:px-42 shadow-sm sticky top-0 z-100 bg-white/95 backdrop-blur-md w-full"
+    >
       <NavbarBrand href="/">
         <img src={LogoFuntasya} alt="Logo Funtasya" className="h-8" />
       </NavbarBrand>
 
       <div className="flex items-center gap-2 md:order-2">
         {isLoggedIn ? (
-          // Tombol Profil
+          // Tombol Profil (Kuning) jika sudah login
           <Link
             to="/profile"
-            className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-bold rounded-full px-6 py-2 gap-2 transition shadow-sm border border-[#F59E0B]/50"
+            className="flex items-center bg-[#F59E0B] hover:bg-amber-600 text-white font-bold rounded-full px-5 py-2 md:px-6 md:py-2 gap-2 transition shadow-sm border border-[#F59E0B]/50 whitespace-nowrap"
           >
-            <IconProfile /> Profile
+            <IconProfile /> <span className="hidden sm:inline">Profile</span>
           </Link>
         ) : (
-          <Button
-            as={Link}
-            to="/login"
-            color="yellow"
-            className="rounded-full px-8 font-bold"
+          // Tombol Sign up (Ungu) jika belum login (guest mode)
+          <Link
+            to="/register"
+            className="flex items-center bg-[#6F5CE4] hover:bg-purple-700 text-white font-bold rounded-full px-5 py-2 md:px-6 md:py-2 gap-2 transition shadow-sm whitespace-nowrap"
           >
-            Masuk
-          </Button>
+            <IconSignUp /> <span className="hidden sm:inline">Sign up</span>
+          </Link>
         )}
 
         <Button
           color="blue"
-          className="opacity-70 rounded-full px-6 gap-2 hidden md:flex"
+          className="opacity-70 rounded-full px-6 gap-2 hidden lg:flex"
         >
           <IconLanguage /> Indonesia
         </Button>
         <NavbarToggle />
       </div>
 
-      <NavbarCollapse className="md:flex md:items-center">
+      <NavbarCollapse className="md:flex md:items-center bg-white/95 backdrop-blur-md md:bg-transparent">
         {navLinks.map(({ to, label }) => (
           <NavItem key={to} to={to}>
             {label}
