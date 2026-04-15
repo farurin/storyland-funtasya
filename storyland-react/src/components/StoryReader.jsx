@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getBookPages, finishBook } from "../services/api";
 
 // icon svg
 const IconBackCurved = () => (
@@ -97,10 +98,7 @@ const StoryReader = ({ book }) => {
     const fetchPages = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/books/${book.id}/pages`,
-        );
-        const data = await res.json();
+        const data = await getBookPages(book.id);
         setPages(data);
         setCurrentPage(0);
         setHasFinished(false);
@@ -114,9 +112,8 @@ const StoryReader = ({ book }) => {
     fetchPages();
   }, [book]);
 
-  // logika trigger selesai baca
+  // Logika trigger selesai baca (Silent Trigger)
   useEffect(() => {
-    // Jika halaman sudah dimuat, dan user berada di halaman paling akhir, dan belum pernah dikirim datanya
     if (
       pages.length > 0 &&
       currentPage === pages.length - 1 &&
@@ -125,12 +122,9 @@ const StoryReader = ({ book }) => {
     ) {
       setHasFinished(true);
 
-      fetch(`${import.meta.env.VITE_API_URL}/books/${book.id}/finish`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) =>
+      // Memanggil fungsi finishBook dari api.js
+      finishBook(book.id, token)
+        .then(() =>
           console.log("Silent Trigger: Buku selesai dibaca! Misi di-update."),
         )
         .catch((err) => console.error("Silent Trigger Error:", err));
