@@ -37,14 +37,14 @@ export default function App() {
           {/* Corner */}
           <Route path="/corner" element={<Corner />} />
 
-          {/* Profile */}
-          <Route path="/profile" element={<Profile />} />
-
           {/* About Us */}
           <Route path="/about" element={<About />} />
 
           {/* Rute yang dijaga satpam */}
-          <Route element={<ProtectedRoute />}></Route>
+          <Route element={<ProtectedRoute />}>
+            {/* Profile */}
+            <Route path="/profile" element={<Profile />} />
+          </Route>
         </Route>
       </Routes>
 
