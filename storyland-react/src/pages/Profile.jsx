@@ -21,7 +21,7 @@ const Profile = () => {
   const handleConfirmLogout = () => {
     logout(); // Hapus token & user dari Context/LocalStorage
     setIsLogoutModalOpen(false); // Tutup modal
-    navigate("/login"); // Lempar ke halaman login
+    navigate("/"); // Lempar ke halaman Beranda (Home)
   };
 
   return (
