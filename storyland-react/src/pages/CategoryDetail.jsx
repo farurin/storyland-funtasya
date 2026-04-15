@@ -6,7 +6,6 @@ import Card from "../components/Card";
 import CategorySlider from "../components/CategorySlider";
 import { getCategories, getBooks } from "../services/api";
 
-// Ikon untuk tombol Grid & List
 const IconGrid = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +17,6 @@ const IconGrid = () => (
     <path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" />
   </svg>
 );
-
 const IconList = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -30,7 +28,6 @@ const IconList = () => (
     <path d="M4 14h2v-2H4v2zm0 5h2v-2H4v2zm0-10h2V7H4v2zm4 5h12v-2H8v2zm0 5h12v-2H8v2zM8 7v2h12V7H8z" />
   </svg>
 );
-
 const IconSearch = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -55,10 +52,14 @@ const CategoryDetail = () => {
 
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
         const [catData, bookData] = await Promise.all([
           getCategories(),
@@ -67,9 +68,10 @@ const CategoryDetail = () => {
 
         setCategories(catData);
         setBooks(bookData);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message || "Gagal terhubung ke server.");
+      } finally {
         setIsLoading(false);
       }
     };
@@ -85,6 +87,25 @@ const CategoryDetail = () => {
     return matchCat && matchSearch;
   });
 
+  // tampilan error
+  if (error) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center text-center px-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-red-500 mb-2">
+          Koleksi Tidak Ditemukan
+        </h2>
+        <p className="text-gray-500 mb-6 max-w-md">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-8 py-3 bg-[#6B4EFF] text-white rounded-full font-bold shadow-md hover:bg-purple-700 transition cursor-pointer"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
+
+  // tampilan loading
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
@@ -93,6 +114,7 @@ const CategoryDetail = () => {
     );
   }
 
+  // tampilan sukses
   return (
     <div className="w-full">
       <BannerCorner
@@ -125,21 +147,13 @@ const CategoryDetail = () => {
           <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition ${
-                viewMode === "grid"
-                  ? "bg-white text-purple-600 shadow-sm"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`p-2 rounded-lg transition ${viewMode === "grid" ? "bg-white text-purple-600 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
             >
               <IconGrid />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-lg transition ${
-                viewMode === "list"
-                  ? "bg-white text-purple-600 shadow-sm"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`p-2 rounded-lg transition ${viewMode === "list" ? "bg-white text-purple-600 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
             >
               <IconList />
             </button>
@@ -187,14 +201,13 @@ const CategoryDetail = () => {
                         />
                       </div>
                     </div>
-
                     <div className="flex flex-col justify-center flex-1 py-1">
                       <h3 className="text-lg md:text-xl font-bold text-gray-900">
                         {book.title}
                       </h3>
                       <p className="text-sm text-gray-500 mt-2 line-clamp-3 md:line-clamp-4 max-w-4xl leading-relaxed">
                         {book.description ||
-                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
                       </p>
                     </div>
                   </div>

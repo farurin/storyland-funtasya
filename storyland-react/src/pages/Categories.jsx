@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import CtaDownload from "../components/CtaDownload";
 import { getCategories, getBooks } from "../services/api";
 
-// icon svg
 const IconArrowCircle = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -26,10 +25,14 @@ const IconArrowCircle = () => (
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(null); // Reset error
       try {
         const [catData, bookData] = await Promise.all([
           getCategories(),
@@ -38,9 +41,10 @@ const Categories = () => {
 
         setCategories(catData);
         setBooks(bookData);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message || "Gagal terhubung ke server.");
+      } finally {
         setIsLoading(false);
       }
     };
@@ -48,6 +52,25 @@ const Categories = () => {
     fetchData();
   }, []);
 
+  // tampilan error
+  if (error) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center text-center px-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-red-500 mb-2">
+          Gagal Memuat Kategori
+        </h2>
+        <p className="text-gray-500 mb-6 max-w-md">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-8 py-3 bg-[#6B4EFF] text-white rounded-full font-bold shadow-md hover:bg-purple-700 transition cursor-pointer"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
+
+  // tampilan loading
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
@@ -56,9 +79,9 @@ const Categories = () => {
     );
   }
 
+  // tampilan sukses
   return (
     <div className="w-full">
-      {/* Header Section */}
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
           Kategori
@@ -68,7 +91,6 @@ const Categories = () => {
         </p>
       </section>
 
-      {/* Grid Categories */}
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {categories.map((cat) => {
@@ -82,7 +104,6 @@ const Categories = () => {
                 key={cat.id}
                 className="group block bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
               >
-                {/* Bagian Atas: Gambar Ilustrasi */}
                 <div className="w-full aspect-2/1 bg-gray-50 overflow-hidden relative">
                   <img
                     src={`/images/category/${cat.image_card}`}
@@ -94,8 +115,6 @@ const Categories = () => {
                     }}
                   />
                 </div>
-
-                {/* Bagian Bawah: Teks & Ikon */}
                 <div className="p-5 flex items-center justify-between">
                   <h2 className="text-lg md:text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
                     {cat.name}
@@ -113,7 +132,6 @@ const Categories = () => {
         </div>
       </section>
 
-      {/* CTA Download App */}
       <CtaDownload />
     </div>
   );
