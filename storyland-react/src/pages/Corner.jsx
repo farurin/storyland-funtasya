@@ -7,13 +7,15 @@ import CtaDownload from "../components/CtaDownload";
 import { getCornerData } from "../services/api";
 
 const Corner = () => {
-  const { isLoggedIn, token } = useAuth();
+  // Panggil refreshKey dari context
+  const { isLoggedIn, token, refreshKey } = useAuth();
 
   const [activeFilter, setActiveFilter] = useState("riwayat");
   const [search, setSearch] = useState("");
 
   const [progressData, setProgressData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const groupHistoryByDate = (historyArray) => {
     const grouped = { "Hari Ini": [], Kemarin: [], "Lebih Lama": [] };
@@ -42,36 +44,30 @@ const Corner = () => {
     }
 
     setIsLoading(true);
+    setError(null); // Reset error setiap mulai fetch
     try {
       let endpoint = "";
       if (activeFilter === "favorit") endpoint = "favorites";
       else if (activeFilter === "disimpan") endpoint = "saved";
       else endpoint = "history";
+
       const data = await getCornerData(endpoint, token);
 
       if (activeFilter === "favorit") setProgressData({ Favorit: data });
       else if (activeFilter === "disimpan") setProgressData({ Disimpan: data });
       else setProgressData(groupHistoryByDate(data));
-    } catch (error) {
-      console.error("Error fetching corner data:", error.message);
+    } catch (err) {
+      console.error("Error fetching corner data:", err.message);
       setProgressData({});
+      setError(err.message); // Tangkap error
     } finally {
       setIsLoading(false);
     }
   }, [activeFilter, isLoggedIn, token]);
 
-  // Panggil data saat halaman pertama dimuat
   useEffect(() => {
     fetchCornerData();
-  }, [fetchCornerData]);
-
-  // event listener
-  useEffect(() => {
-    const handleDataChange = () => fetchCornerData();
-    window.addEventListener("cornerDataChanged", handleDataChange);
-    return () =>
-      window.removeEventListener("cornerDataChanged", handleDataChange);
-  }, [fetchCornerData]);
+  }, [fetchCornerData, refreshKey]);
 
   const emptyContent = {
     riwayat: isLoggedIn
@@ -117,13 +113,31 @@ const Corner = () => {
       />
 
       <div className="w-full min-h-100">
+        {/* UI ERROR BARU */}
+        {error && !isLoading && (
+          <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center bg-white mt-12 mb-20 rounded-3xl border border-red-100 shadow-sm">
+            <h3 className="text-xl md:text-2xl font-bold text-red-500 leading-tight">
+              Oops! Terjadi Kesalahan
+            </h3>
+            <p className="text-gray-500 mt-3 text-sm md:text-base max-w-lg mx-auto">
+              {error}
+            </p>
+            <button
+              onClick={fetchCornerData}
+              className="mt-6 px-6 py-2 bg-[#FDECA2] text-black font-bold rounded-full hover:bg-yellow-300 transition shadow-sm"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        )}
+
         {isLoading && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center text-gray-400 font-medium animate-pulse bg-white mt-12 mb-20">
             Memuat data {activeFilter}...
           </div>
         )}
 
-        {!isLoading && hasNoBooks && (
+        {!isLoading && !error && hasNoBooks && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-32 text-center bg-white mt-12 mb-20">
             <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
               {emptyContent[activeFilter].title}
@@ -134,7 +148,7 @@ const Corner = () => {
           </div>
         )}
 
-        {!isLoading && !hasNoBooks && (
+        {!isLoading && !error && !hasNoBooks && (
           <>
             {activeFilter === "favorit" && (
               <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 -mb-5">
@@ -147,7 +161,6 @@ const Corner = () => {
                 </p>
               </div>
             )}
-
             {activeFilter === "disimpan" && (
               <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 -mb-5">
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -159,12 +172,10 @@ const Corner = () => {
                 </p>
               </div>
             )}
-
             <Progress data={progressData} search={search} type={activeFilter} />
           </>
         )}
       </div>
-
       <CtaDownload />
     </div>
   );

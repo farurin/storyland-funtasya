@@ -3,16 +3,16 @@ import React, { createContext, useContext, useState } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Ambil token dan data user dari Local Storage jika ada
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [user, setUser] = useState(
     () => JSON.parse(localStorage.getItem("user")) || null,
   );
 
-  // Status login sekarang ditentukan oleh ADA ATAU TIDAKNYA token
+  // state
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const isLoggedIn = !!token;
 
-  // Fungsi login sekarang menerima token dan data user dari Backend
   const login = (newToken, userData) => {
     setToken(newToken);
     setUser(userData);
@@ -27,8 +27,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
   };
 
+  // fungsi dipanggil jika butuh halaman corner untuk me-refresh
+  const triggerRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        user,
+        token,
+        login,
+        logout,
+        refreshKey,
+        triggerRefresh,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

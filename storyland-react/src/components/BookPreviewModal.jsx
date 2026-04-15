@@ -101,7 +101,7 @@ const BookPreviewModal = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const previewId = searchParams.get("preview");
   const navigate = useNavigate();
-  const { token, isLoggedIn } = useAuth();
+  const { token, isLoggedIn, triggerRefresh } = useAuth();
 
   const [book, setBook] = useState(null);
   const [firstPageImage, setFirstPageImage] = useState(null);
@@ -156,7 +156,7 @@ const BookPreviewModal = () => {
     try {
       const data = await toggleFavorite(book.id, token);
       setIsFavorite(data.isFavorite);
-      window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
+      triggerRefresh();
     } catch (error) {
       console.error(error);
     }
@@ -166,7 +166,7 @@ const BookPreviewModal = () => {
     try {
       const data = await toggleSave(book.id, token);
       setIsSaved(data.isSaved);
-      window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
+      triggerRefresh();
     } catch (error) {
       console.error(error);
     }

@@ -18,7 +18,7 @@ import {
 const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, isLoggedIn } = useAuth();
+  const { token, isLoggedIn, triggerRefresh } = useAuth();
 
   const [book, setBook] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
@@ -72,7 +72,7 @@ const BookDetail = () => {
     try {
       const data = await toggleFavorite(book.id, token);
       setIsFavorite(data.isFavorite);
-      window.dispatchEvent(new Event("cornerDataChanged"));
+      triggerRefresh();
     } catch (error) {
       console.error("Gagal toggle favorit:", error);
     }
@@ -82,7 +82,7 @@ const BookDetail = () => {
     try {
       const data = await toggleSave(book.id, token);
       setIsSaved(data.isSaved);
-      window.dispatchEvent(new Event("cornerDataChanged"));
+      triggerRefresh();
     } catch (error) {
       console.error("Gagal toggle simpan:", error);
     }
