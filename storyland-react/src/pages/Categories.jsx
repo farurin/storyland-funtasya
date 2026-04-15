@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import CtaDownload from "../components/CtaDownload";
+import { getCategories, getBooks } from "../services/api";
 
-// Ikon panah ungu lingkaran sesuai desain Figma
+// icon svg
 const IconArrowCircle = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -23,26 +24,17 @@ const IconArrowCircle = () => (
 );
 
 const Categories = () => {
-  // State untuk menyimpan data dari API
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch data kategori dan buku dari API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, bookRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/categories`),
-          fetch(`${import.meta.env.VITE_API_URL}/books`),
+        const [catData, bookData] = await Promise.all([
+          getCategories(),
+          getBooks(),
         ]);
-
-        if (!catRes.ok || !bookRes.ok) {
-          throw new Error("Gagal mengambil data dari server");
-        }
-
-        const catData = await catRes.json();
-        const bookData = await bookRes.json();
 
         setCategories(catData);
         setBooks(bookData);
@@ -80,7 +72,6 @@ const Categories = () => {
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {categories.map((cat) => {
-            // Menghitung jumlah cerita riil berdasarkan data di tabel books
             const storyCount = books.filter(
               (b) => b.id_categories === cat.id,
             ).length;
@@ -94,7 +85,6 @@ const Categories = () => {
                 {/* Bagian Atas: Gambar Ilustrasi */}
                 <div className="w-full aspect-2/1 bg-gray-50 overflow-hidden relative">
                   <img
-                    // Menggunakan image_card dari MySQL
                     src={`/images/category/${cat.image_card}`}
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

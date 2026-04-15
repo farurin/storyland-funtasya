@@ -4,32 +4,23 @@ import Carousel from "../components/Carousel";
 import CategorySlider from "../components/CategorySlider";
 import BookListSection from "../components/BookListSection";
 import CtaDownload from "../components/CtaDownload";
+import { getCategories, getBooks } from "../services/api";
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
-  // 1. Sekarang state books dimulai dari array kosong, bukan lagi dari data.json
   const [books, setBooks] = useState([]);
 
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // 2. Mengambil Kategori dan Buku secara bersamaan dari API Express
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Promise.all agar fetch berjalan paralel (lebih cepat)
-        const [catRes, bookRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/categories`),
-          fetch(`${import.meta.env.VITE_API_URL}/books`),
+        const [catData, bookData] = await Promise.all([
+          getCategories(),
+          getBooks(),
         ]);
-
-        if (!catRes.ok || !bookRes.ok) {
-          throw new Error("Gagal mengambil data dari server");
-        }
-
-        const catData = await catRes.json();
-        const bookData = await bookRes.json();
 
         setCategories(catData);
         setBooks(bookData);

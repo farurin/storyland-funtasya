@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import BannerCorner from "../components/BannerCorner";
 import CtaDownload from "../components/CtaDownload";
 import Card from "../components/Card";
 import CategorySlider from "../components/CategorySlider";
+import { getCategories, getBooks } from "../services/api";
 
 // Ikon untuk tombol Grid & List
 const IconGrid = () => (
@@ -52,26 +53,17 @@ const CategoryDetail = () => {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState("grid");
 
-  // 1. State untuk menampung data API
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 2. Fetch data dari API Express
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, bookRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/categories`),
-          fetch(`${import.meta.env.VITE_API_URL}/books`),
+        const [catData, bookData] = await Promise.all([
+          getCategories(),
+          getBooks(),
         ]);
-
-        if (!catRes.ok || !bookRes.ok) {
-          throw new Error("Gagal mengambil data dari server");
-        }
-
-        const catData = await catRes.json();
-        const bookData = await bookRes.json();
 
         setCategories(catData);
         setBooks(bookData);
@@ -83,9 +75,8 @@ const CategoryDetail = () => {
     };
 
     fetchData();
-  }, []); // Array kosong berarti fetch 1x saja, biarkan React yang memfilter secara dinamis
+  }, []);
 
-  // 3. Logika Filter Data
   const category = categories.find((c) => c.id === parseInt(id));
 
   const filteredBooks = books.filter((b) => {
@@ -94,7 +85,6 @@ const CategoryDetail = () => {
     return matchCat && matchSearch;
   });
 
-  // Tampilan Loading
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
@@ -105,7 +95,6 @@ const CategoryDetail = () => {
 
   return (
     <div className="w-full">
-      {/* Banner Category Dinamis */}
       <BannerCorner
         title={category ? category.name : "Kategori"}
         description={
@@ -115,15 +104,12 @@ const CategoryDetail = () => {
         }
       />
 
-      {/* Slider Category */}
       <div className="mt-10">
         <CategorySlider categories={categories} activeCategoryId={id} />
       </div>
 
-      {/* Tombol Cari dan toggle */}
       <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-10 mb-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Kolom Pencarian */}
           <div className="relative w-full sm:w-80">
             <input
               type="text"
@@ -136,7 +122,6 @@ const CategoryDetail = () => {
             </div>
           </div>
 
-          {/* Toggle Grid / List View */}
           <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
             <button
               onClick={() => setViewMode("grid")}
@@ -162,20 +147,16 @@ const CategoryDetail = () => {
         </div>
       </section>
 
-      {/* Judul & daftar buku */}
       <div className="w-full bg-[#F7F5FF] pt-12 pb-20">
         <section className="mx-3 md:mx-20 lg:mx-42 px-6">
-          {/* Judul Kategori */}
           {category && (
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
               {category.name}
             </h2>
           )}
 
-          {/* Daftar Buku */}
           {filteredBooks.length > 0 ? (
             viewMode === "grid" ? (
-              /* GRID VIEW */
               <div className="flex flex-wrap gap-5">
                 {filteredBooks.map((book) => (
                   <div
@@ -187,14 +168,12 @@ const CategoryDetail = () => {
                 ))}
               </div>
             ) : (
-              /* LIST VIEW */
               <div className="flex flex-col gap-5">
                 {filteredBooks.map((book) => (
                   <div
                     key={book.id}
                     className="flex bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden p-4 md:p-5 gap-5 md:gap-8 hover:shadow-md transition cursor-pointer"
                   >
-                    {/* Cover Buku Kiri */}
                     <div className="w-24 md:w-32 shrink-0">
                       <div className="w-full aspect-2/3 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                         <img
@@ -209,7 +188,6 @@ const CategoryDetail = () => {
                       </div>
                     </div>
 
-                    {/* Info Buku Kanan */}
                     <div className="flex flex-col justify-center flex-1 py-1">
                       <h3 className="text-lg md:text-xl font-bold text-gray-900">
                         {book.title}
@@ -231,7 +209,6 @@ const CategoryDetail = () => {
         </section>
       </div>
 
-      {/* CTA Download App */}
       <CtaDownload />
     </div>
   );
