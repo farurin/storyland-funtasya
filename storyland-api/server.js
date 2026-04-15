@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 require("./config/db");
@@ -20,7 +21,7 @@ app.use("/api/corner", require("./routes/cornerRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
 
 // Jalankan Server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`Server Backend berjalan di http://localhost:${PORT}`),
 );

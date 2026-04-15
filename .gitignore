@@ -1,2 +1,4 @@
 # Abaikan folder node_modules di Backend API
 storyland-api/node_modules/
+
+.env
