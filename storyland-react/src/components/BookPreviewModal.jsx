@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "./ActionPopupModal";
+import {
+  getBooks,
+  getBookPages,
+  getBookStatus,
+  toggleFavorite,
+  toggleSave,
+} from "../services/api";
 
 // icon SVG
 const IconBookmark = ({ filled }) => (
@@ -108,32 +115,21 @@ const BookPreviewModal = () => {
 
     const fetchModalData = async () => {
       try {
-        const booksRes = await fetch(`${import.meta.env.VITE_API_URL}/books`);
-        const booksData = await booksRes.json();
+        const booksData = await getBooks();
         const foundBook = booksData.find((b) => b.id === parseInt(previewId));
 
         if (foundBook) {
           setBook(foundBook);
-          const pagesRes = await fetch(
-            `${import.meta.env.VITE_API_URL}/books/${foundBook.id}/pages`,
-          );
-          const pagesData = await pagesRes.json();
+
+          const pagesData = await getBookPages(foundBook.id);
           setFirstPageImage(
             pagesData && pagesData.length > 0 ? pagesData[0].image : null,
           );
 
           if (isLoggedIn && token) {
-            const statusRes = await fetch(
-              `${import.meta.env.VITE_API_URL}/books/${foundBook.id}/status`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              },
-            );
-            if (statusRes.ok) {
-              const statusData = await statusRes.json();
-              setIsFavorite(statusData.isFavorite);
-              setIsSaved(statusData.isSaved);
-            }
+            const statusData = await getBookStatus(foundBook.id, token);
+            setIsFavorite(statusData.isFavorite);
+            setIsSaved(statusData.isSaved);
           }
         }
       } catch (err) {
@@ -158,18 +154,9 @@ const BookPreviewModal = () => {
   // API trigger
   const executeToggleFavAPI = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setIsFavorite(data.isFavorite);
-        window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
-      }
+      const data = await toggleFavorite(book.id, token);
+      setIsFavorite(data.isFavorite);
+      window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
     } catch (error) {
       console.error(error);
     }
@@ -177,18 +164,9 @@ const BookPreviewModal = () => {
 
   const executeToggleSaveAPI = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/books/${book.id}/save`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setIsSaved(data.isSaved);
-        window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
-      }
+      const data = await toggleSave(book.id, token);
+      setIsSaved(data.isSaved);
+      window.dispatchEvent(new Event("cornerDataChanged")); // Beritahu Halaman Corner
     } catch (error) {
       console.error(error);
     }

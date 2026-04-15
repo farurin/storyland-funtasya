@@ -7,6 +7,13 @@ import { CategorySection } from "../components/BookListSection";
 import CtaDownload from "../components/CtaDownload";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "../components/ActionPopupModal";
+import {
+  getBooks,
+  getCategories,
+  getBookStatus,
+  toggleFavorite,
+  toggleSave,
+} from "../services/api";
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -24,13 +31,12 @@ const BookDetail = () => {
   useEffect(() => {
     const fetchBookData = async () => {
       try {
-        const [booksRes, catsRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/books`),
-          fetch(`${import.meta.env.VITE_API_URL}/categories`),
+        // Panggil API
+        const [books, categories] = await Promise.all([
+          getBooks(),
+          getCategories(),
         ]);
 
-        const books = await booksRes.json();
-        const categories = await catsRes.json();
         const currentBook = books.find((b) => b.id === parseInt(id));
 
         if (currentBook) {
@@ -43,19 +49,11 @@ const BookDetail = () => {
             setCategoryData(cat);
           }
 
-          // fetch status simpan & faforit jika login
+          // Fetch status simpan & favorit jika login
           if (isLoggedIn && token) {
-            const statusRes = await fetch(
-              `${import.meta.env.VITE_API_URL}/books/${currentBook.id}/status`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              },
-            );
-            if (statusRes.ok) {
-              const statusData = await statusRes.json();
-              setIsFavorite(statusData.isFavorite);
-              setIsSaved(statusData.isSaved);
-            }
+            const statusData = await getBookStatus(currentBook.id, token);
+            setIsFavorite(statusData.isFavorite);
+            setIsSaved(statusData.isSaved);
           }
         }
       } catch (error) {
@@ -69,21 +67,12 @@ const BookDetail = () => {
     window.scrollTo(0, 0);
   }, [id, isLoggedIn, token]);
 
-  // logika eksekusi API & trigger notifikasi corner
+  // Logika eksekusi API & trigger notifikasi corner
   const executeToggleFavAPI = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setIsFavorite(data.isFavorite);
-        window.dispatchEvent(new Event("cornerDataChanged"));
-      }
+      const data = await toggleFavorite(book.id, token);
+      setIsFavorite(data.isFavorite);
+      window.dispatchEvent(new Event("cornerDataChanged"));
     } catch (error) {
       console.error("Gagal toggle favorit:", error);
     }
@@ -91,24 +80,15 @@ const BookDetail = () => {
 
   const executeToggleSaveAPI = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/books/${book.id}/save`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setIsSaved(data.isSaved);
-        window.dispatchEvent(new Event("cornerDataChanged"));
-      }
+      const data = await toggleSave(book.id, token);
+      setIsSaved(data.isSaved);
+      window.dispatchEvent(new Event("cornerDataChanged"));
     } catch (error) {
       console.error("Gagal toggle simpan:", error);
     }
   };
 
-  // handler show popup
+  // Handler show popup
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
