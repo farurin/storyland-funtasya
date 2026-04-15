@@ -34,15 +34,27 @@ const finishBook = async (req, res) => {
   const bookId = req.params.id;
 
   try {
-    // Catat History
-    const progressSql = `
-      INSERT INTO user_progress (id_user, id_book, reading_progress, last_read_at) 
-      VALUES (?, ?, 100, NOW())
-      ON DUPLICATE KEY UPDATE reading_progress = 100, last_read_at = NOW()
-    `;
-    await db.query(progressSql, [userId, bookId]);
+    // cek apakah buku sudah ada di riwayat
+    const [existing] = await db.query(
+      "SELECT id FROM user_progress WHERE id_user = ? AND id_book = ?",
+      [userId, bookId],
+    );
 
-    // Update Misi
+    if (existing.length > 0) {
+      // jika ada, timpa menjadi 100% dan status 'completed'
+      await db.query(
+        "UPDATE user_progress SET reading_progress = 100, status = 'completed', last_read_at = NOW() WHERE id_user = ? AND id_book = ?",
+        [userId, bookId],
+      );
+    } else {
+      // jika belum ada, buat baru
+      await db.query(
+        "INSERT INTO user_progress (id_user, id_book, reading_progress, status, last_read_at) VALUES (?, ?, 100, 'completed', NOW())",
+        [userId, bookId],
+      );
+    }
+
+    // update misi
     const missionSql = `
       UPDATE user_missions um
       JOIN missions m ON um.id_mission = m.id
@@ -55,7 +67,41 @@ const finishBook = async (req, res) => {
       message: "Sinyal diterima! Buku selesai dan progres misi bertambah.",
     });
   } catch (err) {
-    console.error("Gagal mencatat riwayat:", err);
+    console.error("Gagal mencatat riwayat selesai:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// catat progress bacaan
+const updateProgress = async (req, res) => {
+  const userId = req.user.id;
+  const bookId = req.params.id;
+  const { progress } = req.body;
+
+  try {
+    // cek apakah buku sudah ada di riwayat
+    const [existing] = await db.query(
+      "SELECT id FROM user_progress WHERE id_user = ? AND id_book = ?",
+      [userId, bookId],
+    );
+
+    if (existing.length > 0) {
+      // Jika ada, timpa progress-nya dan ubah status ke 'reading'
+      await db.query(
+        "UPDATE user_progress SET reading_progress = ?, status = 'reading', last_read_at = NOW() WHERE id_user = ? AND id_book = ?",
+        [progress, userId, bookId],
+      );
+    } else {
+      // Jika belum ada, buat baru dan set status ke 'reading'
+      await db.query(
+        "INSERT INTO user_progress (id_user, id_book, reading_progress, status, last_read_at) VALUES (?, ?, ?, 'reading', NOW())",
+        [userId, bookId, progress],
+      );
+    }
+
+    res.json({ message: "Progres baca diperbarui!" });
+  } catch (err) {
+    console.error("Gagal update progres:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -147,4 +193,5 @@ module.exports = {
   getBookStatus,
   toggleFavorite,
   toggleSaved,
+  updateProgress,
 };

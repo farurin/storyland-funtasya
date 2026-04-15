@@ -42,6 +42,12 @@ export const getBookPages = (id) => fetchAPI(`/books/${id}/pages`);
 // user action (need tokens)
 export const finishBook = (id, token) =>
   fetchAPI(`/books/${id}/finish`, { method: "POST" }, token);
+export const updateProgress = (id, progress, token) =>
+  fetchAPI(
+    `/books/${id}/progress`,
+    { method: "POST", body: JSON.stringify({ progress }) },
+    token,
+  );
 export const getBookStatus = (id, token) =>
   fetchAPI(`/books/${id}/status`, {}, token);
 export const toggleFavorite = (id, token) =>

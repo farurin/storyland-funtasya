@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getBookPages, finishBook } from "../services/api";
+import { getBookPages, finishBook, updateProgress } from "../services/api";
 
 // icon svg
 const IconBackCurved = () => (
@@ -130,6 +130,18 @@ const StoryReader = ({ book }) => {
         .catch((err) => console.error("Silent Trigger Error:", err));
     }
   }, [currentPage, pages.length, hasFinished, token, book]);
+
+  // Logika update progres ke backend setiap kali ganti halaman
+  useEffect(() => {
+    if (pages.length > 0 && token && currentPage < pages.length - 1) {
+      const currentPercentage = Math.round(
+        ((currentPage + 1) / pages.length) * 100,
+      );
+      updateProgress(book.id, currentPercentage, token).catch((err) =>
+        console.error("Silent Progress Update Error:", err),
+      );
+    }
+  }, [currentPage, pages.length, token, book.id]);
 
   // Logika Autoplay
   useEffect(() => {
