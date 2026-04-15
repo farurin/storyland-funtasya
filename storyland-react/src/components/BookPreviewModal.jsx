@@ -178,9 +178,9 @@ const BookPreviewModal = () => {
     if (!isLoggedIn) {
       setPopupConfig({
         image: "/images/popups/popup-fav.png",
-        title: "Wah, Rak Favoritmu Masih Kosong!",
+        title: "Suka Cerita Ini?",
         description:
-          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
+          "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati ini tersimpan rapi",
         primaryBtnText: "Buat Akun",
         primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
         secondaryBtnText: "Nanti Saja",
