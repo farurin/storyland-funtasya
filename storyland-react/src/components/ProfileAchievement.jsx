@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getUserProfile } from "../services/api";
 
 const ProfileAchievement = () => {
   const { token } = useAuth();
@@ -9,18 +10,18 @@ const ProfileAchievement = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchStats = async () => {
+      try {
+        const data = await getUserProfile(token);
         setStats(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Gagal ambil data rekor:", err);
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchStats();
   }, [token]);
 
   // Menggunakan file statis lokal

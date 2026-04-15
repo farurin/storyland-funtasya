@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import ProfileCharacterSelect from "./ProfileCharacterSelect";
 import ProfileInfoCard from "./ProfileInfoCard";
 import { useAuth } from "../context/AuthContext";
+import { getCharacters, updateActiveCharacter } from "../services/api";
 
-// Data Cadangan jika API belum siap
 const fallbackCharacters = [
   {
     id: 1,
@@ -16,7 +16,6 @@ const fallbackCharacters = [
 
 const ProfileStatus = () => {
   const { token } = useAuth();
-
   const [isEditingCharacter, setIsEditingCharacter] = useState(false);
   const [characterList, setCharacterList] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
@@ -24,34 +23,21 @@ const ProfileStatus = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Abaikan jika token belum di-load oleh AuthContext
     if (token === undefined) return;
 
-    const fetchCharacters = async () => {
+    const fetchCharacterData = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/user/characters`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            setCharacterList(data);
-            const activeChar = data.find((c) => c.isActive) || data[0];
-            setSelectedCharacter(activeChar);
-            setTempCharacter(activeChar);
-          } else {
-            throw new Error("Data kosong");
-          }
+        const data = await getCharacters(token);
+        if (data && data.length > 0) {
+          setCharacterList(data);
+          const activeChar = data.find((c) => c.isActive) || data[0];
+          setSelectedCharacter(activeChar);
+          setTempCharacter(activeChar);
         } else {
-          throw new Error("Gagal mengambil data");
+          throw new Error("Data kosong");
         }
       } catch (error) {
         console.error("Error fetching characters:", error);
-        // fallback
         setCharacterList(fallbackCharacters);
         setSelectedCharacter(fallbackCharacters[0]);
         setTempCharacter(fallbackCharacters[0]);
@@ -60,42 +46,27 @@ const ProfileStatus = () => {
       }
     };
 
-    fetchCharacters();
+    fetchCharacterData();
   }, [token]);
 
   const handleButtonClick = async () => {
     if (isEditingCharacter) {
-      // proses simpan ke db
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/user/characters/active`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ characterId: tempCharacter.id }),
-          },
-        );
-
-        if (response.ok) {
-          setSelectedCharacter(tempCharacter);
-          setIsEditingCharacter(false);
-        } else {
-          alert("Gagal menyimpan karakter. Pastikan koneksi aman!");
-        }
+        await updateActiveCharacter(tempCharacter.id, token);
+        setSelectedCharacter(tempCharacter);
+        setIsEditingCharacter(false);
       } catch (error) {
+        alert(
+          error.message || "Gagal menyimpan karakter. Pastikan koneksi aman!",
+        );
         console.error("Error saving character:", error);
       }
     } else {
-      // proses mode edit
       setTempCharacter(selectedCharacter);
       setIsEditingCharacter(true);
     }
   };
 
-  // Loading Screen
   if (isLoading || !selectedCharacter) {
     return (
       <div className="flex flex-col items-center justify-center py-20 w-full h-full min-h-100">
@@ -109,7 +80,6 @@ const ProfileStatus = () => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-stretch justify-center h-full">
-      {/* kiri: ilustrasi & tombol */}
       <div className="flex flex-col items-center shrink-0 justify-center">
         <div className="w-64 h-64 md:w-80 md:h-80 relative mb-6">
           <img
@@ -127,7 +97,6 @@ const ProfileStatus = () => {
             }
           />
         </div>
-
         <button
           onClick={handleButtonClick}
           className="bg-[#8B5CF6] text-white font-bold py-2.5 px-12 rounded-full hover:bg-purple-700 hover:scale-105 transition shadow-lg min-w-40 cursor-pointer"
@@ -135,8 +104,6 @@ const ProfileStatus = () => {
           {isEditingCharacter ? "Simpan" : "Ubah"}
         </button>
       </div>
-
-      {/* kanan: status atau pilih karakter */}
       <div className="flex-1 max-w-xl w-full flex">
         {isEditingCharacter ? (
           <ProfileCharacterSelect
@@ -145,7 +112,6 @@ const ProfileStatus = () => {
             setTempCharacter={setTempCharacter}
           />
         ) : (
-          // komponen profil info
           <ProfileInfoCard />
         )}
       </div>

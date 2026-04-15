@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getUserProfile, getAvatars, updateUserProfile } from "../services/api";
 
 // icon svg
 const IconEdit = () => (
@@ -89,7 +90,6 @@ const ProfileInfoCard = () => {
   const [profileData, setProfileData] = useState(null);
   const [avatarList, setAvatarList] = useState([]);
 
-  // state modal edit
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState({
     username: "",
@@ -98,28 +98,20 @@ const ProfileInfoCard = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fungsi Fetch Profile
   const fetchProfile = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const data = await getUserProfile(token);
       setProfileData(data);
     } catch (err) {
       console.error("Gagal ambil profil:", err);
     }
   };
 
-  // Fungsi Fetch Avatar
-  const fetchAvatars = async () => {
+  const fetchAvatarData = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/avatars`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const data = await getAvatars(token);
       setAvatarList(data);
     } catch (err) {
       console.error("Gagal ambil daftar avatar:", err);
@@ -128,14 +120,13 @@ const ProfileInfoCard = () => {
 
   useEffect(() => {
     fetchProfile();
-    fetchAvatars(); // Panggil API avatar saat halaman dimuat
+    fetchAvatarData();
   }, [token]);
 
   const handleOpenModal = () => {
     setEditData({
       username: profileData.username,
       age: profileData.age || "",
-      // Default ke avatar pertama dari database jika user belum punya
       avatar_url:
         profileData.avatar_url ||
         (avatarList.length > 0 ? avatarList[0].image_url : ""),
@@ -146,27 +137,19 @@ const ProfileInfoCard = () => {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      await updateUserProfile(
+        {
           username: editData.username,
           age: parseInt(editData.age) || 0,
           avatar_url: editData.avatar_url,
-        }),
-      });
+        },
+        token,
+      );
 
-      if (res.ok) {
-        await fetchProfile();
-        setIsModalOpen(false);
-      } else {
-        const errorData = await res.json();
-        alert(errorData.message || "Gagal menyimpan profil.");
-      }
+      await fetchProfile();
+      setIsModalOpen(false);
     } catch (err) {
+      alert(err.message || "Gagal menyimpan profil.");
       console.error("Error saving profile:", err);
     } finally {
       setIsSaving(false);
@@ -186,7 +169,6 @@ const ProfileInfoCard = () => {
 
   return (
     <div className="w-full bg-[#F4F3FF] rounded-[40px] p-6 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between min-h-100">
-      {/* Tombol Buka Modal */}
       <button
         onClick={handleOpenModal}
         className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm cursor-pointer"
@@ -194,7 +176,6 @@ const ProfileInfoCard = () => {
         <IconEdit /> Ubah
       </button>
 
-      {/* Info Dasar User */}
       <div className="flex items-center gap-5 md:gap-6 mb-10 mt-2">
         <div className="relative">
           <div className="w-20 h-20 md:w-24 md:h-24 bg-[#EAE8F0] rounded-full border-4 border-white overflow-hidden shadow-sm">
@@ -223,7 +204,6 @@ const ProfileInfoCard = () => {
         </div>
       </div>
 
-      {/* Statistik */}
       <div className="flex items-center gap-6 md:gap-10 mb-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -266,7 +246,6 @@ const ProfileInfoCard = () => {
         </div>
       </div>
 
-      {/* Kalender Absensi */}
       <div className="flex justify-between items-center bg-white/40 p-2 rounded-3xl">
         {profileData.calendar &&
           profileData.calendar.map((item, index) => (
@@ -289,7 +268,6 @@ const ProfileInfoCard = () => {
           ))}
       </div>
 
-      {/* pop up modal edit profil */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-4xl w-full max-w-2xl p-6 md:p-10 relative shadow-2xl scale-100 transition-transform">
@@ -336,7 +314,6 @@ const ProfileInfoCard = () => {
               </div>
             </div>
 
-            {/* pilihan avatar dari db */}
             <div className="mb-10">
               <h3 className="text-[#A898FF] font-bold mb-4">
                 Pilih karakter profile

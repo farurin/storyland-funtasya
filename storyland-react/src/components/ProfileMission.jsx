@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getMissions, claimMission } from "../services/api";
 
 // icon svg
 const IconGift = ({ size = 40 }) => (
@@ -10,21 +11,16 @@ const IconGift = ({ size = 40 }) => (
     viewBox="0 0 24 24"
     fill="none"
   >
-    {/* Badan Kado */}
     <path
       d="M4 10H20V20C20 21.1 19.1 22 18 22H6C4.9 22 4 21.1 4 20V10Z"
       fill="#5838E5"
     />
-    {/* Tutup Kado */}
     <rect x="2" y="6" width="20" height="4" rx="1" fill="#6B4EFF" />
-    {/* Pita Tengah */}
     <rect x="11" y="6" width="2" height="16" fill="#F4F3FF" />
-    {/* Pita Atas */}
     <path d="M12 6C12 6 8.5 1.5 5 4C2.5 5.5 8 8 12 6Z" fill="#6B4EFF" />
     <path d="M12 6C12 6 15.5 1.5 19 4C21.5 5.5 16 8 12 6Z" fill="#6B4EFF" />
   </svg>
 );
-
 const IconMedalRibbon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +35,6 @@ const IconMedalRibbon = () => (
     <path d="M9 16l-2 6 5-2 5 2-2-6" fill="#FDECA2" />
   </svg>
 );
-
 const IconSmallMedal = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -55,29 +50,20 @@ const IconSmallMedal = () => (
 
 const ProfileMission = () => {
   const { token } = useAuth();
-
   const [missions, setMissions] = useState([]);
   const [missionPoints, setMissionPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchMissions = async () => {
+  const fetchMissionData = async () => {
     if (!token) return;
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/user/missions`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setMissions(data.missions);
+      const data = await getMissions(token);
+      setMissions(data.missions);
 
-        const totalClaimedPoints = data.missions.reduce((sum, mission) => {
-          return mission.isClaimed ? sum + mission.rewardPoints : sum;
-        }, 0);
-        setMissionPoints(totalClaimedPoints);
-      }
+      const totalClaimedPoints = data.missions.reduce((sum, mission) => {
+        return mission.isClaimed ? sum + mission.rewardPoints : sum;
+      }, 0);
+      setMissionPoints(totalClaimedPoints);
     } catch (error) {
       console.error("Gagal mengambil data misi:", error);
     } finally {
@@ -86,26 +72,15 @@ const ProfileMission = () => {
   };
 
   useEffect(() => {
-    fetchMissions();
+    fetchMissionData();
   }, [token]);
 
   const handleClaim = async (missionId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/user/missions/${missionId}/claim`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (response.ok) {
-        fetchMissions();
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Gagal mengambil hadiah.");
-      }
+      await claimMission(missionId, token);
+      fetchMissionData();
     } catch (error) {
+      alert(error.message || "Gagal mengambil hadiah.");
       console.error("Error claiming mission:", error);
     }
   };
@@ -122,16 +97,13 @@ const ProfileMission = () => {
 
   return (
     <div className="w-full max-w-5xl mx-auto animate-fade-in">
-      {/* --- SECTION PROGRESS BAR --- */}
       <div className="relative w-full pt-6 pb-12 px-2 md:px-6 mb-8 overflow-x-auto">
         <div className="min-w-150">
           <div className="absolute top-[35%] md:top-[40%] left-[3%] right-[3%] h-6 md:h-8 bg-[#EAE8F0] -translate-y-1/2 z-0 rounded-full"></div>
-
           <div
             className="absolute top-[35%] md:top-[40%] left-[3%] h-6 md:h-8 bg-[#00D166] -translate-y-1/2 z-0 rounded-full transition-all duration-1000"
             style={{ width: `${topBarPercentage}%` }}
           ></div>
-
           <div className="relative z-10 flex justify-between items-end w-full px-2">
             <div className="flex flex-col items-center pb-1">
               <IconMedalRibbon />
@@ -139,7 +111,6 @@ const ProfileMission = () => {
                 0
               </span>
             </div>
-
             {[20, 40, 60, 80].map((val) => (
               <div key={val} className="flex flex-col items-center">
                 <div
@@ -152,7 +123,6 @@ const ProfileMission = () => {
                 </span>
               </div>
             ))}
-
             <div className="flex flex-col items-center">
               <div
                 className={`transition-transform duration-500 ${missionPoints >= 100 ? "scale-110" : "opacity-70"}`}
@@ -167,7 +137,6 @@ const ProfileMission = () => {
         </div>
       </div>
 
-      {/* section daftar misi */}
       <div className="flex flex-col gap-5 md:gap-6">
         {missions.length > 0 ? (
           missions.map((mission) => {
@@ -181,7 +150,6 @@ const ProfileMission = () => {
                 key={mission.id}
                 className="bg-[#F8F7FF] rounded-4xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm border border-gray-100 transition-transform hover:scale-[1.01]"
               >
-                {/* Kiri: Info & Progress Bar Misi */}
                 <div className="flex-1 w-full">
                   <h3 className="text-xl md:text-2xl font-extrabold text-black">
                     {mission.title}
@@ -189,7 +157,6 @@ const ProfileMission = () => {
                   <p className="text-sm md:text-base text-gray-800 font-medium mt-1 mb-4">
                     {mission.desc}
                   </p>
-
                   <div className="w-full max-w-md h-5 md:h-6 bg-white border border-gray-200 rounded-full relative overflow-hidden shadow-inner">
                     <div
                       className="absolute top-0 left-0 h-full bg-[#00D166] transition-all duration-1000"
@@ -203,9 +170,7 @@ const ProfileMission = () => {
                   </div>
                 </div>
 
-                {/* Tengah: Garis Pembatas, Hadiah & EXP (Revisi Layout) */}
                 <div className="flex items-center gap-6 w-full md:w-auto border-t md:border-t-0 md:border-l-[3px] border-[#E2DDFE] pt-6 md:pt-0 md:pl-10 shrink-0">
-                  {/* Badge */}
                   <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 drop-shadow-sm hover:scale-105 transition-transform">
                     <img
                       src={mission.badgeImg}
@@ -216,8 +181,6 @@ const ProfileMission = () => {
                       }
                     />
                   </div>
-
-                  {/* Icon EXP */}
                   <div className="flex flex-col items-center justify-center">
                     <IconSmallMedal />
                     <span className="font-extrabold text-sm md:text-base text-gray-900 mt-1">
@@ -226,7 +189,6 @@ const ProfileMission = () => {
                   </div>
                 </div>
 
-                {/* Kanan: Tombol Aksi */}
                 <div className="shrink-0 w-full md:w-auto mt-2 md:mt-0 flex justify-end md:pl-4">
                   {mission.isClaimed ? (
                     <button

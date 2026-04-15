@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getLeaderboard } from "../services/api";
 
 // svg piala
 const IconBigTrophy = () => (
@@ -9,17 +10,12 @@ const IconBigTrophy = () => (
     xmlns="http://www.w3.org/2000/svg"
     className="w-full h-full drop-shadow-md"
   >
-    {/* Base Bawah (Coklat) */}
     <path d="M30 85 h40 v10 h-40 z" fill="#8B5A2B" />
     <path d="M35 75 h30 v10 h-30 z" fill="#A0522D" />
-    {/* Plakat Emas di Base */}
     <path d="M42 87 h16 v6 h-16 z" fill="#FDE047" />
-    {/* Batang Piala */}
     <path d="M45 60 h10 v15 h-10 z" fill="#F59E0B" />
-    {/* Mangkuk Piala */}
     <path d="M25 25 c0 25 10 35 25 35 c15 0 25 -10 25 -35 z" fill="#FBBF24" />
     <path d="M25 25 h50 v5 h-50 z" fill="#FDE047" />
-    {/* Telinga Piala */}
     <path
       d="M25 30 c-15 0 -15 20 0 20"
       stroke="#FBBF24"
@@ -32,7 +28,6 @@ const IconBigTrophy = () => (
       strokeWidth="6"
       strokeLinecap="round"
     />
-    {/* Highlight Cahaya */}
     <path d="M40 30 h10 v20 h-10 z" fill="#FDE047" opacity="0.4" />
   </svg>
 );
@@ -54,13 +49,10 @@ const ProfileLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // fungsi ambil senin terakhir
   const getLastMondayDate = () => {
     const today = new Date();
-    const day = today.getDay(); // 0 = Minggu, 1 = Senin, dst.
-    // Jika hari ini Minggu (0), mundur 6 hari. Jika hari lain, mundur ke hari Senin (1)
+    const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-
     const lastMonday = new Date(today.setDate(diff));
     const months = [
       "Jan",
@@ -76,25 +68,24 @@ const ProfileLeaderboard = () => {
       "Nov",
       "Des",
     ];
-
-    return `${lastMonday.getDate()} ${months[lastMonday.getMonth()]}`; // Output: "25 Okt"
+    return `${lastMonday.getDate()} ${months[lastMonday.getMonth()]}`;
   };
 
   useEffect(() => {
     if (!token) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/user/leaderboard`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchLeaderboard = async () => {
+      try {
+        const data = await getLeaderboard(token);
         setLeaderboardData(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Gagal mengambil leaderboard:", err);
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchLeaderboard();
   }, [token]);
 
   if (isLoading) {
@@ -105,7 +96,6 @@ const ProfileLeaderboard = () => {
     );
   }
 
-  // Pisahkan Top 3 dan sisanya
   const top3 = leaderboardData.slice(0, 3);
   const tableData = leaderboardData.slice(3);
 
@@ -118,9 +108,7 @@ const ProfileLeaderboard = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B4EFF; }
       `}</style>
 
-      {/* bagian atas */}
       <div className="flex flex-col md:flex-row gap-6 mb-8">
-        {/* kiri: penjelasan papan peringkat */}
         <div className="flex-1 bg-[#F4F3FF] rounded-3xl p-6 md:p-8 flex items-center justify-between gap-6 shadow-sm border border-white/50">
           <div className="w-32 md:w-40 shrink-0">
             <IconBigTrophy />
@@ -138,12 +126,10 @@ const ProfileLeaderboard = () => {
           </div>
         </div>
 
-        {/* kanan: Top 3 */}
         <div className="w-full md:w-1/3 bg-[#F4F3FF] rounded-3xl p-6 shadow-sm border border-white/50 flex flex-col items-center justify-center">
           <h3 className="text-xl font-extrabold text-gray-900 mb-6">TOP 3</h3>
 
           <div className="flex items-end justify-center gap-3 md:gap-5 w-full">
-            {/* Peringkat 3 (Posisi Kiri) */}
             {top3[2] && (
               <div className="flex flex-col items-center pb-2 shrink-0">
                 <IconSolidCrown className="w-6 h-6 -mb-2.5 z-10" />
@@ -162,7 +148,6 @@ const ProfileLeaderboard = () => {
               </div>
             )}
 
-            {/* Peringkat 1 (Posisi Tengah) */}
             {top3[0] && (
               <div className="flex flex-col items-center shrink-0">
                 <IconSolidCrown className="w-8 h-8 -mb-3 z-10" />
@@ -181,7 +166,6 @@ const ProfileLeaderboard = () => {
               </div>
             )}
 
-            {/* Peringkat 2 (Posisi Kanan) */}
             {top3[1] && (
               <div className="flex flex-col items-center pb-2 shrink-0">
                 <IconSolidCrown className="w-6 h-6 -mb-2.5 z-10" />
@@ -203,7 +187,6 @@ const ProfileLeaderboard = () => {
         </div>
       </div>
 
-      {/* bagian bawah: Tabel */}
       <div className="bg-white rounded-3xl p-4 md:p-6 shadow-sm border border-gray-100">
         <div className="grid grid-cols-[1fr_3fr_1.5fr_1.5fr_1.5fr] gap-4 text-center font-bold text-xs md:text-sm text-gray-900 pb-4 border-b border-gray-200 px-4">
           <div>Ranking</div>
