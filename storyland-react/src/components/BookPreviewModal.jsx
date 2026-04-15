@@ -177,7 +177,7 @@ const BookPreviewModal = () => {
     // guest mode
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-fav-guest.png",
+        image: "/images/popups/popup-fav.png",
         title: "Wah, Rak Favoritmu Masih Kosong!",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
@@ -233,7 +233,7 @@ const BookPreviewModal = () => {
     // guest mode
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-saved-guest.png",
+        image: "/images/popups/popup-bookmark.png",
         title: "Rak Bukumu Masih Menunggu!",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu.",
