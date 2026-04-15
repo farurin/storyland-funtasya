@@ -83,7 +83,7 @@ const ProfileLeaderboard = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:5000/api/user/leaderboard", {
+    fetch(`${import.meta.env.VITE_API_URL}/user/leaderboard`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

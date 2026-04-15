@@ -25,8 +25,8 @@ const BookDetail = () => {
     const fetchBookData = async () => {
       try {
         const [booksRes, catsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/books"),
-          fetch("http://localhost:5000/api/categories"),
+          fetch(`${import.meta.env.VITE_API_URL}/books`),
+          fetch(`${import.meta.env.VITE_API_URL}/categories`),
         ]);
 
         const books = await booksRes.json();
@@ -46,7 +46,7 @@ const BookDetail = () => {
           // fetch status simpan & faforit jika login
           if (isLoggedIn && token) {
             const statusRes = await fetch(
-              `http://localhost:5000/api/books/${currentBook.id}/status`,
+              `${import.meta.env.VITE_API_URL}/books/${currentBook.id}/status`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               },
@@ -73,7 +73,7 @@ const BookDetail = () => {
   const executeToggleFavAPI = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/books/${book.id}/favorite`,
+        `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -92,7 +92,7 @@ const BookDetail = () => {
   const executeToggleSaveAPI = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/books/${book.id}/save`,
+        `${import.meta.env.VITE_API_URL}/books/${book.id}/save`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

@@ -9,7 +9,7 @@ const ProfileAchievement = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:5000/api/user/profile", {
+    fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

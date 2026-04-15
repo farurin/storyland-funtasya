@@ -44,10 +44,13 @@ const ProgressCard = ({ progress, type }) => {
       secondaryBtnText: "Batalkan",
       onPrimaryClick: async () => {
         try {
-          await fetch(`http://localhost:5000/api/books/${book.id}/favorite`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await fetch(
+            `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
           window.dispatchEvent(new Event("cornerDataChanged"));
           setPopupConfig(null);
         } catch (err) {

@@ -173,23 +173,6 @@ const BookListSection = ({ data }) => {
           {index === BANNER_AFTER_INDEX && <BannerIklan />}
         </React.Fragment>
       ))}
-
-      {/* CSS untuk titik pagination kustom */}
-      <style jsx global>{`
-        .custom-list-swiper .swiper-pagination {
-          bottom: 0px !important;
-        }
-        .custom-list-swiper .swiper-pagination-bullet {
-          width: 12px;
-          height: 12px;
-          background: #a454ff !important;
-          opacity: 0.3;
-          margin: 0 5px !important;
-        }
-        .custom-list-swiper .swiper-pagination-bullet-active {
-          opacity: 1;
-        }
-      `}</style>
     </section>
   );
 };

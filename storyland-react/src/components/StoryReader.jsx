@@ -98,7 +98,7 @@ const StoryReader = ({ book }) => {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:5000/api/books/${book.id}/pages`,
+          `${import.meta.env.VITE_API_URL}/books/${book.id}/pages`,
         );
         const data = await res.json();
         setPages(data);
@@ -125,7 +125,7 @@ const StoryReader = ({ book }) => {
     ) {
       setHasFinished(true);
 
-      fetch(`http://localhost:5000/api/books/${book.id}/finish`, {
+      fetch(`${import.meta.env.VITE_API_URL}/books/${book.id}/finish`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       })

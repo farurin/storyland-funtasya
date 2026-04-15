@@ -20,8 +20,8 @@ const Home = () => {
       try {
         // Promise.all agar fetch berjalan paralel (lebih cepat)
         const [catRes, bookRes] = await Promise.all([
-          fetch("http://localhost:5000/api/categories"),
-          fetch("http://localhost:5000/api/books"),
+          fetch(`${import.meta.env.VITE_API_URL}/categories`),
+          fetch(`${import.meta.env.VITE_API_URL}/books`),
         ]);
 
         if (!catRes.ok || !bookRes.ok) {

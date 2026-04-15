@@ -63,9 +63,12 @@ const ProfileMission = () => {
   const fetchMissions = async () => {
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:5000/api/user/missions", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/user/missions`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (response.ok) {
         const data = await response.json();
         setMissions(data.missions);
@@ -89,7 +92,7 @@ const ProfileMission = () => {
   const handleClaim = async (missionId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/user/missions/${missionId}/claim`,
+        `${import.meta.env.VITE_API_URL}/user/missions/${missionId}/claim`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

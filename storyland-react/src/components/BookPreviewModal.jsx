@@ -108,14 +108,14 @@ const BookPreviewModal = () => {
 
     const fetchModalData = async () => {
       try {
-        const booksRes = await fetch("http://localhost:5000/api/books");
+        const booksRes = await fetch(`${import.meta.env.VITE_API_URL}/books`);
         const booksData = await booksRes.json();
         const foundBook = booksData.find((b) => b.id === parseInt(previewId));
 
         if (foundBook) {
           setBook(foundBook);
           const pagesRes = await fetch(
-            `http://localhost:5000/api/books/${foundBook.id}/pages`,
+            `${import.meta.env.VITE_API_URL}/books/${foundBook.id}/pages`,
           );
           const pagesData = await pagesRes.json();
           setFirstPageImage(
@@ -124,7 +124,7 @@ const BookPreviewModal = () => {
 
           if (isLoggedIn && token) {
             const statusRes = await fetch(
-              `http://localhost:5000/api/books/${foundBook.id}/status`,
+              `${import.meta.env.VITE_API_URL}/books/${foundBook.id}/status`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               },
@@ -159,7 +159,7 @@ const BookPreviewModal = () => {
   const executeToggleFavAPI = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/books/${book.id}/favorite`,
+        `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -178,7 +178,7 @@ const BookPreviewModal = () => {
   const executeToggleSaveAPI = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/books/${book.id}/save`,
+        `${import.meta.env.VITE_API_URL}/books/${book.id}/save`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

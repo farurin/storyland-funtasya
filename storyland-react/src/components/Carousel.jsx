@@ -169,32 +169,6 @@ const Carousel = ({ books }) => {
           </div>
         )}
       </div>
-
-      <style jsx global>{`
-        /* CSS untuk Pagination Swiper */
-        .custom-carousel-swiper {
-          padding-top: 15px !important;
-          padding-bottom: 50px !important;
-        }
-        .custom-carousel-swiper .swiper-pagination {
-          position: absolute;
-          bottom: 0px !important;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 10;
-        }
-        .custom-carousel-swiper .swiper-pagination-bullet {
-          width: 12px;
-          height: 12px;
-          background: #a454ff !important;
-          opacity: 0.3;
-          margin: 0 6px !important;
-          display: inline-block;
-        }
-        .custom-carousel-swiper .swiper-pagination-bullet-active {
-          opacity: 1;
-        }
-      `}</style>
     </section>
   );
 };

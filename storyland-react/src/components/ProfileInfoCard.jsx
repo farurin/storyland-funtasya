@@ -102,7 +102,7 @@ const ProfileInfoCard = () => {
   const fetchProfile = async () => {
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:5000/api/user/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -116,7 +116,7 @@ const ProfileInfoCard = () => {
   const fetchAvatars = async () => {
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:5000/api/user/avatars", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/avatars`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -146,7 +146,7 @@ const ProfileInfoCard = () => {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch("http://localhost:5000/api/user/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

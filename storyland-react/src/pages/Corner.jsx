@@ -48,7 +48,7 @@ const Corner = () => {
       else endpoint = "history";
 
       const response = await fetch(
-        `http://localhost:5000/api/corner/${endpoint}`,
+        `${import.meta.env.VITE_API_URL}/corner/${endpoint}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

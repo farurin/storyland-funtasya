@@ -30,7 +30,7 @@ const ProfileStatus = () => {
     const fetchCharacters = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/user/characters",
+          `${import.meta.env.VITE_API_URL}/user/characters`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -68,7 +68,7 @@ const ProfileStatus = () => {
       // proses simpan ke db
       try {
         const response = await fetch(
-          "http://localhost:5000/api/user/characters/active",
+          `${import.meta.env.VITE_API_URL}/user/characters/active`,
           {
             method: "PUT",
             headers: {
