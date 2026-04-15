@@ -19,9 +19,11 @@ const Profile = () => {
 
   // Fungsi saat klik "Keluar" di popup
   const handleConfirmLogout = () => {
-    logout(); // Hapus token & user dari Context/LocalStorage
-    setIsLogoutModalOpen(false); // Tutup modal
-    navigate("/"); // Lempar ke halaman Beranda (Home)
+    setIsLogoutModalOpen(false);
+    navigate("/");
+    setTimeout(() => {
+      logout();
+    }, 100);
   };
 
   return (
