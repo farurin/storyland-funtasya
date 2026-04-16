@@ -4,7 +4,6 @@ import loveCat from "../assets/lovecat.png";
 const CtaDownload = () => {
   return (
     <section className="bg-[#F0EDFF] w-full py-12">
-      {/* Margin disamakan dengan global, tanpa tambahan px-10 yang merusak alignment */}
       <div className="mx-3 md:mx-20 lg:mx-42 px-6 flex flex-col lg:flex-row items-center justify-between gap-10">
         {/* Left Content */}
         <div className="max-w-xl text-center lg:text-left">
@@ -18,16 +17,35 @@ const CtaDownload = () => {
           </p>
 
           <div className="flex items-center justify-center lg:justify-start gap-4 mt-6">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-              alt="Google Play"
-              className="h-10 cursor-pointer transition hover:opacity-80"
-            />
-            <img
-              src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-              alt="App Store"
-              className="h-10 cursor-pointer transition hover:opacity-80"
-            />
+            {/* Link Google Play Store */}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.funtasya.kidsstoryapp&pcampaignid=web_share"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:scale-105"
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                alt="Google Play"
+                className="h-10 cursor-pointer"
+              />
+            </a>
+
+            {/* Link App Store (Placeholder) */}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                alert("Aplikasi versi iOS sedang dalam tahap pengembangan!");
+              }}
+              className="transition hover:scale-105"
+            >
+              <img
+                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                alt="App Store"
+                className="h-10 cursor-pointer"
+              />
+            </a>
           </div>
         </div>
 
