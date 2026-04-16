@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 import Card from "./Card";
 
-// Icon SVG
+// icon SVG
 const IconLike = () => (
   <div className="bg-white/30 p-1.5 rounded-full flex items-center justify-center shrink-0">
     <svg
@@ -35,7 +35,6 @@ const IconFire = () => (
     </svg>
   </div>
 );
-
 const IconStar = () => (
   <div className="bg-white/30 p-1.5 rounded-full flex items-center justify-center shrink-0">
     <svg
@@ -50,9 +49,40 @@ const IconStar = () => (
     </svg>
   </div>
 );
+const IconArrowLeft = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="#852BFA"
+    stroke="#852BFA"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 5 L7 12 L15 19 Z" />
+  </svg>
+);
+const IconArrowRight = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="#852BFA"
+    stroke="#852BFA"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 5 L17 12 L9 19 Z" />
+  </svg>
+);
 
 const Carousel = ({ books }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const categoriesData = useMemo(
     () => [
@@ -84,90 +114,127 @@ const Carousel = ({ books }) => {
     [books],
   );
 
-  const displayedBooks = categoriesData[activeTab].items;
+  // Menggabungkan data yang akan dirender
+  const listToDisplay = useMemo(() => {
+    if (searchQuery) {
+      return books.filter((book) =>
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    }
+    return categoriesData[activeTab].items;
+  }, [searchQuery, books, activeTab, categoriesData]);
 
   return (
-    <section className="mx-3 md:mx-20 lg:mx-42 px-6 mt-16 custom-swiper-container">
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
-        {/* TAB BUTTONS */}
-        <div className="flex flex-wrap items-center gap-4">
-          {categoriesData.map((cat) => {
-            // Tentukan apakah tab ini sedang aktif
-            const isActive = activeTab === cat.id;
+    <section className="bg-[#F1F1FF] pt-12 pb-8 mt-12 w-full">
+      <div className="mx-3 md:mx-20 lg:mx-42 px-6 custom-swiper-container relative">
+        {/* BAGIAN ATAS: TAB & PENCARIAN */}
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
+          {searchQuery ? (
+            <div className="flex items-center">
+              <h2 className="text-2xl font-extrabold text-gray-900">
+                Hasil Pencarian:{" "}
+                <span className="text-[#8B5CF6]">"{searchQuery}"</span>
+              </h2>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-4">
+              {categoriesData.map((cat) => {
+                const isActive = activeTab === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveTab(cat.id)}
+                    style={{
+                      backgroundColor: isActive
+                        ? cat.activeColor
+                        : cat.inactiveColor,
+                    }}
+                    className={`flex flex-row items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-sm focus:outline-none 
+                      ${isActive ? "opacity-100 scale-105" : "hover:opacity-90"}
+                    `}
+                  >
+                    {cat.icon}
+                    <span className="whitespace-nowrap">{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                style={{
-                  backgroundColor: isActive
-                    ? cat.activeColor
-                    : cat.inactiveColor,
-                }}
-                className={`flex flex-row items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-sm focus:outline-none 
-                  ${isActive ? "ring-4 ring-offset-2 opacity-100 scale-105" : "hover:opacity-90"}
-                `}
+          <div className="relative w-full xl:w-96 shrink-0">
+            <input
+              type="text"
+              placeholder="Cari judul cerita..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-6 pr-12 py-3 rounded-full border border-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm text-gray-600 placeholder-gray-400 shadow-sm bg-white"
+            />
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {cat.icon}
-                <span className="whitespace-nowrap">{cat.label}</span>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* BAGIAN BAWAH: SLIDER BUKU */}
+        <div className="relative flex items-start h-auto">
+          {listToDisplay.length > 0 ? (
+            <>
+              <button className="carousel-prev absolute -left-8 md:-left-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
+                <IconArrowLeft />
               </button>
-            );
-          })}
-        </div>
 
-        {/* Search Bar (statis) */}
-        <div className="relative w-full xl:w-96 shrink-0">
-          <input
-            type="text"
-            placeholder="Cari judul, kategori..."
-            readOnly
-            className="w-full pl-6 pr-12 py-3 rounded-full border border-gray-200 focus:outline-none text-sm text-gray-600 placeholder-gray-400 shadow-sm bg-gray-50 cursor-not-allowed"
-            title="Fitur pencarian sedang dalam tahap pengembangan"
-          />
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </div>
-        </div>
-      </div>
+              <div className="flex-1 min-w-0 w-full relative">
+                <Swiper
+                  key={searchQuery ? "search" : `tab-${activeTab}`}
+                  modules={[Autoplay, Navigation]}
+                  navigation={{
+                    prevEl: ".carousel-prev",
+                    nextEl: ".carousel-next",
+                  }}
+                  slidesPerView="auto"
+                  spaceBetween={20}
+                  autoplay={
+                    searchQuery
+                      ? false
+                      : { delay: 3500, disableOnInteraction: false }
+                  }
+                  className="w-full"
+                >
+                  {listToDisplay.map((book) => (
+                    <SwiperSlide key={book.id} style={{ width: "179px" }}>
+                      <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105 cursor-pointer">
+                        <Card book={book} />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
 
-      {/* SLIDER BUKU */}
-      <div className="relative min-h-75">
-        {displayedBooks.length > 0 ? (
-          <Swiper
-            key={activeTab}
-            modules={[Pagination, Autoplay]}
-            slidesPerView="auto"
-            spaceBetween={20}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 3500, disableOnInteraction: false }}
-            className="w-full custom-carousel-swiper"
-          >
-            {displayedBooks.map((book) => (
-              <SwiperSlide key={book.id} style={{ width: "179px" }}>
-                <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105 cursor-pointer">
-                  <Card book={book} />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <div className="w-full h-40 flex items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-medium">
-            Tidak ada buku di kategori ini.
-          </div>
-        )}
+              <button className="carousel-next absolute -right-8 md:-right-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
+                <IconArrowRight />
+              </button>
+            </>
+          ) : (
+            <div className="w-full h-63.75 flex items-center justify-center bg-white rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-medium">
+              {searchQuery
+                ? "Pencarian tidak ditemukan."
+                : "Tidak ada buku di kategori ini."}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
