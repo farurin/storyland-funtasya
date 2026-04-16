@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "./ActionPopupModal";
+import { toggleFavorite } from "../services/api";
 
 // Ikon svg
 const IconHeartSolid = () => (
@@ -22,7 +23,7 @@ const IconHeartSolid = () => (
 
 const ProgressCard = ({ progress, type }) => {
   const location = useLocation();
-  const { token } = useAuth();
+  const { token, triggerRefresh } = useAuth();
   const [popupConfig, setPopupConfig] = useState(null);
   const book = progress.book || progress;
   const reading_progress = progress.reading_progress ?? 0;
@@ -44,14 +45,8 @@ const ProgressCard = ({ progress, type }) => {
       secondaryBtnText: "Batalkan",
       onPrimaryClick: async () => {
         try {
-          await fetch(
-            `${import.meta.env.VITE_API_URL}/books/${book.id}/favorite`,
-            {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
-          window.dispatchEvent(new Event("cornerDataChanged"));
+          await toggleFavorite(book.id, token);
+          triggerRefresh();
           setPopupConfig(null);
         } catch (err) {
           console.error("Gagal menghapus favorit:", err);
