@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import BannerCorner from "../components/BannerCorner";
 import FilterCorner from "../components/FilterCorner";
@@ -7,10 +7,14 @@ import CtaDownload from "../components/CtaDownload";
 import { getCornerData } from "../services/api";
 
 const Corner = () => {
-  // Panggil refreshKey dari context
   const { isLoggedIn, token, refreshKey } = useAuth();
 
-  const [activeFilter, setActiveFilter] = useState("riwayat");
+  const [activeFilter, setActiveFilter] = useState(() => {
+    return localStorage.getItem("cornerActiveTab") || "riwayat";
+  });
+  useEffect(() => {
+    localStorage.setItem("cornerActiveTab", activeFilter);
+  }, [activeFilter]);
   const [search, setSearch] = useState("");
 
   const [progressData, setProgressData] = useState({});
@@ -44,7 +48,7 @@ const Corner = () => {
     }
 
     setIsLoading(true);
-    setError(null); // Reset error setiap mulai fetch
+    setError(null);
     try {
       let endpoint = "";
       if (activeFilter === "favorit") endpoint = "favorites";
@@ -59,7 +63,7 @@ const Corner = () => {
     } catch (err) {
       console.error("Error fetching corner data:", err.message);
       setProgressData({});
-      setError(err.message); // Tangkap error
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +72,25 @@ const Corner = () => {
   useEffect(() => {
     fetchCornerData();
   }, [fetchCornerData, refreshKey]);
+
+  // logika pencarian
+  const filteredProgressData = useMemo(() => {
+    // Jika tidak ada pencarian, kembalikan data utuh
+    if (!search) return progressData;
+
+    const filtered = {};
+    // Looping setiap grup (Favorit, Hari Ini, dll) dan saring bukunya
+    for (const [groupName, books] of Object.entries(progressData)) {
+      const matchedBooks = books.filter((book) =>
+        book.title.toLowerCase().includes(search.toLowerCase()),
+      );
+      // Hanya masukkan grup yang memiliki buku hasil pencarian
+      if (matchedBooks.length > 0) {
+        filtered[groupName] = matchedBooks;
+      }
+    }
+    return filtered;
+  }, [progressData, search]);
 
   const emptyContent = {
     riwayat: isLoggedIn
@@ -99,9 +122,14 @@ const Corner = () => {
         },
   };
 
-  const hasNoBooks =
+  // Kondisi untuk menentukan UI apa yang harus muncul
+  const hasNoBooksOriginal =
     !isLoading &&
     Object.values(progressData).every((group) => group.length === 0);
+  const hasNoSearchResults =
+    !isLoading &&
+    search &&
+    Object.values(filteredProgressData).every((group) => group.length === 0);
 
   return (
     <div className="w-full">
@@ -113,7 +141,7 @@ const Corner = () => {
       />
 
       <div className="w-full min-h-100">
-        {/* UI ERROR BARU */}
+        {/* UI JIKA ERROR API */}
         {error && !isLoading && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center bg-white mt-12 mb-20 rounded-3xl border border-red-100 shadow-sm">
             <h3 className="text-xl md:text-2xl font-bold text-red-500 leading-tight">
@@ -131,13 +159,15 @@ const Corner = () => {
           </div>
         )}
 
+        {/* UI JIKA SEDANG LOADING */}
         {isLoading && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-20 text-center text-gray-400 font-medium animate-pulse bg-white mt-12 mb-20">
             Memuat data {activeFilter}...
           </div>
         )}
 
-        {!isLoading && !error && hasNoBooks && (
+        {/* UI JIKA RAK BUKU MEMANG KOSONG DARI AWAL */}
+        {!isLoading && !error && hasNoBooksOriginal && !search && (
           <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-32 text-center bg-white mt-12 mb-20">
             <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
               {emptyContent[activeFilter].title}
@@ -148,9 +178,23 @@ const Corner = () => {
           </div>
         )}
 
-        {!isLoading && !error && !hasNoBooks && (
+        {/* UI JIKA HASIL PENCARIAN TIDAK DITEMUKAN */}
+        {!isLoading && !error && hasNoSearchResults && (
+          <div className="mx-3 md:mx-20 lg:mx-42 px-6 py-24 text-center bg-white mt-12 mb-20 rounded-3xl border border-dashed border-gray-200">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-400 leading-tight">
+              Pencarian tidak ditemukan
+            </h3>
+            <p className="text-gray-400 mt-2 text-sm md:text-base">
+              Tidak ada buku yang sesuai dengan kata kunci "{search}" di rak
+              ini.
+            </p>
+          </div>
+        )}
+
+        {/* UI JIKA BUKU ADA DAN/ATAU PENCARIAN DITEMUKAN */}
+        {!isLoading && !error && !hasNoBooksOriginal && !hasNoSearchResults && (
           <>
-            {activeFilter === "favorit" && (
+            {activeFilter === "favorit" && !search && (
               <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 -mb-5">
                 <h2 className="text-2xl font-bold text-gray-900">
                   Semua cerita favorit-mu
@@ -161,7 +205,7 @@ const Corner = () => {
                 </p>
               </div>
             )}
-            {activeFilter === "disimpan" && (
+            {activeFilter === "disimpan" && !search && (
               <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 -mb-5">
                 <h2 className="text-2xl font-bold text-gray-900">
                   Disimpan untuk nanti
@@ -172,7 +216,20 @@ const Corner = () => {
                 </p>
               </div>
             )}
-            <Progress data={progressData} search={search} type={activeFilter} />
+            {search && (
+              <div className="mx-3 md:mx-20 lg:mx-42 px-6 mt-12 -mb-5">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Hasil Pencarian
+                </h2>
+              </div>
+            )}
+
+            {/* oper data yang sudah di-filter (filteredProgressData) ke komponen Progress */}
+            <Progress
+              data={filteredProgressData}
+              search={search}
+              type={activeFilter}
+            />
           </>
         )}
       </div>
