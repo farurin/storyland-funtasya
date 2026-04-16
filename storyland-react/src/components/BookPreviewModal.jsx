@@ -141,7 +141,9 @@ const BookPreviewModal = () => {
 
   if (!previewId || !book) return null;
 
+  // Memindahkan pembersihan popup ke dalam closeModal
   const closeModal = () => {
+    setPopupConfig(null);
     searchParams.delete("preview");
     setSearchParams(searchParams);
   };
@@ -174,7 +176,6 @@ const BookPreviewModal = () => {
 
   // handler popup
   const handleToggleFavorite = async () => {
-    // guest mode
     if (!isLoggedIn) {
       setPopupConfig({
         image: "/images/popups/popup-fav.png",
@@ -186,16 +187,14 @@ const BookPreviewModal = () => {
         secondaryBtnText: "Nanti Saja",
         onPrimaryClick: () => {
           closeModal();
-          navigate("/register"); // Arahkan ke halaman Register
+          navigate("/register");
         },
-        onSecondaryClick: () => setPopupConfig(null), // Simply close the popup
+        onSecondaryClick: () => setPopupConfig(null),
       });
-      return; // Stop execution
+      return;
     }
 
-    // logged in mode
     if (isFavorite) {
-      // Show confirmation before deleting
       setPopupConfig({
         image: "/images/popups/popup-delete-fav.png",
         title: "Hapus dari Favorit",
@@ -211,7 +210,6 @@ const BookPreviewModal = () => {
         onSecondaryClick: () => setPopupConfig(null),
       });
     } else {
-      // Execute API first, then show success popup
       await executeToggleFavAPI();
       setPopupConfig({
         image: "/images/popups/popup-fav.png",
@@ -221,6 +219,8 @@ const BookPreviewModal = () => {
         primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
         secondaryBtnText: "Tutup",
         onPrimaryClick: () => {
+          localStorage.setItem("cornerActiveTab", "favorit");
+          triggerRefresh();
           closeModal();
           navigate("/corner");
         },
@@ -230,7 +230,6 @@ const BookPreviewModal = () => {
   };
 
   const handleToggleSave = async () => {
-    // guest mode
     if (!isLoggedIn) {
       setPopupConfig({
         image: "/images/popups/popup-bookmark.png",
@@ -242,19 +241,16 @@ const BookPreviewModal = () => {
         secondaryBtnText: "Nanti Saja",
         onPrimaryClick: () => {
           closeModal();
-          navigate("/register"); // Arahkan ke halaman Register
+          navigate("/register");
         },
-        onSecondaryClick: () => setPopupConfig(null), // Simply close the popup
+        onSecondaryClick: () => setPopupConfig(null),
       });
-      return; // Stop execution
+      return;
     }
 
-    // logged in mode
     if (isSaved) {
-      // Execute API directly without popup (no confirmation design)
       await executeToggleSaveAPI();
     } else {
-      // Execute API first, then show success popup
       await executeToggleSaveAPI();
       setPopupConfig({
         image: "/images/popups/popup-bookmark.png",
@@ -265,6 +261,8 @@ const BookPreviewModal = () => {
         primaryBtnColor: "bg-[#8B5CF6] hover:bg-purple-700",
         secondaryBtnText: "Tutup",
         onPrimaryClick: () => {
+          localStorage.setItem("cornerActiveTab", "disimpan");
+          triggerRefresh();
           closeModal();
           navigate("/corner");
         },
@@ -334,7 +332,6 @@ const BookPreviewModal = () => {
             </div>
 
             <div className="mt-6 md:mt-8 flex flex-col gap-2.5 shrink-0">
-              {/* Baris BACA / SIMPAN */}
               <div className="flex gap-2.5 h-9">
                 <button
                   onClick={handleToggleSave}
@@ -350,7 +347,6 @@ const BookPreviewModal = () => {
                 </button>
               </div>
 
-              {/* Baris TONTON / FAVORIT */}
               <div className="flex gap-2.5 h-9">
                 <button
                   onClick={handleToggleFavorite}

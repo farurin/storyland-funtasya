@@ -9,12 +9,16 @@ import { getCornerData } from "../services/api";
 const Corner = () => {
   const { isLoggedIn, token, refreshKey } = useAuth();
 
+  // Mengambil tab aktif dari memori browser (default: "riwayat")
   const [activeFilter, setActiveFilter] = useState(() => {
     return localStorage.getItem("cornerActiveTab") || "riwayat";
   });
+
+  // Menyimpan tab aktif ke memori browser setiap kali berubah
   useEffect(() => {
     localStorage.setItem("cornerActiveTab", activeFilter);
   }, [activeFilter]);
+
   const [search, setSearch] = useState("");
 
   const [progressData, setProgressData] = useState({});
@@ -69,7 +73,14 @@ const Corner = () => {
     }
   }, [activeFilter, isLoggedIn, token]);
 
+  // baca ulang tab aktif sebelum fetch
   useEffect(() => {
+    // Sinkronkan tab aktif jika ada perubahan dari Modal/halaman lain
+    const savedTab = localStorage.getItem("cornerActiveTab");
+    if (savedTab) {
+      setActiveFilter(savedTab);
+    }
+
     fetchCornerData();
   }, [fetchCornerData, refreshKey]);
 
