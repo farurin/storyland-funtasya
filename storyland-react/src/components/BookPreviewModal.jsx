@@ -149,7 +149,6 @@ const BookPreviewModal = () => {
   };
 
   const handleReadClick = () => {
-    closeModal();
     navigate(`/book/${book.id}`);
   };
 

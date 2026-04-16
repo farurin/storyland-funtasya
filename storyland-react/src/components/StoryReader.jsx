@@ -206,7 +206,14 @@ const StoryReader = ({ book }) => {
 
       <div className="absolute top-0 left-0 right-0 p-5 md:p-8 flex items-center justify-between bg-linear-to-b from-black/40 to-transparent z-10">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            // Cek apakah sedang dalam mode layar penuh
+            if (document.fullscreenElement) {
+              document.exitFullscreen(); // Jika iya, keluar dari layar penuh saja
+            } else {
+              navigate(-1); // Jika tidak, baru kembali ke halaman sebelumnya
+            }
+          }}
           className="w-10 h-10 md:w-12.5 md:h-12.5 bg-[#FDECA2] rounded-full flex items-center justify-center hover:scale-105 transition shadow-md text-gray-900"
         >
           <IconBackCurved />
