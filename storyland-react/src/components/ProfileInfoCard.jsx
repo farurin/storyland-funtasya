@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile, getAvatars, updateUserProfile } from "../services/api";
 
@@ -98,7 +98,7 @@ const ProfileInfoCard = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!token) return;
     try {
       const data = await getUserProfile(token);
@@ -106,9 +106,9 @@ const ProfileInfoCard = () => {
     } catch (err) {
       console.error("Gagal ambil profil:", err);
     }
-  };
+  }, [token]);
 
-  const fetchAvatarData = async () => {
+  const fetchAvatarData = useCallback(async () => {
     if (!token) return;
     try {
       const data = await getAvatars(token);
@@ -116,12 +116,12 @@ const ProfileInfoCard = () => {
     } catch (err) {
       console.error("Gagal ambil daftar avatar:", err);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchProfile();
     fetchAvatarData();
-  }, [token]);
+  }, [fetchProfile, fetchAvatarData]);
 
   const handleOpenModal = () => {
     setEditData({
@@ -269,7 +269,7 @@ const ProfileInfoCard = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/40 animate-fade-in">
           <div className="bg-white rounded-4xl w-full max-w-2xl p-6 md:p-10 relative shadow-2xl scale-100 transition-transform">
             <button
               onClick={() => setIsModalOpen(false)}
