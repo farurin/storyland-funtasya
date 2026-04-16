@@ -190,7 +190,10 @@ const StoryReader = ({ book }) => {
   };
 
   return (
-    <div className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500 rounded-2xl md:rounded-[40px]">
+    <div
+      id="story-reader-container"
+      className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500 rounded-2xl md:rounded-[40px]"
+    >
       <img
         src={pages[currentPage].image}
         alt={`Halaman ${currentPage + 1}`}

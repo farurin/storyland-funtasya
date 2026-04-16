@@ -170,7 +170,9 @@ const BookDetail = () => {
   };
 
   const handleFullscreen = () => {
-    const elem = document.documentElement;
+    const elem = document.getElementById("story-reader-container");
+    if (!elem) return;
+
     if (!document.fullscreenElement) {
       elem.requestFullscreen().catch((err) => {
         console.error(`Gagal masuk mode layar penuh: ${err.message}`);
