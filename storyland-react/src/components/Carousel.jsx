@@ -6,7 +6,7 @@ import "swiper/css/navigation";
 
 import Card from "./Card";
 
-// icon SVG
+// Icon SVG
 const IconLike = () => (
   <div className="bg-white/30 p-1.5 rounded-full flex items-center justify-center shrink-0">
     <svg
@@ -80,6 +80,7 @@ const IconArrowRight = () => (
   </svg>
 );
 
+// Main components
 const Carousel = ({ books }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -114,7 +115,6 @@ const Carousel = ({ books }) => {
     [books],
   );
 
-  // Menggabungkan data yang akan dirender
   const listToDisplay = useMemo(() => {
     if (searchQuery) {
       return books.filter((book) =>
@@ -130,14 +130,15 @@ const Carousel = ({ books }) => {
         {/* BAGIAN ATAS: TAB & PENCARIAN */}
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
           {searchQuery ? (
-            <div className="flex items-center">
-              <h2 className="text-2xl font-extrabold text-gray-900">
+            <div className="flex justify-center xl:justify-start items-center w-full">
+              <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 text-center xl:text-left">
                 Hasil Pencarian:{" "}
                 <span className="text-[#8B5CF6]">"{searchQuery}"</span>
               </h2>
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-4">
+            // flex-col untuk Mobile (menumpuk), flex-row untuk Desktop
+            <div className="flex flex-col md:flex-row items-center justify-center xl:justify-start gap-4 w-full xl:w-auto">
               {categoriesData.map((cat) => {
                 const isActive = activeTab === cat.id;
                 return (
@@ -149,7 +150,7 @@ const Carousel = ({ books }) => {
                         ? cat.activeColor
                         : cat.inactiveColor,
                     }}
-                    className={`flex flex-row items-center gap-3 text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-sm focus:outline-none 
+                    className={`cursor-pointer flex flex-row items-center justify-center md:justify-start gap-3 w-48 md:w-auto text-white pl-2 pr-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-sm focus:outline-none 
                       ${isActive ? "opacity-100 scale-105" : "hover:opacity-90"}
                     `}
                   >
@@ -161,7 +162,8 @@ const Carousel = ({ books }) => {
             </div>
           )}
 
-          <div className="relative w-full xl:w-96 shrink-0">
+          {/* Kolom Pencarian */}
+          <div className="relative w-full md:w-80 xl:w-96 shrink-0 mx-auto xl:mx-0">
             <input
               type="text"
               placeholder="Cari judul cerita..."
@@ -189,10 +191,11 @@ const Carousel = ({ books }) => {
         </div>
 
         {/* BAGIAN BAWAH: SLIDER BUKU */}
-        <div className="relative flex items-start h-auto">
+        <div className="relative flex items-center h-auto">
           {listToDisplay.length > 0 ? (
             <>
-              <button className="carousel-prev absolute -left-8 md:-left-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
+              {/* Panah kiri */}
+              <button className="carousel-prev absolute -left-8 md:-left-12 top-1/2 -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
                 <IconArrowLeft />
               </button>
 
@@ -211,11 +214,11 @@ const Carousel = ({ books }) => {
                       ? false
                       : { delay: 3500, disableOnInteraction: false }
                   }
-                  className="w-full"
+                  className="w-full py-6! px-2"
                 >
                   {listToDisplay.map((book) => (
                     <SwiperSlide key={book.id} style={{ width: "179px" }}>
-                      <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105 cursor-pointer">
+                      <div className="transition-transform duration-300 hover:scale-105 cursor-pointer h-full">
                         <Card book={book} />
                       </div>
                     </SwiperSlide>
@@ -223,7 +226,8 @@ const Carousel = ({ books }) => {
                 </Swiper>
               </div>
 
-              <button className="carousel-next absolute -right-8 md:-right-12 top-[127.5px] -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
+              {/* Panah kanan */}
+              <button className="carousel-next absolute -right-8 md:-right-12 top-1/2 -translate-y-1/2 z-10 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
                 <IconArrowRight />
               </button>
             </>

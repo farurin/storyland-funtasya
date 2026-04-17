@@ -8,12 +8,12 @@ const Card = ({ book }) => {
   return (
     <Link
       to={`${location.pathname}?preview=${book.id}`}
-      className="block w-full rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer"
+      className="block w-full h-full rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer bg-white"
     >
       <img
         src={`/images/books/${book.image}`}
         alt={book.title || "Cover Buku"}
-        className="w-full h-56 md:h-63.75 object-cover"
+        className="w-full h-65 md:h-63.75 object-cover"
         onError={(e) => {
           e.target.src = "https://via.placeholder.com/150x220?text=Cover";
         }}
