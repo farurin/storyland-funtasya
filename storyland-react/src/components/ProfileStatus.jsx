@@ -22,6 +22,9 @@ const ProfileStatus = () => {
   const [tempCharacter, setTempCharacter] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Variabel untuk mengontrol status tombol (TRUE = tombol mati/tidak bisa diklik)
+  const isFeatureDisabled = true;
+
   useEffect(() => {
     if (token === undefined) return;
 
@@ -50,6 +53,9 @@ const ProfileStatus = () => {
   }, [token]);
 
   const handleButtonClick = async () => {
+    // Tambahan perlindungan jika tombol dipaksa klik
+    if (isFeatureDisabled) return;
+
     if (isEditingCharacter) {
       try {
         await updateActiveCharacter(tempCharacter.id, token);
@@ -69,9 +75,9 @@ const ProfileStatus = () => {
 
   if (isLoading || !selectedCharacter) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 w-full h-full min-h-100">
+      <div className="flex flex-col items-center justify-center py-20 w-full h-full min-h-75">
         <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-purple-600 font-bold animate-pulse">
+        <p className="text-purple-600 font-bold animate-pulse text-sm md:text-base">
           Memuat Karakter...
         </p>
       </div>
@@ -79,9 +85,12 @@ const ProfileStatus = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-stretch justify-center h-full">
-      <div className="flex flex-col items-center shrink-0 justify-center">
-        <div className="w-64 h-64 md:w-80 md:h-80 relative mb-6">
+    // PERBAIKAN RESPONSIVITAS:
+    // Di HP bertumpuk (flex-col), di Tablet/Desktop bersebelahan (lg:flex-row)
+    <div className="flex flex-col lg:flex-row gap-8 lg:gap-20 items-center lg:items-stretch justify-center h-full w-full">
+      {/* Kolom Kiri: Karakter & Tombol Ubah */}
+      <div className="flex flex-col items-center shrink-0 justify-center w-full lg:w-auto">
+        <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80 relative mb-4 md:mb-6">
           <img
             src={
               isEditingCharacter ? tempCharacter.image : selectedCharacter.image
@@ -97,15 +106,31 @@ const ProfileStatus = () => {
             }
           />
         </div>
+
+        {/* PERBAIKAN TOMBOL: Menonaktifkan tombol sementara */}
         <button
           onClick={handleButtonClick}
-          className="bg-[#8B5CF6] text-white font-bold py-2.5 px-12 rounded-full hover:bg-purple-700 hover:scale-105 transition shadow-lg min-w-40 cursor-pointer"
+          disabled={isFeatureDisabled} // Menerapkan status disabled
+          className={`font-bold py-2.5 px-12 rounded-full min-w-40 md:min-w-45 text-sm md:text-base transition-all shadow-md
+            ${
+              isFeatureDisabled
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none" // Gaya saat tombol mati
+                : "bg-[#8B5CF6] text-white hover:bg-purple-700 hover:scale-105 cursor-pointer shadow-lg" // Gaya saat tombol nyala
+            }
+          `}
         >
-          {isEditingCharacter ? "Simpan" : "Ubah"}
+          {/* fitur belum fix */}
+          {isFeatureDisabled
+            ? "Segera Hadir"
+            : isEditingCharacter
+              ? "Simpan"
+              : "Ubah"}
         </button>
       </div>
-      <div className="flex-1 max-w-xl w-full flex">
-        {isEditingCharacter ? (
+
+      {/* Kolom Kanan: Info Card atau Pilihan Karakter */}
+      <div className="flex-1 w-full max-w-xl flex justify-center lg:justify-start mt-6 lg:mt-0">
+        {isEditingCharacter && !isFeatureDisabled ? (
           <ProfileCharacterSelect
             characterList={characterList}
             tempCharacter={tempCharacter}
