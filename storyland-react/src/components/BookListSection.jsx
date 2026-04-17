@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
@@ -7,7 +7,8 @@ import "swiper/css/navigation";
 import Card from "./Card";
 import { Button } from "flowbite-react";
 import bannerImg from "../assets/banner.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import ActionPopupModal from "./ActionPopupModal"; // Pastikan import modal-nya
 
 // Icon SVG
 const IconArrowLeft = () => (
@@ -44,33 +45,61 @@ const IconArrowRight = () => (
 
 const BANNER_AFTER_INDEX = 2;
 
-const BannerIklan = () => (
-  <section className="w-full my-16">
-    <div className="flex flex-col-reverse lg:flex-row items-center gap-10 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-      <div className="w-full lg:w-1/2 text-center lg:text-left">
-        <h1 className="text-black font-bold text-3xl md:text-4xl leading-tight">
-          Pengumuman
-        </h1>
-        <p className="text-gray-600 mt-4 text-sm md:text-base max-w-md mx-auto lg:mx-0">
-          Banyak kisah menarik menunggu untuk kamu jelajahi. Temukan cerita
-          favoritmu sekarang.
-        </p>
-        <div className="mt-6 flex justify-center lg:justify-start">
-          <Button className="capitalize bg-[#A454FF] text-white font-semibold rounded-full px-10 shadow-md hover:bg-purple-700 transition border-none focus:ring-0">
-            cek sekarang
-          </Button>
+// Komponen BannerIklan
+const BannerIklan = ({ latestBook }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  return (
+    <section className="w-full my-16">
+      <div className="flex flex-col-reverse lg:flex-row items-center gap-10 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+        <div className="w-full lg:w-1/2 text-center lg:text-left">
+          <h1 className="text-black font-bold text-3xl md:text-4xl leading-tight">
+            Pengumuman
+          </h1>
+          <p className="text-gray-600 mt-4 text-sm md:text-base max-w-md mx-auto lg:mx-0">
+            Banyak kisah menarik menunggu untuk kamu jelajahi. Temukan cerita
+            favoritmu sekarang.
+          </p>
+          <div className="mt-6 flex justify-center lg:justify-start">
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="capitalize bg-[#A454FF] text-white font-semibold rounded-full px-10 shadow-md hover:bg-purple-700 transition border-none focus:ring-0"
+            >
+              cek sekarang
+            </Button>
+          </div>
+        </div>
+        <div className="w-full lg:w-1/2 flex justify-center">
+          <img
+            src={bannerImg}
+            alt="Banner Illustration"
+            className="w-full max-w-sm md:max-w-md lg:max-w-xl object-contain"
+          />
         </div>
       </div>
-      <div className="w-full lg:w-1/2 flex justify-center">
-        <img
-          src={bannerImg}
-          alt="Banner Illustration"
-          className="w-full max-w-sm md:max-w-md lg:max-w-xl object-contain"
+
+      {/* Render Modal jika latestBook tersedia */}
+      {latestBook && (
+        <ActionPopupModal
+          isOpen={isModalOpen}
+          image={`/images/books/${latestBook.image}`}
+          title="BUKU BARU!"
+          description={`Ada buku baru untukmu: "${latestBook.title}". Buku ini sudah siap kamu baca. Selamat menikmati!`}
+          primaryBtnText="Lihat"
+          primaryBtnColor="bg-[#852BFA] hover:bg-purple-700"
+          secondaryBtnText="Tutup"
+          onPrimaryClick={() => {
+            setIsModalOpen(false);
+            navigate(`${location.pathname}?preview=${latestBook.id}`);
+          }}
+          onSecondaryClick={() => setIsModalOpen(false)}
         />
-      </div>
-    </div>
-  </section>
-);
+      )}
+    </section>
+  );
+};
 
 export const CategorySection = ({ category, customTitle }) => {
   const booksToShow = category.books ? category.books.slice(0, 6) : [];
@@ -165,12 +194,19 @@ export const CategorySection = ({ category, customTitle }) => {
 const BookListSection = ({ data }) => {
   const filtered = data.filter((c) => c.image !== null);
 
+  const allBooks = data.flatMap((category) => category.books || []);
+  const latestBook =
+    allBooks.length > 0 ? allBooks.sort((a, b) => b.id - a.id)[0] : null;
+
   return (
     <section className="mx-3 md:mx-20 lg:mx-42 px-6">
       {filtered.map((category, index) => (
         <React.Fragment key={category.id}>
           <CategorySection category={category} />
-          {index === BANNER_AFTER_INDEX && <BannerIklan />}
+          {/* Kirim buku terbaru ke komponen BannerIklan */}
+          {index === BANNER_AFTER_INDEX && (
+            <BannerIklan latestBook={latestBook} />
+          )}
         </React.Fragment>
       ))}
     </section>
