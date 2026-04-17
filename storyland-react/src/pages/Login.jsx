@@ -7,9 +7,10 @@ import AuthLayout, {
   IconGoogle,
   IconFacebook,
 } from "../components/AuthLayout";
-import { validateAuth } from "../utils/validation";
+import { validateLogin } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../services/api";
+import ActionPopupModal from "../components/ActionPopupModal";
 
 const Login = () => {
   const { login } = useAuth();
@@ -17,22 +18,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      setIsError(true);
-      setErrorMessage("*Harap lengkapi email dan password.");
-      return;
-    }
-
-    const validation = validateAuth(email, password);
+    const validation = validateLogin(email, password);
     if (!validation.isValid) {
       setIsError(true);
-      setErrorMessage("*Email atau kata sandi yang Anda masukkan salah.");
+      setErrorMessage("*Harap lengkapi email dan password dengan benar.");
       return;
     }
 
@@ -43,9 +40,9 @@ const Login = () => {
       setErrorMessage("");
       login(data.token, data.user);
       navigate("/");
-    } catch (error) {
+    } catch {
       setIsError(true);
-      setErrorMessage(`*${error.message}`);
+      setErrorMessage("*Email atau kata sandi yang Anda masukkan salah.");
     }
   };
 
@@ -56,7 +53,7 @@ const Login = () => {
           Selamat Datang !
         </h1>
         <p className="text-gray-500 mt-2 text-sm">
-          Lengkapi Email dan Paswword Untuk Masuk
+          Lengkapi Email dan Password Untuk Masuk
         </p>
       </div>
 
@@ -92,7 +89,7 @@ const Login = () => {
             <TextInput
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Masukkan Paswword"
+              placeholder="Masukkan Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               color={isError ? "failure" : "gray"}
@@ -130,6 +127,7 @@ const Login = () => {
       <div className="flex items-center gap-4">
         <button
           type="button"
+          onClick={() => setIsModalOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition"
         >
           <IconGoogle />
@@ -137,6 +135,7 @@ const Login = () => {
         </button>
         <button
           type="button"
+          onClick={() => setIsModalOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition"
         >
           <IconFacebook />
@@ -155,6 +154,19 @@ const Login = () => {
           </NavLink>
         </p>
       </div>
+
+      {/* Popup Modal */}
+      <ActionPopupModal
+        isOpen={isModalOpen}
+        image="/images/popups/popup-fav.png"
+        title="Fitur Segera Hadir!"
+        description="Maaf, fitur masuk menggunakan Google dan Facebook saat ini masih dalam tahap pengembangan."
+        primaryBtnText="Oke, Mengerti"
+        primaryBtnColor="bg-[#F59E0B]"
+        secondaryBtnText="Tutup"
+        onPrimaryClick={() => setIsModalOpen(false)}
+        onSecondaryClick={() => setIsModalOpen(false)}
+      />
     </AuthLayout>
   );
 };

@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput } from "flowbite-react";
 import AuthLayout, {
   IconEye,
   IconEyeOff,
   IconGoogle,
   IconFacebook,
 } from "../components/AuthLayout";
-import { validateAuth } from "../utils/validation";
+import { validateRegister } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
 import { registerUser } from "../services/api";
+import ActionPopupModal from "../components/ActionPopupModal";
 
 const Register = () => {
   const { login } = useAuth();
@@ -20,22 +21,16 @@ const Register = () => {
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      setIsError(true);
-      setErrorMessage("*Harap lengkapi email dan password.");
-      return;
-    }
-
-    const validation = validateAuth(email, password);
+    const validation = validateRegister(email, password);
     if (!validation.isValid) {
       setIsError(true);
-      setErrorMessage(
-        "*Email tidak valid atau password kurang dari 8 karakter.",
-      );
+      // Tampilkan error spesifik dari validation.js (email atau password)
+      setErrorMessage(validation.errors.email || validation.errors.password);
       return;
     }
 
@@ -79,7 +74,9 @@ const Register = () => {
             placeholder="Masukkan email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            color={isError ? "failure" : "gray"}
+            color={
+              isError && errorMessage.includes("Email") ? "failure" : "gray"
+            }
             className="[&_input]:rounded-full"
           />
         </div>
@@ -97,10 +94,14 @@ const Register = () => {
             <TextInput
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Masukkan Paswword"
+              placeholder="Masukkan Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              color={isError ? "failure" : "gray"}
+              color={
+                isError && errorMessage.includes("Password")
+                  ? "failure"
+                  : "gray"
+              }
               className="[&_input]:rounded-full [&_input]:pr-12"
             />
             <button
@@ -112,31 +113,16 @@ const Register = () => {
             </button>
           </div>
           {isError && (
-            <p className="text-xs text-red-500 mt-2 ml-1 font-medium">
+            <p className="text-xs text-red-500 mt-2 ml-1 font-medium leading-relaxed">
               {errorMessage}
             </p>
           )}
         </div>
 
-        {/* Syarat dan Ketentuan */}
-        <div className="flex items-center gap-2 mt-1">
-          <Checkbox
-            id="terms"
-            className="focus:ring-amber-400 text-amber-500"
-            required
-          />
-          <Label
-            htmlFor="terms"
-            className="text-sm font-medium text-gray-700 cursor-pointer"
-          >
-            Saya setuju dengan syarat & ketentuan
-          </Label>
-        </div>
-
         {/* Tombol Daftar */}
         <Button
           type="submit"
-          className="w-full bg-[#F59E0B] enabled:hover:bg-amber-600 rounded-full mt-2"
+          className="w-full bg-[#F59E0B] enabled:hover:bg-amber-600 rounded-full mt-4"
         >
           Daftar
         </Button>
@@ -153,6 +139,7 @@ const Register = () => {
       <div className="flex items-center gap-4">
         <button
           type="button"
+          onClick={() => setIsModalOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition font-medium text-sm text-gray-700"
         >
           <IconGoogle />
@@ -160,6 +147,7 @@ const Register = () => {
         </button>
         <button
           type="button"
+          onClick={() => setIsModalOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] rounded-full hover:bg-blue-600 transition font-medium text-sm text-white"
         >
           <IconFacebook />
@@ -179,6 +167,19 @@ const Register = () => {
           </NavLink>
         </p>
       </div>
+
+      {/* Popup Modal */}
+      <ActionPopupModal
+        isOpen={isModalOpen}
+        image="/images/popups/popup-fav.png"
+        title="Fitur Segera Hadir!"
+        description="Maaf, fitur pendaftaran menggunakan Google dan Facebook saat ini masih dalam tahap pengembangan."
+        primaryBtnText="Oke, Mengerti"
+        primaryBtnColor="bg-[#F59E0B]"
+        secondaryBtnText="Tutup"
+        onPrimaryClick={() => setIsModalOpen(false)}
+        onSecondaryClick={() => setIsModalOpen(false)}
+      />
     </AuthLayout>
   );
 };
