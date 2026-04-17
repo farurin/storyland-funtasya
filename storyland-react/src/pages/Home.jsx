@@ -10,16 +10,16 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
 
-  const [activeCategory, setActiveCategory] = useState("Semua");
-  const [search, setSearch] = useState("");
+  const [, setActiveCategory] = useState("Semua");
+  const [, setSearch] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null); // State error baru
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      setError(null); // Reset error setiap kali mulai fetch
+      setError(null);
       try {
         const [catData, bookData] = await Promise.all([
           getCategories(),
@@ -30,9 +30,9 @@ const Home = () => {
         setBooks(bookData);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError(err.message || "Gagal terhubung ke server."); // Tangkap error
+        setError(err.message || "Gagal terhubung ke server.");
       } finally {
-        setIsLoading(false); // Matikan loading baik sukses maupun gagal
+        setIsLoading(false);
       }
     };
 
@@ -44,7 +44,6 @@ const Home = () => {
     books: books.filter((b) => b.id_categories === cat.id),
   }));
 
-  // tampilan error (Server mati / Gagal ambil data)
   if (error) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center text-center px-6">
@@ -62,7 +61,6 @@ const Home = () => {
     );
   }
 
-  // tampilan loading
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-purple-600 font-bold text-xl">
@@ -71,15 +69,19 @@ const Home = () => {
     );
   }
 
-  // tampilan sukses
   return (
     <div>
       <HeroSection />
-      <Carousel
-        books={books}
-        onChangeCategory={setActiveCategory}
-        onSearch={setSearch}
-      />
+
+      {/* TARGET SCROLL: bungkus Carousel dengan div ber-ID */}
+      <div id="jelajahi-cerita" className="scroll-mt-24 md:scroll-mt-28">
+        <Carousel
+          books={books}
+          onChangeCategory={setActiveCategory}
+          onSearch={setSearch}
+        />
+      </div>
+
       <CategorySlider categories={categories} />
       <BookListSection data={categoriesWithBooks} />
       <CtaDownload />
