@@ -168,15 +168,17 @@ const ProfileInfoCard = () => {
   }
 
   return (
-    <div className="w-full bg-[#F4F3FF] rounded-[40px] p-6 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between min-h-100">
+    <div className="w-full bg-[#F4F3FF] rounded-3xl md:rounded-[40px] p-5 md:p-8 relative shadow-sm border border-white/50 animate-fade-in flex flex-col justify-between min-h-auto md:min-h-100">
+      {/* Tombol Ubah */}
       <button
         onClick={handleOpenModal}
-        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm cursor-pointer"
+        className="absolute top-5 right-5 md:top-8 md:right-8 flex items-center gap-1.5 bg-white px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[10px] md:text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition shadow-sm cursor-pointer z-10"
       >
         <IconEdit /> Ubah
       </button>
 
-      <div className="flex items-center gap-5 md:gap-6 mb-10 mt-2">
+      {/* Area Avatar dan Nama */}
+      <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 md:gap-6 mb-8 md:mb-10 mt-4 md:mt-2">
         <div className="relative">
           <div className="w-20 h-20 md:w-24 md:h-24 bg-[#EAE8F0] rounded-full border-4 border-white overflow-hidden shadow-sm">
             <img
@@ -188,15 +190,17 @@ const ProfileInfoCard = () => {
               }
             />
           </div>
-          <div className="absolute top-0 right-0 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md">
+          {/* Badge Api di sudut Avatar */}
+          <div className="absolute top-0 right-0 w-6 h-6 md:w-7 md:h-7 bg-white rounded-full flex items-center justify-center shadow-md">
             <IconFire />
           </div>
         </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight truncate max-w-50">
+
+        <div className="flex flex-col justify-center">
+          <h2 className="text-xl md:text-3xl font-extrabold text-gray-900 leading-tight truncate max-w-50 md:max-w-50 mx-auto md:mx-0">
             {profileData.username}
           </h2>
-          <p className="text-sm md:text-base font-semibold text-gray-600 mt-1">
+          <p className="text-xs md:text-base font-semibold text-gray-600 mt-1">
             {profileData.age > 0
               ? `${profileData.age} Tahun`
               : "Umur belum diatur"}
@@ -204,87 +208,99 @@ const ProfileInfoCard = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-6 md:gap-10 mb-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+      {/* Area Statistik (Streak, Pencapaian, Peringkat) */}
+      <div className="grid grid-cols-3 md:flex md:flex-row items-center justify-between md:justify-start gap-2 md:gap-10 mb-8 md:mb-10 w-full">
+        {/* Item 1: Streak */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-center md:text-left">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
             <IconFire />
           </div>
           <div>
-            <h4 className="text-xl md:text-2xl font-extrabold text-gray-900 leading-none">
+            <h4 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-none">
               {profileData.current_streak}
             </h4>
-            <p className="text-[10px] md:text-xs font-bold text-gray-500">
+            <p className="text-[9px] md:text-xs font-bold text-gray-500 mt-0.5 md:mt-0">
               Streak Harian
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+
+        {/* Item 2: Pencapaian */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-center md:text-left">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
             <IconMedal />
           </div>
           <div>
-            <h4 className="text-xl md:text-2xl font-extrabold text-gray-900 leading-none">
+            <h4 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-none">
               {profileData.total_achievements}
             </h4>
-            <p className="text-[10px] md:text-xs font-bold text-gray-500">
+            <p className="text-[9px] md:text-xs font-bold text-gray-500 mt-0.5 md:mt-0">
               Pencapaian
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+
+        {/* Item 3: Peringkat */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-center md:text-left">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
             <IconPodium />
           </div>
           <div>
-            <h4 className="text-xl md:text-2xl font-extrabold text-gray-900 leading-none">
+            <h4 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-none">
               {profileData.rank}
             </h4>
-            <p className="text-[10px] md:text-xs font-bold text-gray-500">
+            <p className="text-[9px] md:text-xs font-bold text-gray-500 mt-0.5 md:mt-0">
               Peringkat
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-between items-center bg-white/40 p-2 rounded-3xl">
-        {profileData.calendar &&
-          profileData.calendar.map((item, index) => (
-            <div
-              key={index}
-              className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-2xl transition-all ${item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"}`}
-            >
-              <div className="h-2 mb-1">
-                {item.isToday && (
-                  <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
-                )}
+      {/* Area Kalender */}
+      <div className="w-full bg-white/40 p-2 md:p-3 rounded-2xl md:rounded-3xl overflow-x-auto scrollbar-hide">
+        <div className="flex justify-between items-center min-w-70">
+          {profileData.calendar &&
+            profileData.calendar.map((item, index) => (
+              <div
+                key={index}
+                className={`flex flex-col items-center justify-center w-10 md:w-14 h-16 md:h-20 rounded-xl md:rounded-2xl transition-all shrink-0 ${
+                  item.isActive ? "bg-[#DFDAFE] shadow-sm" : "bg-transparent"
+                }`}
+              >
+                <div className="h-2 mb-1">
+                  {item.isToday && (
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full"></div>
+                  )}
+                </div>
+                <span className="text-[10px] md:text-xs font-bold text-gray-600 mb-0.5 md:mb-1">
+                  {item.day}
+                </span>
+                <span className="text-sm md:text-lg font-extrabold text-gray-900">
+                  {item.date}
+                </span>
               </div>
-              <span className="text-[10px] md:text-xs font-bold text-gray-600 mb-1">
-                {item.day}
-              </span>
-              <span className="text-sm md:text-lg font-extrabold text-gray-900">
-                {item.date}
-              </span>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
 
+      {/* MODAL UBAH PROFIL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/40 animate-fade-in">
-          <div className="bg-white rounded-4xl w-full max-w-2xl p-6 md:p-10 relative shadow-2xl scale-100 transition-transform">
+          <div className="bg-white rounded-4xl md:rounded-4xl w-full max-w-2xl p-5 md:p-10 relative shadow-2xl scale-100 transition-transform max-h-[90vh] overflow-y-auto scrollbar-hide">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-6 right-6 md:top-8 md:right-8 text-black hover:scale-110 transition cursor-pointer"
+              className="absolute top-5 right-5 md:top-8 md:right-8 text-black hover:scale-110 transition cursor-pointer bg-gray-100 rounded-full p-1 md:bg-transparent md:p-0"
             >
               <IconClose />
             </button>
 
-            <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8 mt-2">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-center text-gray-900 mb-6 md:mb-8 mt-2">
               Ubah Profile
             </h2>
 
-            <div className="space-y-4 mb-8">
-              <div className="bg-[#F4F3FF] rounded-[20px] px-5 py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
-                <label className="text-xs font-bold text-[#A898FF] block mb-1">
+            <div className="space-y-4 mb-6 md:mb-8">
+              <div className="bg-[#F4F3FF] rounded-2xl md:rounded-[20px] px-4 py-2 md:px-5 md:py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
+                <label className="text-[10px] md:text-xs font-bold text-[#A898FF] block mb-1">
                   Nama*
                 </label>
                 <input
@@ -293,13 +309,13 @@ const ProfileInfoCard = () => {
                   onChange={(e) =>
                     setEditData({ ...editData, username: e.target.value })
                   }
-                  className="w-full bg-transparent text-gray-900 font-bold outline-none"
+                  className="w-full bg-transparent text-gray-900 text-sm md:text-base font-bold outline-none"
                   placeholder="Masukkan nama"
                 />
               </div>
 
-              <div className="bg-[#F4F3FF] rounded-[20px] px-5 py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
-                <label className="text-xs font-bold text-[#A898FF] block mb-1">
+              <div className="bg-[#F4F3FF] rounded-2xl md:rounded-[20px] px-4 py-2 md:px-5 md:py-3 border border-transparent focus-within:border-[#C0B4FE] transition-colors">
+                <label className="text-[10px] md:text-xs font-bold text-[#A898FF] block mb-1">
                   Usia*
                 </label>
                 <input
@@ -308,17 +324,17 @@ const ProfileInfoCard = () => {
                   onChange={(e) =>
                     setEditData({ ...editData, age: e.target.value })
                   }
-                  className="w-full bg-transparent text-gray-900 font-bold outline-none"
+                  className="w-full bg-transparent text-gray-900 text-sm md:text-base font-bold outline-none"
                   placeholder="Masukkan usia"
                 />
               </div>
             </div>
 
-            <div className="mb-10">
-              <h3 className="text-[#A898FF] font-bold mb-4">
+            <div className="mb-8 md:mb-10">
+              <h3 className="text-[#A898FF] font-bold text-sm md:text-base mb-3 md:mb-4 text-center md:text-left">
                 Pilih karakter profile
               </h3>
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4 max-h-[40vh] md:max-h-none overflow-y-auto p-1">
                 {avatarList.length > 0 ? (
                   avatarList.map((avatar) => (
                     <button
@@ -346,7 +362,7 @@ const ProfileInfoCard = () => {
                     </button>
                   ))
                 ) : (
-                  <p className="text-xs text-gray-400 col-span-full">
+                  <p className="text-xs text-gray-400 col-span-full text-center md:text-left">
                     Belum ada pilihan avatar.
                   </p>
                 )}
@@ -357,7 +373,7 @@ const ProfileInfoCard = () => {
               <button
                 onClick={handleSaveProfile}
                 disabled={isSaving}
-                className="bg-[#EAE8F0] text-[#A898FF] hover:bg-[#6B4EFF] hover:text-white px-10 py-3 rounded-2xl font-extrabold transition-colors disabled:opacity-50 cursor-pointer"
+                className="bg-[#EAE8F0] text-[#A898FF] hover:bg-[#6B4EFF] hover:text-white w-full md:w-auto px-10 py-3 rounded-xl md:rounded-2xl font-extrabold transition-colors disabled:opacity-50 cursor-pointer text-sm md:text-base"
               >
                 {isSaving ? "Menyimpan..." : "Simpan"}
               </button>
