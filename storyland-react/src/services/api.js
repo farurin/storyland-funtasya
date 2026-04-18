@@ -13,6 +13,25 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
     ...options,
     headers,
   });
+
+  // Sesi habis
+  if (response.status === 401) {
+    // 1. Hapus token dan data user dari memori
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // 2. Beri tahu pengguna
+    alert(
+      "Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!",
+    );
+
+    // 3. Paksa reload dan kembali ke halaman utama
+    window.location.href = "/";
+
+    // 4. Hentikan eksekusi kode selanjutnya
+    throw new Error("Sesi kedaluwarsa");
+  }
+
   const data = await response.json();
 
   if (!response.ok) {
