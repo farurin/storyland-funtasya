@@ -25,7 +25,7 @@ dist-ssr
 
 # Abaikan folder gambar
 public/images/
-src/assets/
+# src/assets/
 
 # Abaikan folder node_modules di Backend API
 storyland-api/node_modules/
