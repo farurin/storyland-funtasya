@@ -4,7 +4,7 @@ import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
 import "swiper/css";
 
-// Mengimpor kustom ikon panah ungu milikmu
+// icon svg
 const IconArrowLeft = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -48,11 +48,7 @@ const CategorySlider = ({ categories, activeCategoryId }) => {
           Kategori Cerita
         </h2>
       )}
-
-      {/* Pembungkus relative untuk penempatan absolute tombol */}
       <div className="relative flex items-center w-full">
-        {/* Tombol Panah Kiri Custom */}
-        {/* Posisi digeser agak ke luar (-left-6/10) agar tidak menutupi gambar kategori */}
         <button className="cat-prev absolute -left-6 md:-left-10 top-1/2 -translate-y-1/2 z-20 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
           <IconArrowLeft />
         </button>

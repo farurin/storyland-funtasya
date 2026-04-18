@@ -8,7 +8,7 @@ import Card from "./Card";
 import { Button } from "flowbite-react";
 import bannerImg from "../assets/banner.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import ActionPopupModal from "./ActionPopupModal"; // Pastikan import modal-nya
+import ActionPopupModal from "./ActionPopupModal";
 
 // Icon SVG
 const IconArrowLeft = () => (
@@ -52,7 +52,7 @@ const BannerIklan = ({ latestBook }) => {
   const location = useLocation();
 
   return (
-    <section className="w-full my-16">
+    <section className="w-full mt-10 mb-2">
       <div className="flex flex-col-reverse lg:flex-row items-center gap-10 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
         <div className="w-full lg:w-1/2 text-center lg:text-left">
           <h1 className="text-black font-bold text-3xl md:text-4xl leading-tight">
@@ -105,7 +105,8 @@ export const CategorySection = ({ category, customTitle }) => {
   const booksToShow = category.books ? category.books.slice(0, 6) : [];
 
   return (
-    <div className="mt-10 mb-6">
+    // PERBAIKAN: Menghapus mt-10 mb-6, karena padding atas-bawah sekarang diatur oleh parent (warna zebra)
+    <div className="w-full">
       {/* Header Section */}
       <div className="flex items-end justify-between mb-4">
         <div>
@@ -199,16 +200,25 @@ const BookListSection = ({ data }) => {
     allBooks.length > 0 ? allBooks.sort((a, b) => b.id - a.id)[0] : null;
 
   return (
-    <section className="mx-3 md:mx-20 lg:mx-42 px-6">
-      {filtered.map((category, index) => (
-        <React.Fragment key={category.id}>
-          <CategorySection category={category} />
-          {/* Kirim buku terbaru ke komponen BannerIklan */}
-          {index === BANNER_AFTER_INDEX && (
-            <BannerIklan latestBook={latestBook} />
-          )}
-        </React.Fragment>
-      ))}
+    <section className="w-full mt-4">
+      {filtered.map((category, index) => {
+        // Logic bg putih-ungu
+        const isEven = index % 2 === 0;
+        const bgClass = isEven ? "bg-white" : "bg-[#F4F1FF]";
+
+        return (
+          <div key={category.id} className={`${bgClass} py-12`}>
+            <div className="mx-3 md:mx-20 lg:mx-42 px-6">
+              <CategorySection category={category} />
+
+              {/* Render BannerIklan setelah index tertentu */}
+              {index === BANNER_AFTER_INDEX && (
+                <BannerIklan latestBook={latestBook} />
+              )}
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 };
