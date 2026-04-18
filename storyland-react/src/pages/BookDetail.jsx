@@ -15,6 +15,13 @@ import {
   toggleSave,
 } from "../services/api";
 
+// Assets Popup Statis
+import popupFavGuestImg from "../assets/popups/popup-fav.png";
+import popupDeleteFavImg from "../assets/popups/popup-delete-fav.png";
+import popupFavImg from "../assets/popups/popup-fav.png";
+import popupSavedGuestImg from "../assets/popups/popup-bookmark.png";
+import popupBookmarkImg from "../assets/popups/popup-bookmark.png";
+
 const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -92,8 +99,9 @@ const BookDetail = () => {
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-fav-guest.png",
-        title: "Wah, Rak Favoritmu Masih Kosong!",
+        // Popup add fav guest
+        image: popupFavGuestImg,
+        title: "Wah, Rak Favoritmu Masih Rahasia!",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati tetap tersimpan aman untuk dibaca lagi nanti.",
         primaryBtnText: "Buat Akun",
@@ -107,7 +115,8 @@ const BookDetail = () => {
 
     if (isFavorite) {
       setPopupConfig({
-        image: "/images/popups/popup-delete-fav.png",
+        // Popup delete fav
+        image: popupDeleteFavImg,
         title: "Hapus dari Favorit",
         description:
           "Setelah dihapus, cerita ini tidak akan ada di daftar favoritmu",
@@ -123,7 +132,8 @@ const BookDetail = () => {
     } else {
       await executeToggleFavAPI();
       setPopupConfig({
-        image: "/images/popups/popup-fav.png",
+        // Pop up add fav
+        image: popupFavImg,
         title: "Difavoritkan",
         description: "Lihat dan baca cerita yang sudah kamu favoritkan yuk!",
         primaryBtnText: "Lihat",
@@ -138,7 +148,8 @@ const BookDetail = () => {
   const handleToggleSave = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-saved-guest.png",
+        // Popup simpan guest
+        image: popupSavedGuestImg,
         title: "Rak Bukumu Masih Menunggu!",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu.",
@@ -156,7 +167,8 @@ const BookDetail = () => {
     } else {
       await executeToggleSaveAPI();
       setPopupConfig({
-        image: "/images/popups/popup-bookmark.png",
+        // Popup simpan
+        image: popupBookmarkImg,
         title: "Berhasil Menyimpan",
         description:
           "Kamu bisa melihat cerita yang sudah kamu simpan di halaman Corner",

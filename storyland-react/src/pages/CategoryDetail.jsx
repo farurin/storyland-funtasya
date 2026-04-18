@@ -5,6 +5,7 @@ import CtaDownload from "../components/CtaDownload";
 import Card from "../components/Card";
 import CategorySlider from "../components/CategorySlider";
 import { getCategories, getBooks } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const IconGrid = () => (
   <svg
@@ -191,7 +192,8 @@ const CategoryDetail = () => {
                     <div className="w-24 md:w-32 shrink-0">
                       <div className="w-full aspect-2/3 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                         <img
-                          src={`/images/books/${book.image}`}
+                          // helper bungkus cover buku untuk mode List
+                          src={getImageUrl(book.image)}
                           alt={book.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {

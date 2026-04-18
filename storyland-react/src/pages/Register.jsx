@@ -11,6 +11,7 @@ import { validateRegister } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
 import { registerUser } from "../services/api";
 import ActionPopupModal from "../components/ActionPopupModal";
+import popupFavImg from "../assets/popups/popup-fav.png";
 
 const Register = () => {
   const { login } = useAuth();
@@ -171,7 +172,7 @@ const Register = () => {
       {/* Popup Modal */}
       <ActionPopupModal
         isOpen={isModalOpen}
-        image="/images/popups/popup-fav.png"
+        image={popupFavImg}
         title="Fitur Segera Hadir!"
         description="Maaf, fitur pendaftaran menggunakan Google dan Facebook saat ini masih dalam tahap pengembangan."
         primaryBtnText="Oke, Mengerti"

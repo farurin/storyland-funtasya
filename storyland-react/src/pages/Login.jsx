@@ -11,6 +11,7 @@ import { validateLogin } from "../utils/validation";
 import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../services/api";
 import ActionPopupModal from "../components/ActionPopupModal";
+import popupFavImg from "../assets/popups/popup-fav.png";
 
 const Login = () => {
   const { login } = useAuth();
@@ -158,7 +159,7 @@ const Login = () => {
       {/* Popup Modal */}
       <ActionPopupModal
         isOpen={isModalOpen}
-        image="/images/popups/popup-fav.png"
+        image={popupFavImg}
         title="Fitur Segera Hadir!"
         description="Maaf, fitur masuk menggunakan Google dan Facebook saat ini masih dalam tahap pengembangan."
         primaryBtnText="Oke, Mengerti"

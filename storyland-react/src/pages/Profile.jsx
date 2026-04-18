@@ -7,6 +7,7 @@ import ProfileAchievement from "../components/ProfileAchievement";
 import ProfileLeaderboard from "../components/ProfileLeaderboard";
 import ProfileMission from "../components/ProfileMission";
 import ActionPopupModal from "../components/ActionPopupModal";
+import popupDeleteFavImg from "../assets/popups/popup-delete-fav.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ const Profile = () => {
       {/* POPUP KONFIRMASI LOGOUT */}
       <ActionPopupModal
         isOpen={isLogoutModalOpen}
-        image="/images/popups/popup-delete-fav.png"
+        image={popupDeleteFavImg}
         title="Apakah kamu yakin ingin keluar?"
         description="Kamu bisa masuk lagi kapan saja"
         primaryBtnText="Keluar"

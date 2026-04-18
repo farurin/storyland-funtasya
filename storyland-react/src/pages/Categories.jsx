@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import CtaDownload from "../components/CtaDownload";
 import { getCategories, getBooks } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const IconArrowCircle = () => (
   <svg
@@ -106,7 +107,8 @@ const Categories = () => {
               >
                 <div className="w-full aspect-2/1 bg-gray-50 overflow-hidden relative">
                   <img
-                    src={`/images/category/${cat.image_card}`}
+                    // helper bungkus cat.image_card
+                    src={getImageUrl(cat.image_card)}
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
