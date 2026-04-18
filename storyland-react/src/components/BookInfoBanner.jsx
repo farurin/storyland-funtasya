@@ -1,4 +1,5 @@
 import React from "react";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // icon svg
 const IconPages = () => (
@@ -107,7 +108,8 @@ const BookInfoBanner = ({ book, totalPages = 11 }) => {
       <div className="w-30 md:w-40.75 shrink-0 self-center md:self-start">
         <div className="w-full h-45 md:h-58 rounded-2xl overflow-hidden shadow-lg border-[3px] border-white/80 bg-gray-200">
           <img
-            src={`/images/books/${book.image}`}
+            // helper untuk membungkus data book.image
+            src={getImageUrl(book.image)}
             alt={book.title}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -120,12 +122,9 @@ const BookInfoBanner = ({ book, totalPages = 11 }) => {
 
       {/* KANAN: Detail Informasi */}
       <div className="flex-1 py-1 md:py-2 flex flex-col justify-center">
-        {/* 2. PERBAIKAN TEKS: text-[30px] dari Figma */}
         <h4 className="text-[#6B4EFF] font-bold text-2xl md:text-[30px] mb-2 md:mb-3 leading-none">
           Sedang Membaca..
         </h4>
-
-        {/* 3. PERBAIKAN JUDUL: text-[40px] dari Figma */}
         <h1 className="text-3xl md:text-[40px] font-extrabold text-black tracking-tight mb-4 leading-tight">
           {book.title}
         </h1>

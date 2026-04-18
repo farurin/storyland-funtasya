@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getBookPages, finishBook, updateProgress } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // icon svg
 const IconBackCurved = () => (
@@ -195,7 +196,8 @@ const StoryReader = ({ book }) => {
       className="relative w-full aspect-video mx-auto bg-black overflow-hidden shadow-2xl group transition-all duration-500 rounded-2xl md:rounded-[40px]"
     >
       <img
-        src={pages[currentPage].image}
+        // helper untuk membungkus gambar setiap halaman scene cerita
+        src={getImageUrl(pages[currentPage].image)}
         alt={`Halaman ${currentPage + 1}`}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         onError={(e) => {

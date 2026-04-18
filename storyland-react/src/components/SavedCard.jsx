@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // Icon svg
 const IconClock = () => (
@@ -78,7 +79,8 @@ const SavedCard = ({ book }) => {
     <div className="w-full bg-[#EBE9FF] rounded-3xl p-5 flex gap-5 transition-transform hover:scale-[1.02] shadow-sm hover:shadow-md border border-white/50">
       <div className="w-28 md:w-32 shrink-0 aspect-2/3 rounded-2xl overflow-hidden shadow-sm bg-gray-200">
         <img
-          src={`/images/books/${book.image}`}
+          // helper bungkus cover buku
+          src={getImageUrl(book.image)}
           alt={book.title}
           className="w-full h-full object-cover"
           onError={(e) => {

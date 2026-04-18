@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile, getAvatars, updateUserProfile } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // icon svg
 const IconEdit = () => (
@@ -182,7 +183,8 @@ const ProfileInfoCard = () => {
         <div className="relative">
           <div className="w-20 h-20 md:w-24 md:h-24 bg-[#EAE8F0] rounded-full border-4 border-white overflow-hidden shadow-sm">
             <img
-              src={profileData.avatar_url || "/images/avatars/cat-avatar.png"}
+              // helper getImageUrl
+              src={getImageUrl(profileData.avatar_url)}
               alt="Avatar"
               className="w-full h-full object-cover"
               onError={(e) =>
@@ -352,7 +354,8 @@ const ProfileInfoCard = () => {
                       }`}
                     >
                       <img
-                        src={avatar.image_url}
+                        // helper untuk daftar pilihan avatar
+                        src={getImageUrl(avatar.image_url)}
                         alt={avatar.name}
                         className="w-full h-full object-cover bg-[#EAE8F0]"
                         onError={(e) =>

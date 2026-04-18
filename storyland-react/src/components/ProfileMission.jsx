@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getMissions, claimMission } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // icon svg
 const IconGift = ({ size = 40 }) => (
@@ -187,7 +188,8 @@ const ProfileMission = () => {
                   <div className="flex items-center gap-3 md:gap-6">
                     <div className="w-12 h-12 md:w-20 md:h-20 shrink-0 drop-shadow-sm hover:scale-105 transition-transform">
                       <img
-                        src={mission.badgeImg}
+                        // helper untuk badgeImg
+                        src={getImageUrl(mission.badgeImg)}
                         alt="Badge"
                         className="w-full h-full object-contain"
                         onError={(e) =>

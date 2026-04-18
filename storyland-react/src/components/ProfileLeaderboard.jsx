@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getLeaderboard } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // svg piala
 const IconBigTrophy = () => (
@@ -142,7 +143,8 @@ const ProfileLeaderboard = () => {
                 <div className="relative">
                   <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-full border-[3px] border-[#6B4EFF] overflow-hidden shadow-md">
                     <img
-                      src={top3[2].avatar || "/images/avatars/cat-avatar.png"}
+                      // helper untuk avatar Top 3
+                      src={getImageUrl(top3[2].avatar)}
                       alt="Rank 3"
                       className="w-full h-full object-cover"
                     />
@@ -161,7 +163,8 @@ const ProfileLeaderboard = () => {
                 <div className="relative">
                   <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full border-4 border-[#6B4EFF] overflow-hidden shadow-lg">
                     <img
-                      src={top3[0].avatar || "/images/avatars/cat-avatar.png"}
+                      // helper untuk avatar Top 1
+                      src={getImageUrl(top3[0].avatar)}
                       alt="Rank 1"
                       className="w-full h-full object-cover"
                     />
@@ -180,7 +183,8 @@ const ProfileLeaderboard = () => {
                 <div className="relative">
                   <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-full border-[3px] border-[#6B4EFF] overflow-hidden shadow-md">
                     <img
-                      src={top3[1].avatar || "/images/avatars/cat-avatar.png"}
+                      // helper untuk avatar Top 2
+                      src={getImageUrl(top3[1].avatar)}
                       alt="Rank 2"
                       className="w-full h-full object-cover"
                     />
@@ -220,7 +224,8 @@ const ProfileLeaderboard = () => {
                   <div className="flex items-center gap-2 md:gap-3 text-left">
                     <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-white shadow-sm">
                       <img
-                        src={user.avatar || "/images/avatars/cat-avatar.png"}
+                        // helper untuk avatar peserta lain
+                        src={getImageUrl(user.avatar)}
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />

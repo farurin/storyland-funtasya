@@ -10,6 +10,9 @@ import bannerImg from "../assets/banner.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import ActionPopupModal from "./ActionPopupModal";
 
+// 1. IMPORT HELPER
+import { getImageUrl } from "../utils/getImageUrl";
+
 // Icon SVG
 const IconArrowLeft = () => (
   <svg
@@ -84,7 +87,8 @@ const BannerIklan = ({ latestBook }) => {
       {latestBook && (
         <ActionPopupModal
           isOpen={isModalOpen}
-          image={`/images/books/${latestBook.image}`}
+          // helper untuk membungkus latestBook.image
+          image={getImageUrl(latestBook.image)}
           title="BUKU BARU!"
           description={`Ada buku baru untukmu: "${latestBook.title}". Buku ini sudah siap kamu baca. Selamat menikmati!`}
           primaryBtnText="Lihat"
@@ -105,7 +109,6 @@ export const CategorySection = ({ category, customTitle }) => {
   const booksToShow = category.books ? category.books.slice(0, 6) : [];
 
   return (
-    // PERBAIKAN: Menghapus mt-10 mb-6, karena padding atas-bawah sekarang diatur oleh parent (warna zebra)
     <div className="w-full">
       {/* Header Section */}
       <div className="flex items-end justify-between mb-4">
@@ -141,7 +144,8 @@ export const CategorySection = ({ category, customTitle }) => {
             className="hidden lg:block w-33.25 h-63.75 shrink-0 relative group overflow-hidden rounded-2xl shadow-sm bg-gray-100"
           >
             <img
-              src={`/images/category/${category.image_banner}`}
+              // helper untuk category.image_banner
+              src={getImageUrl(category.image_banner)}
               alt={category.name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               onError={(e) => {

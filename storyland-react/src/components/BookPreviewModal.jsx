@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "./ActionPopupModal";
+import { getImageUrl } from "../utils/getImageUrl";
 import {
   getBooks,
   getBookPages,
@@ -9,6 +10,11 @@ import {
   toggleFavorite,
   toggleSave,
 } from "../services/api";
+
+// gambar popup statis
+import popupFavImg from "../assets/popups/popup-fav.png";
+import popupDeleteFavImg from "../assets/popups/popup-delete-fav.png";
+import popupBookmarkImg from "../assets/popups/popup-bookmark.png";
 
 // icon SVG
 const IconBookmark = ({ filled }) => (
@@ -141,7 +147,6 @@ const BookPreviewModal = () => {
 
   if (!previewId || !book) return null;
 
-  // Memindahkan pembersihan popup ke dalam closeModal
   const closeModal = () => {
     setPopupConfig(null);
     searchParams.delete("preview");
@@ -152,7 +157,6 @@ const BookPreviewModal = () => {
     navigate(`/book/${book.id}`);
   };
 
-  // API trigger
   const executeToggleFavAPI = async () => {
     try {
       const data = await toggleFavorite(book.id, token);
@@ -173,11 +177,10 @@ const BookPreviewModal = () => {
     }
   };
 
-  // handler popup
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-fav.png",
+        image: popupFavImg,
         title: "Suka Cerita Ini?",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu beri tanda hati ini tersimpan rapi",
@@ -195,7 +198,7 @@ const BookPreviewModal = () => {
 
     if (isFavorite) {
       setPopupConfig({
-        image: "/images/popups/popup-delete-fav.png",
+        image: popupDeleteFavImg,
         title: "Hapus dari Favorit",
         description:
           "Setelah dihapus, cerita ini tidak akan ada di daftar favoritmu",
@@ -211,7 +214,7 @@ const BookPreviewModal = () => {
     } else {
       await executeToggleFavAPI();
       setPopupConfig({
-        image: "/images/popups/popup-fav.png",
+        image: popupFavImg,
         title: "Difavoritkan",
         description: "Lihat dan baca cerita yang sudah kamu favoritkan yuk!",
         primaryBtnText: "Lihat",
@@ -231,7 +234,7 @@ const BookPreviewModal = () => {
   const handleToggleSave = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        image: "/images/popups/popup-bookmark.png",
+        image: popupBookmarkImg,
         title: "Rak Bukumu Masih Menunggu!",
         description:
           "Yuk, buat akunmu sekarang supaya semua cerita yang kamu simpan punya tempat yang rapi di rak pribadimu.",
@@ -252,7 +255,7 @@ const BookPreviewModal = () => {
     } else {
       await executeToggleSaveAPI();
       setPopupConfig({
-        image: "/images/popups/popup-bookmark.png",
+        image: popupBookmarkImg,
         title: "Berhasil Menyimpan",
         description:
           "Kamu bisa melihat cerita yang sudah kamu simpan di halaman Corner",
@@ -270,9 +273,7 @@ const BookPreviewModal = () => {
     }
   };
 
-  const bgImageToUse = firstPageImage
-    ? firstPageImage
-    : `/images/books/${book.image}`;
+  const bgImageToUse = firstPageImage ? firstPageImage : book.image;
 
   return (
     <>
@@ -285,7 +286,7 @@ const BookPreviewModal = () => {
           onClick={(e) => e.stopPropagation()}
         >
           <img
-            src={bgImageToUse}
+            src={getImageUrl(bgImageToUse)}
             alt={book.title}
             className="absolute inset-0 w-full h-full object-cover"
             onError={(e) => {

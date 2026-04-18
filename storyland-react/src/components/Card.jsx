@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const Card = ({ book }) => {
   const location = useLocation();
@@ -11,7 +12,8 @@ const Card = ({ book }) => {
       className="block w-full h-full rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer bg-white group"
     >
       <img
-        src={`/images/books/${book.image}`}
+        // bungkus book.image dengan helper
+        src={getImageUrl(book.image)}
         alt={book.title || "Cover Buku"}
         className="w-full h-65 md:h-63.75 object-cover transition-transform duration-500 group-hover:scale-105"
         onError={(e) => {

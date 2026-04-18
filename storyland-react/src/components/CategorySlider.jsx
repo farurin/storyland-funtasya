@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
 import "swiper/css";
+import { getImageUrl } from "../utils/getImageUrl";
 
 // icon svg
 const IconArrowLeft = () => (
@@ -49,6 +50,7 @@ const CategorySlider = ({ categories, activeCategoryId }) => {
         </h2>
       )}
       <div className="relative flex items-center w-full">
+        {/* Tombol Panah Kiri */}
         <button className="cat-prev absolute -left-6 md:-left-10 top-1/2 -translate-y-1/2 z-20 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
           <IconArrowLeft />
         </button>
@@ -87,7 +89,8 @@ const CategorySlider = ({ categories, activeCategoryId }) => {
                       }`}
                     >
                       <img
-                        src={`/images/category/${category.image_icon}`}
+                        // gunakan helper
+                        src={getImageUrl(category.image_icon)}
                         alt={category.name}
                         draggable="false"
                         className="w-full h-auto object-cover rounded-2xl select-none"
@@ -104,7 +107,7 @@ const CategorySlider = ({ categories, activeCategoryId }) => {
           </Swiper>
         </div>
 
-        {/* Tombol Panah Kanan Custom */}
+        {/* Tombol Panah Kanan */}
         <button className="cat-next absolute -right-6 md:-right-10 top-1/2 -translate-y-1/2 z-20 hover:scale-110 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
           <IconArrowRight />
         </button>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { getImageUrl } from "../utils/getImageUrl";
 
-// --- IKON GEMBOK ---
+// icon svg
 const IconLock = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +61,8 @@ const ProfileCharacterSelect = ({
             >
               <div className="w-14 h-14 md:w-16 md:h-16 shrink-0 mt-1">
                 <img
-                  src={char.image}
+                  // bungkus char.image_url dengan helper Cloudinary
+                  src={getImageUrl(char.image_url)}
                   alt={char.name}
                   className={`w-full h-full object-contain ${!char.isUnlocked ? "grayscale opacity-50" : ""}`}
                 />

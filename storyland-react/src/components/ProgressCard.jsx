@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActionPopupModal from "./ActionPopupModal";
 import { toggleFavorite } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
+import popupDeleteFavImg from "../assets/popups/popup-delete-fav.png";
 
 // Ikon svg
 const IconHeartSolid = () => (
@@ -36,7 +38,8 @@ const ProgressCard = ({ progress, type }) => {
     e.stopPropagation();
 
     setPopupConfig({
-      image: "/images/popups/popup-delete-fav.png",
+      // popup delete fav
+      image: popupDeleteFavImg,
       title: "Hapus dari Favorit",
       description:
         "Setelah dihapus, cerita ini tidak akan ada di daftar favoritmu",
@@ -77,11 +80,8 @@ const ProgressCard = ({ progress, type }) => {
           className={`w-full bg-gray-100 overflow-hidden ${type === "favorit" ? "h-56 md:h-63.75" : "aspect-2/3"}`}
         >
           <img
-            src={
-              book?.image
-                ? `/images/books/${book.image}`
-                : "/images/default.png"
-            }
+            // helper untuk gambar buku.
+            src={getImageUrl(book?.image)}
             alt={book?.title || "Buku"}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             onError={(e) => {

@@ -3,12 +3,13 @@ import ProfileCharacterSelect from "./ProfileCharacterSelect";
 import ProfileInfoCard from "./ProfileInfoCard";
 import { useAuth } from "../context/AuthContext";
 import { getCharacters, updateActiveCharacter } from "../services/api";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const fallbackCharacters = [
   {
     id: 1,
     name: "Student",
-    image: "/images/character/character-student.png",
+    image: "character-student.png",
     isUnlocked: true,
     isActive: true,
   },
@@ -21,8 +22,6 @@ const ProfileStatus = () => {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [tempCharacter, setTempCharacter] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Variabel untuk mengontrol status tombol (TRUE = tombol mati/tidak bisa diklik)
   const isFeatureDisabled = true;
 
   useEffect(() => {
@@ -53,7 +52,7 @@ const ProfileStatus = () => {
   }, [token]);
 
   const handleButtonClick = async () => {
-    // Tambahan perlindungan jika tombol dipaksa klik
+    // Jika tombol dipaksa klik
     if (isFeatureDisabled) return;
 
     if (isEditingCharacter) {
@@ -84,17 +83,19 @@ const ProfileStatus = () => {
     );
   }
 
+  // Ambil URL gambar tergantung status edit
+  const displayImage = isEditingCharacter
+    ? tempCharacter.image_url || tempCharacter.image
+    : selectedCharacter.image_url || selectedCharacter.image;
+
   return (
-    // PERBAIKAN RESPONSIVITAS:
-    // Di HP bertumpuk (flex-col), di Tablet/Desktop bersebelahan (lg:flex-row)
     <div className="flex flex-col lg:flex-row gap-8 lg:gap-20 items-center lg:items-stretch justify-center h-full w-full">
       {/* Kolom Kiri: Karakter & Tombol Ubah */}
       <div className="flex flex-col items-center shrink-0 justify-center w-full lg:w-auto">
         <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80 relative mb-4 md:mb-6">
           <img
-            src={
-              isEditingCharacter ? tempCharacter.image : selectedCharacter.image
-            }
+            // helper untuk membungkus gambar kucing
+            src={getImageUrl(displayImage)}
             alt="Maskot Profil"
             className={`w-full h-full object-contain drop-shadow-md transition-all duration-300 ${
               isEditingCharacter && !tempCharacter.isUnlocked
@@ -110,7 +111,7 @@ const ProfileStatus = () => {
         {/* PERBAIKAN TOMBOL: Menonaktifkan tombol sementara */}
         <button
           onClick={handleButtonClick}
-          disabled={isFeatureDisabled} // Menerapkan status disabled
+          disabled={isFeatureDisabled} // status disabled
           className={`font-bold py-2.5 px-12 rounded-full min-w-40 md:min-w-45 text-sm md:text-base transition-all shadow-md
             ${
               isFeatureDisabled

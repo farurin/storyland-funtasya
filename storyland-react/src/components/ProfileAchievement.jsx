@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../services/api";
 
+// Import file statis lokal dari assets
+import badgeGoodJob from "../assets/badges/badge-goodjob.png";
+import badgeExcellent from "../assets/badges/badge-exellent.png";
+import badgeOutstanding from "../assets/badges/badge-outstanding.png";
+import badgeBrilliant from "../assets/badges/badge-brilliant.png";
+import badgeWellDone from "../assets/badges/badge-welldone.png";
+import badgeSuperb from "../assets/badges/badge-superb.png";
+
 const ProfileAchievement = () => {
   const { token } = useAuth();
   const [stats, setStats] = useState(null);
@@ -24,42 +32,42 @@ const ProfileAchievement = () => {
     fetchStats();
   }, [token]);
 
-  // Menggunakan file statis lokal
+  // Menggunakan file hasil import
   const badges = [
     {
       id: 1,
       name: "Good Job",
-      image: "/images/badges/badge-goodjob.png",
+      image: badgeGoodJob,
       isUnlocked: true,
     },
     {
       id: 2,
       name: "Excellent",
-      image: "/images/badges/badge-exellent.png",
+      image: badgeExcellent,
       isUnlocked: true,
     },
     {
       id: 3,
       name: "Outstanding",
-      image: "/images/badges/badge-outstanding.png",
+      image: badgeOutstanding,
       isUnlocked: true,
     },
     {
       id: 4,
       name: "Brilliant",
-      image: "/images/badges/badge-brilliant.png",
+      image: badgeBrilliant,
       isUnlocked: false,
     },
     {
       id: 5,
       name: "Well Done",
-      image: "/images/badges/badge-welldone.png",
+      image: badgeWellDone,
       isUnlocked: false,
     },
     {
       id: 6,
       name: "Superb",
-      image: "/images/badges/badge-superb.png",
+      image: badgeSuperb,
       isUnlocked: false,
     },
   ];

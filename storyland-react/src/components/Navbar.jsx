@@ -8,7 +8,7 @@ import {
 } from "flowbite-react";
 import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import LogoFuntasya from "/images/logo-funtasya.png";
+import LogoFuntasya from "../assets/logo-funtasya.png";
 
 // icon svg
 const IconProfile = () => (

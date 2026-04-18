@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "flowbite-react";
-
-import heroImg from "/images/hero.png";
+import heroImg from "../assets/hero.png";
 
 const Hero = () => {
   // Fungsi scroll ke carousel

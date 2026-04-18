@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import LogoFuntasya from "/images/logo-funtasya.png";
+import LogoFuntasya from "../assets/logo-funtasya.png";
 
 const IconInstagram = () => (
   <svg
