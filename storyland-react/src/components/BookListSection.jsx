@@ -167,7 +167,7 @@ export const CategorySection = ({ category, customTitle }) => {
               >
                 {booksToShow.map((book) => (
                   <SwiperSlide key={book.id} style={{ width: "179px" }}>
-                    <div className="w-44.75 h-63.75 transition-transform duration-300 hover:scale-105">
+                    <div className="w-44.75 h-63.75">
                       <Card book={book} />
                     </div>
                   </SwiperSlide>
