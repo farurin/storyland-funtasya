@@ -1,17 +1,28 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+// Layouts
 import MainLayout from "./layouts/MainLayout";
+import AdminLayout from "./layouts/AdminLayout";
+
+// User Pages
 import Home from "./pages/Home";
 import Corner from "./pages/Corner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Categories from "./pages/Categories";
 import CategoryDetail from "./pages/CategoryDetail";
-import ProtectedRoute from "./components/ProtectedRoute";
 import BookDetail from "./pages/BookDetail";
-import BookPreviewModal from "./components/BookPreviewModal";
 import Profile from "./pages/Profile";
-import About from "./pages/About"; // 1. Tambahkan import halaman About
+import About from "./pages/About";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminCategories from "./pages/admin/AdminCategories";
+
+// Components/Guards
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import BookPreviewModal from "./components/BookPreviewModal";
 
 export default function App() {
   return (
@@ -21,7 +32,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Main Layout Routes */}
+        {/* Rute Public */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
 
@@ -40,10 +51,27 @@ export default function App() {
           {/* About Us */}
           <Route path="/about" element={<About />} />
 
-          {/* Rute yang dijaga satpam */}
+          {/* Rute login User */}
           <Route element={<ProtectedRoute />}>
-            {/* Profile */}
             <Route path="/profile" element={<Profile />} />
+          </Route>
+        </Route>
+
+        {/* Rute Admin */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute allowedRoles={["editor", "admin", "super_admin"]} />
+          }
+        >
+          <Route element={<AdminLayout />}>
+            {/* Redirect /admin langsung mengarah ke /admin/dashboard */}
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="categories" element={<AdminCategories />} />
+
+            {/* Rute Admin Lainnya */}
           </Route>
         </Route>
       </Routes>

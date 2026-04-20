@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
   };
 
-  // fungsi dipanggil jika butuh halaman corner untuk me-refresh
   const triggerRefresh = () => {
     setRefreshKey((prev) => prev + 1);
   };

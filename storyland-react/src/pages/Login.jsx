@@ -24,6 +24,8 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // handle submit
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,8 +41,20 @@ const Login = () => {
 
       setIsError(false);
       setErrorMessage("");
+
+      // Simpan data ke context dan local storage
       login(data.token, data.user);
-      navigate("/");
+
+      // logic redirect berdasarkan role
+      const isAdmin = ["editor", "admin", "super_admin"].includes(
+        data.user.role,
+      );
+
+      if (isAdmin) {
+        navigate("/admin"); // Redirect ke dashboard admin
+      } else {
+        navigate("/"); // Redirect ke beranda user
+      }
     } catch {
       setIsError(true);
       setErrorMessage("*Email atau kata sandi yang Anda masukkan salah.");
