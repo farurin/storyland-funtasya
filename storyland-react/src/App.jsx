@@ -21,7 +21,7 @@ import AdminCategories from "./pages/admin/AdminCategories";
 
 // Components/Guards
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminRoute from "./components/AdminRoute";
+import AdminRoute from "./components/admin/AdminRoute";
 import BookPreviewModal from "./components/BookPreviewModal";
 
 export default function App() {
