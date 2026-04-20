@@ -28,10 +28,16 @@ const register = async (req, res) => {
       [username, email, hashedPassword],
     );
 
-    // 4. Buat Token
-    const token = jwt.sign({ id: result.insertId, email }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    // 4. Buat Token (Set role default 'user' untuk pendaftar baru)
+    const token = jwt.sign(
+      {
+        id: result.insertId,
+        email,
+        role: "user",
+      },
+      JWT_SECRET,
+      { expiresIn: "1d" },
+    );
 
     // 5. Catat Aktivitas
     recordUserActivity(result.insertId);
@@ -40,7 +46,12 @@ const register = async (req, res) => {
     res.status(201).json({
       message: "Pendaftaran sukses!",
       token,
-      user: { id: result.insertId, username, email },
+      user: {
+        id: result.insertId,
+        username,
+        email,
+        role: "user",
+      },
     });
   } catch (error) {
     console.error("Error Register:", error);
@@ -69,18 +80,29 @@ const login = async (req, res) => {
     }
 
     // 3. Buat Token
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: "1d" },
+    );
 
     // 4. Catat Aktivitas
     recordUserActivity(user.id);
 
-    // 5. Kirim Response
+    // 5. Kirim Response (Tambahkan role agar frontend bisa redirect ke Admin/User)
     res.json({
       message: "Login sukses!",
       token,
-      user: { id: user.id, username: user.username, email: user.email },
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Error Login:", error);

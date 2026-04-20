@@ -18,4 +18,22 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, JWT_SECRET };
+// Middleware role-based
+const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return res
+        .status(403)
+        .json({ message: "Akses ditolak! Role tidak ditemukan." });
+    }
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "Akses ditolak! Anda tidak memiliki izin untuk tindakan ini.",
+      });
+    }
+
+    next();
+  };
+};
+
+module.exports = { verifyToken, authorizeRoles, JWT_SECRET };
