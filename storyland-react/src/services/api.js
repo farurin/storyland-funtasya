@@ -99,3 +99,31 @@ export const getLeaderboard = (token) =>
 export const getMissions = (token) => fetchAPI("/user/missions", {}, token);
 export const claimMission = (id, token) =>
   fetchAPI(`/user/missions/${id}/claim`, { method: "POST" }, token);
+
+// Admin Routes (Need Token + Admin Role)
+export const getAdminCategories = (token) =>
+  fetchAPI("/admin/categories", {}, token);
+
+export const createCategory = (data, token) =>
+  fetchAPI(
+    "/admin/categories",
+    { method: "POST", body: JSON.stringify(data) },
+    token,
+  );
+
+export const updateCategory = (id, data, token) =>
+  fetchAPI(
+    `/admin/categories/${id}`,
+    { method: "PUT", body: JSON.stringify(data) },
+    token,
+  );
+
+export const updateCategoryStatus = (id, status, token) =>
+  fetchAPI(
+    `/admin/categories/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+    token,
+  );
+
+export const deleteCategory = (id, token) =>
+  fetchAPI(`/admin/categories/${id}`, { method: "DELETE" }, token);
