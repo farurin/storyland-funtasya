@@ -8,6 +8,9 @@ import {
   HiCog,
 } from "react-icons/hi";
 
+// IMPORT LOGO DARI FOLDER SRC/ASSETS
+import logoFuntasya from "../../assets/logo-funtasya.png";
+
 const navItems = [
   { to: "/admin/dashboard", icon: HiChartPie, label: "Dashboard" },
   { to: "/admin/buku", icon: HiBookOpen, label: "Manajemen Buku" },
@@ -21,7 +24,8 @@ export default function SidebarAdmin() {
     <aside className="flex flex-col w-52 min-h-screen bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-gray-100">
-        <img src="/images/logo-funtasya.png" alt="Logo Funtasya" />
+        {/* PANGGIL VARIABLE LOGO DI SINI */}
+        <img src={logoFuntasya} alt="Logo Funtasya" />
       </div>
 
       {/* Tambah Cerita Baru */}

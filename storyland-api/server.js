@@ -20,6 +20,9 @@ app.use("/api", require("./routes/bookRoutes"));
 app.use("/api/corner", require("./routes/cornerRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
 
+// route admin
+app.use("/api/admin", require("./routes/adminRoutes"));
+
 // Jalankan Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
