@@ -18,6 +18,7 @@ import About from "./pages/About";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCategories from "./pages/admin/AdminCategories";
+import AdminBooks from "./pages/admin/AdminBooks";
 
 // Components/Guards
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -35,23 +36,12 @@ export default function App() {
         {/* Rute Public */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-
-          {/* Kategori */}
           <Route path="/categories" element={<Categories />} />
-
-          {/* Detail Kategori */}
           <Route path="/categories/:id" element={<CategoryDetail />} />
-
-          {/* Detail Baca Buku */}
           <Route path="/book/:id" element={<BookDetail />} />
-
-          {/* Corner */}
           <Route path="/corner" element={<Corner />} />
-
-          {/* About Us */}
           <Route path="/about" element={<About />} />
 
-          {/* Rute login User */}
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />
           </Route>
@@ -65,13 +55,13 @@ export default function App() {
           }
         >
           <Route element={<AdminLayout />}>
-            {/* Redirect /admin langsung mengarah ke /admin/dashboard */}
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
 
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="categories" element={<AdminCategories />} />
 
-            {/* Rute Admin Lainnya */}
+            {/* halaman manajemen buku */}
+            <Route path="books" element={<AdminBooks />} />
           </Route>
         </Route>
       </Routes>

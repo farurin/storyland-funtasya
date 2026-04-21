@@ -13,7 +13,7 @@ import logoFuntasya from "../../assets/logo-funtasya.png";
 
 const navItems = [
   { to: "/admin/dashboard", icon: HiChartPie, label: "Dashboard" },
-  { to: "/admin/buku", icon: HiBookOpen, label: "Manajemen Buku" },
+  { to: "/admin/books", icon: HiBookOpen, label: "Manajemen Buku" },
   { to: "/admin/perpustakaan", icon: HiLibrary, label: "Perpustakaan" },
   { to: "/admin/categories", icon: HiTag, label: "Kategori & Tag" },
   { to: "/admin/backup", icon: HiDatabase, label: "Backup & Ekspor data" },
