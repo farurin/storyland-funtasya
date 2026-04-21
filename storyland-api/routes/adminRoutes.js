@@ -14,6 +14,8 @@ const {
   deleteCategory,
 } = require("../controllers/adminCategoryController");
 
+const { getAdminBooks } = require("../controllers/adminBookController");
+
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
 // Konfigurasi field form gambar yang diterima
@@ -33,5 +35,6 @@ router.delete(
   authorizeRoles("admin", "super_admin"),
   deleteCategory,
 );
+router.get("/books", getAdminBooks);
 
 module.exports = router;
