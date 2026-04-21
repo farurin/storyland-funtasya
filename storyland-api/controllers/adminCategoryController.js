@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-// 1. GET ALL CATEGORIES (Khusus Admin, ambil semua termasuk yang inactive)
+// GET ALL CATEGORIES (Khusus Admin, ambil semua termasuk yang inactive)
 const getAdminCategories = async (req, res) => {
   try {
     const [results] = await db.query(
@@ -12,51 +12,83 @@ const getAdminCategories = async (req, res) => {
   }
 };
 
-// 2. CREATE CATEGORY
+// Create category
+
 const createCategory = async (req, res) => {
   const { name, description, status } = req.body;
-
-  if (!name || !description) {
+  if (!name || !description)
     return res.status(400).json({ message: "Nama dan Deskripsi wajib diisi!" });
-  }
 
   try {
-    // Catatan: Untuk image_icon, image_banner, image_card sementara kita isi default/null
-    // Nanti akan di-upgrade menggunakan Multer & Cloudinary saat integrasi upload file
-    const sql = `INSERT INTO categories (name, description, status, image_icon, image_banner, image_card) 
-                 VALUES (?, ?, ?, 'default-icon.png', 'default-banner.png', 'default-card.png')`;
+    const image_icon =
+      req.files && req.files["image_icon"]
+        ? req.files["image_icon"][0].path
+        : "default-icon.png";
+    const image_banner =
+      req.files && req.files["image_banner"]
+        ? req.files["image_banner"][0].path
+        : "default-banner.png";
+    const image_card =
+      req.files && req.files["image_card"]
+        ? req.files["image_card"][0].path
+        : "default-card.png";
 
+    const sql = `INSERT INTO categories (name, description, status, image_icon, image_banner, image_card) VALUES (?, ?, ?, ?, ?, ?)`;
     const [result] = await db.query(sql, [
       name,
       description,
       status || "active",
+      image_icon,
+      image_banner,
+      image_card,
     ]);
 
-    res.status(201).json({
-      message: "Kategori berhasil ditambahkan!",
-      insertId: result.insertId,
-    });
+    res
+      .status(201)
+      .json({
+        message: "Kategori berhasil ditambahkan!",
+        insertId: result.insertId,
+      });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// 3. UPDATE CATEGORY (Nama & Deskripsi)
 const updateCategory = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
   try {
-    const sql = "UPDATE categories SET name = ?, description = ? WHERE id = ?";
-    await db.query(sql, [name, description, id]);
+    let sql = "UPDATE categories SET name = ?, description = ?";
+    let params = [name, description];
 
+    // Cek apakah ada file baru yang diupload, jika ada, update URL-nya
+    if (req.files) {
+      if (req.files["image_icon"]) {
+        sql += ", image_icon = ?";
+        params.push(req.files["image_icon"][0].path);
+      }
+      if (req.files["image_banner"]) {
+        sql += ", image_banner = ?";
+        params.push(req.files["image_banner"][0].path);
+      }
+      if (req.files["image_card"]) {
+        sql += ", image_card = ?";
+        params.push(req.files["image_card"][0].path);
+      }
+    }
+
+    sql += " WHERE id = ?";
+    params.push(id);
+
+    await db.query(sql, params);
     res.json({ message: "Kategori berhasil diperbarui!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// 4. UPDATE STATUS (Aktif / Nonaktif)
+// UPDATE STATUS (Aktif / Nonaktif)
 const updateCategoryStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body; // 'active' atau 'inactive'
@@ -71,7 +103,7 @@ const updateCategoryStatus = async (req, res) => {
   }
 };
 
-// 5. DELETE CATEGORY
+// DELETE CATEGORY
 const deleteCategory = async (req, res) => {
   const { id } = req.params;
 

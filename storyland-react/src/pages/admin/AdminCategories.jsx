@@ -19,21 +19,23 @@ const AdminCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal States
   const [isOpen, setIsOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [targetCategory, setTargetCategory] = useState(null);
 
-  const [targetCategory, setTargetCategory] = useState(null); // Menyimpan ID/Data kategori yang sedang diedit/dihapus
-
-  // Form States
+  // Form States (Text)
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
   const [isEdit, setIsEdit] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Fungsi ambil data (Bisa dipanggil ulang setelah CRUD)
+  // Form States (Files)
+  const [imageIcon, setImageIcon] = useState(null);
+  const [imageBanner, setImageBanner] = useState(null);
+  const [imageCard, setImageCard] = useState(null);
+
   const fetchCategories = async () => {
     try {
       const res = await getAdminCategories(token);
@@ -48,7 +50,6 @@ const AdminCategories = () => {
     if (token) fetchCategories();
   }, [token]);
 
-  // handler buka modal
   const handleOpenCreate = () => {
     setIsEdit(false);
     setIsOpen(true);
@@ -56,15 +57,23 @@ const AdminCategories = () => {
     setName("");
     setDescription("");
     setStatus("active");
+    // Reset File
+    setImageIcon(null);
+    setImageBanner(null);
+    setImageCard(null);
   };
 
   const handleOpenEdit = (cat) => {
     setIsEdit(true);
     setIsOpen(true);
-    setTargetCategory(cat); // Simpan data kategori yang mau diedit
+    setTargetCategory(cat);
     setName(cat.name);
     setDescription(cat.description);
     setStatus(cat.status || "active");
+    // Reset File agar user upload ulang jika mau ganti, jika tidak biarkan kosong
+    setImageIcon(null);
+    setImageBanner(null);
+    setImageCard(null);
   };
 
   const handleOpenStatusModal = (cat) => {
@@ -83,22 +92,34 @@ const AdminCategories = () => {
     setName("");
     setDescription("");
     setTargetCategory(null);
+    setImageIcon(null);
+    setImageBanner(null);
+    setImageCard(null);
   };
 
-  // handler eksekusi crud
-
-  // 1. CREATE & UPDATE
+  // SUBMIT DENGAN FORMDATA
   const handleSubmitForm = async () => {
     if (!name || !description) return alert("Nama dan Deskripsi harus diisi!");
 
     setIsProcessing(true);
     try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      if (!isEdit) formData.append("status", "active");
+
+      // Memasukkan file ke FormData (Jika user memilih file baru)
+      if (imageIcon) formData.append("image_icon", imageIcon);
+      if (imageBanner) formData.append("image_banner", imageBanner);
+      if (imageCard) formData.append("image_card", imageCard);
+
       if (isEdit) {
-        await updateCategory(targetCategory.id, { name, description }, token);
+        await updateCategory(targetCategory.id, formData, token);
       } else {
-        await createCategory({ name, description, status: "active" }, token);
+        await createCategory(formData, token);
       }
-      await fetchCategories(); // Refresh data
+
+      await fetchCategories();
       handleCloseModal();
     } catch (err) {
       alert(err.message);
@@ -107,14 +128,13 @@ const AdminCategories = () => {
     }
   };
 
-  // 2. UBAH STATUS
   const handleConfirmStatus = async () => {
     setIsProcessing(true);
     try {
       const newStatus =
         targetCategory.status === "active" ? "inactive" : "active";
       await updateCategoryStatus(targetCategory.id, newStatus, token);
-      await fetchCategories(); // Refresh data
+      await fetchCategories();
       setIsStatusOpen(false);
     } catch (err) {
       alert(err.message);
@@ -123,28 +143,23 @@ const AdminCategories = () => {
     }
   };
 
-  // 3. DELETE
   const handleConfirmDelete = async () => {
     setIsProcessing(true);
     try {
       await deleteCategory(targetCategory.id, token);
-      await fetchCategories(); // Refresh data
+      await fetchCategories();
 
-      // Jika kategori yang dihapus sedang dipilih untuk dilihat detailnya, bersihkan layar kanan
       if (selectedCategory?.id === targetCategory.id) {
         setSelectedCategory(null);
       }
-
       setIsDeleteOpen(false);
     } catch (err) {
-      // Backend akan mengirim error jika kategori ini masih dipakai oleh buku
       alert(err.message);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // --- LOGIKA PENCARIAN (CLIENT-SIDE FILTER) ---
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -240,6 +255,43 @@ const AdminCategories = () => {
                 className="w-1/2 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
                 placeholder="Deskripsi Singkat"
               />
+            </div>
+
+            {/* INPUT FILES */}
+            <div className="flex flex-col gap-3 mb-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">
+                  Image Icon (Bulat/Kecil)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageIcon(e.target.files[0])}
+                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">
+                  Image Banner (Landscape/Slider)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageBanner(e.target.files[0])}
+                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">
+                  Image Card (Daftar Kategori)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageCard(e.target.files[0])}
+                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">

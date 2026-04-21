@@ -2,10 +2,13 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 // helper global
 const fetchAPI = async (endpoint, options = {}, token = null) => {
-  const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
+  const headers = { ...options.headers };
+
+  // OTOMATIS: Jika body adalah string JSON, set header jadi application/json.
+  // Jika body adalah FormData (file), JANGAN set Content-Type. Biarkan browser yang mengurusnya (multipart/form-data + boundary).
+  if (options.body && typeof options.body === "string") {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -16,19 +19,12 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
 
   // Sesi habis
   if (response.status === 401) {
-    // 1. Hapus token dan data user dari memori
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    // 2. Beri tahu pengguna
     alert(
       "Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!",
     );
-
-    // 3. Paksa reload dan kembali ke halaman utama
     window.location.href = "/";
-
-    // 4. Hentikan eksekusi kode selanjutnya
     throw new Error("Sesi kedaluwarsa");
   }
 
@@ -41,7 +37,7 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
   return data;
 };
 
-// authentication
+// AUTHENTICATION
 export const loginUser = (credentials) =>
   fetchAPI("/auth/login", {
     method: "POST",
@@ -53,12 +49,12 @@ export const registerUser = (credentials) =>
     body: JSON.stringify(credentials),
   });
 
-// public data (Buku & Kategori)
+// PUBLIC DATA (Buku & Kategori)
 export const getBooks = () => fetchAPI("/books");
 export const getCategories = () => fetchAPI("/categories");
 export const getBookPages = (id) => fetchAPI(`/books/${id}/pages`);
 
-// user action (need tokens)
+// USER ACTIONS (Need Tokens)
 export const finishBook = (id, token) =>
   fetchAPI(`/books/${id}/finish`, { method: "POST" }, token);
 export const updateProgress = (id, progress, token) =>
@@ -74,11 +70,11 @@ export const toggleFavorite = (id, token) =>
 export const toggleSave = (id, token) =>
   fetchAPI(`/books/${id}/save`, { method: "POST" }, token);
 
-// corner
+// CORNER
 export const getCornerData = (endpoint, token) =>
   fetchAPI(`/corner/${endpoint}`, {}, token);
 
-// user profile & gamification
+// USER PROFILE & GAMIFICATION
 export const getUserProfile = (token) => fetchAPI("/user/profile", {}, token);
 export const updateUserProfile = (data, token) =>
   fetchAPI(
@@ -100,23 +96,15 @@ export const getMissions = (token) => fetchAPI("/user/missions", {}, token);
 export const claimMission = (id, token) =>
   fetchAPI(`/user/missions/${id}/claim`, { method: "POST" }, token);
 
-// Admin Routes (Need Token + Admin Role)
+// ADMIN ROUTES (Need Token + Admin Role)
 export const getAdminCategories = (token) =>
   fetchAPI("/admin/categories", {}, token);
 
-export const createCategory = (data, token) =>
-  fetchAPI(
-    "/admin/categories",
-    { method: "POST", body: JSON.stringify(data) },
-    token,
-  );
+export const createCategory = (formData, token) =>
+  fetchAPI("/admin/categories", { method: "POST", body: formData }, token);
 
-export const updateCategory = (id, data, token) =>
-  fetchAPI(
-    `/admin/categories/${id}`,
-    { method: "PUT", body: JSON.stringify(data) },
-    token,
-  );
+export const updateCategory = (id, formData, token) =>
+  fetchAPI(`/admin/categories/${id}`, { method: "PUT", body: formData }, token);
 
 export const updateCategoryStatus = (id, status, token) =>
   fetchAPI(

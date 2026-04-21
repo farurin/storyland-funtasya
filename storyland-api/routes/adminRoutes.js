@@ -4,8 +4,8 @@ const {
   verifyToken,
   authorizeRoles,
 } = require("../middlewares/authMiddleware");
+const { upload } = require("../config/cloudinary");
 
-// Import Controller
 const {
   getAdminCategories,
   createCategory,
@@ -14,18 +14,20 @@ const {
   deleteCategory,
 } = require("../controllers/adminCategoryController");
 
-// Middleware global (untuk semua rute admin)
-// 1. Harus Login (verifyToken)
-// 2. Role harus editor, admin, atau super_admin (authorizeRoles)
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
-// rute kategori
-router.get("/categories", getAdminCategories);
-router.post("/categories", createCategory);
-router.put("/categories/:id", updateCategory);
-router.put("/categories/:id/status", updateCategoryStatus);
+// Konfigurasi field form gambar yang diterima
+const uploadFields = upload.fields([
+  { name: "image_icon", maxCount: 1 },
+  { name: "image_banner", maxCount: 1 },
+  { name: "image_card", maxCount: 1 },
+]);
 
-// Khusus Delete, batasi hanya super_admin (Opsional, sesuaikan kebutuha)
+// router
+router.get("/categories", getAdminCategories);
+router.post("/categories", uploadFields, createCategory);
+router.put("/categories/:id", uploadFields, updateCategory);
+router.put("/categories/:id/status", updateCategoryStatus);
 router.delete(
   "/categories/:id",
   authorizeRoles("admin", "super_admin"),
