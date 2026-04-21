@@ -195,6 +195,7 @@ const AdminCategories = () => {
                 key={cat.id}
                 name={cat.name}
                 description={cat.description}
+                status={cat.status}
                 image_icon={cat.image_icon}
                 image_card={cat.image_card}
                 image_banner={cat.image_banner}
