@@ -19,6 +19,7 @@ import About from "./pages/About";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminBooks from "./pages/admin/AdminBooks";
+import AdminAddBook from "./pages/admin/AdminAddBook";
 
 // Components/Guards
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -59,9 +60,9 @@ export default function App() {
 
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="categories" element={<AdminCategories />} />
-
             {/* halaman manajemen buku */}
             <Route path="books" element={<AdminBooks />} />
+            <Route path="tambah" element={<AdminAddBook />} />
           </Route>
         </Route>
       </Routes>
