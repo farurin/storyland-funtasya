@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Abaikan folder gambar
-public/images/
+# public/images/
 # src/assets/
 
 # Abaikan folder node_modules di Backend API
