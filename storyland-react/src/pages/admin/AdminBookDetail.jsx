@@ -38,19 +38,25 @@ const AdminBookDetail = () => {
     fetchDetail();
   }, [id, token]);
 
-  // AKSI MENGUBAH STATUS (TERBIT / DITOLAK)
+  // AKSI MENGUBAH STATUS (TERBIT / DITOLAK / ARSIP / REVIEW)
   const handleUpdateStatus = async (newStatus) => {
-    const confirmMsg =
-      newStatus === "terbit"
-        ? "Yakin ingin menerbitkan cerita ini?"
-        : "Yakin ingin menolak cerita ini?";
+    let confirmMsg = `Yakin ingin mengubah status buku ini menjadi ${newStatus.toUpperCase()}?`;
+
+    if (newStatus === "terbit")
+      confirmMsg = "Yakin ingin menerbitkan cerita ini ke publik?";
+    if (newStatus === "ditolak") confirmMsg = "Yakin ingin menolak cerita ini?";
+    if (newStatus === "arsip")
+      confirmMsg =
+        "Yakin ingin menarik buku ini dari publik dan menyimpannya ke Arsip?";
 
     if (!window.confirm(confirmMsg)) return;
 
     try {
       await updateAdminBookStatus(id, newStatus, token);
-      alert(`Cerita berhasil di-${newStatus}!`);
-      navigate("/admin/books"); // Lempar kembali ke tabel buku
+      alert(
+        `Status cerita berhasil diubah menjadi ${newStatus.toUpperCase()}!`,
+      );
+      navigate("/admin/books"); // kembali ke tabel buku
     } catch (err) {
       alert("Gagal mengubah status: " + err.message);
     }
@@ -87,7 +93,7 @@ const AdminBookDetail = () => {
         </div>
         <button
           onClick={() => navigate("/admin/books")}
-          className="px-4 py-2 bg-gray-200 rounded-lg font-bold"
+          className="px-4 py-2 bg-gray-200 rounded-lg font-bold cursor-pointer"
         >
           Kembali
         </button>
@@ -118,7 +124,7 @@ const AdminBookDetail = () => {
             <img
               src={getImageUrl(book.cover_image)}
               alt={book.title}
-              className="w-full h-auto object-cover aspect-[5/8]"
+              className="w-full h-auto object-cover aspect-5/8"
               onError={(e) => {
                 e.target.src =
                   "https://via.placeholder.com/300x480?text=No+Cover";
@@ -129,7 +135,7 @@ const AdminBookDetail = () => {
           <div className="flex-1 min-w-0 flex flex-col justify-between py-2">
             <div>
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4 mb-4">
-                <h1 className="text-3xl font-black text-gray-900 break-words">
+                <h1 className="text-3xl font-black text-gray-900 wrap-break-word">
                   {book.title}
                 </h1>
                 <span
@@ -138,7 +144,7 @@ const AdminBookDetail = () => {
                       ? "bg-yellow-100 text-yellow-700"
                       : book.status === "terbit"
                         ? "bg-green-100 text-green-700"
-                        : book.status === "ditolak"
+                        : book.status === "ditolak" || book.status === "arsip"
                           ? "bg-red-100 text-red-700"
                           : "bg-gray-100 text-gray-700"
                   }`}
@@ -171,7 +177,7 @@ const AdminBookDetail = () => {
             <div className="mt-6">
               <button
                 onClick={() => playAudio(book.bg_music)}
-                className="inline-flex items-center gap-2 bg-[#F64C4C] hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm"
+                className="inline-flex items-center gap-2 bg-[#F64C4C] hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
               >
                 <HiMusicNote className="text-lg shrink-0" /> Putar Musik Latar
               </button>
@@ -194,7 +200,7 @@ const AdminBookDetail = () => {
                   <img
                     src={getImageUrl(scene.image)}
                     alt={`Scene ${scene.page_number}`}
-                    className="w-full aspect-[4/3] object-cover"
+                    className="w-full aspect-4/3 object-cover"
                     onError={(e) => {
                       e.target.src =
                         "https://via.placeholder.com/600x450?text=No+Image";
@@ -216,14 +222,14 @@ const AdminBookDetail = () => {
                       <span className="font-bold text-orange-800 block mb-1">
                         Indonesia:
                       </span>
-                      <p className="text-sm font-medium text-gray-700 leading-relaxed break-words whitespace-pre-wrap">
+                      <p className="text-sm font-medium text-gray-700 leading-relaxed wrap-break-word whitespace-pre-wrap">
                         {scene.text_id}
                       </p>
                     </div>
                     <button
                       onClick={() => playAudio(scene.dubbing_id_url)}
                       disabled={!scene.has_dubbing_id}
-                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 ${
+                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${
                         scene.has_dubbing_id
                           ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -242,7 +248,7 @@ const AdminBookDetail = () => {
                       <span className="font-bold text-blue-800 block mb-1">
                         English:
                       </span>
-                      <p className="text-sm font-medium text-gray-700 leading-relaxed break-words whitespace-pre-wrap">
+                      <p className="text-sm font-medium text-gray-700 leading-relaxed wrap-break-word whitespace-pre-wrap">
                         {scene.text_en || (
                           <i className="text-gray-400">Belum ada terjemahan</i>
                         )}
@@ -251,7 +257,7 @@ const AdminBookDetail = () => {
                     <button
                       onClick={() => playAudio(scene.dubbing_en_url)}
                       disabled={!scene.has_dubbing_en}
-                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 ${
+                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${
                         scene.has_dubbing_en
                           ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -267,23 +273,47 @@ const AdminBookDetail = () => {
           ))}
         </div>
 
-        {/* BOTTOM ACTIONS (Hanya muncul jika status 'review') */}
-        {book.status === "review" && (
-          <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-4">
+        {/* BOTTOM ACTIONS */}
+        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-4">
+          {/* Tampil hanya jika status REVIEW */}
+          {book.status === "review" && (
             <button
               onClick={() => handleUpdateStatus("ditolak")}
               className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-8 py-4 rounded-xl transition cursor-pointer"
             >
               <HiX className="text-xl shrink-0" /> Tolak Cerita
             </button>
+          )}
+
+          {/* Tampil jika status REVIEW (Untuk menerbitkan) ATAU status DITOLAK/ARSIP (Untuk ajukan ulang) */}
+          {(book.status === "review" ||
+            book.status === "arsip" ||
+            book.status === "ditolak") && (
             <button
-              onClick={() => handleUpdateStatus("terbit")}
+              onClick={() =>
+                handleUpdateStatus(
+                  book.status === "review" ? "terbit" : "review",
+                )
+              }
               className="flex items-center justify-center gap-2 bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold px-8 py-4 rounded-xl transition cursor-pointer shadow-sm"
             >
-              <HiCheck className="text-xl shrink-0" /> Terbitkan Buku
+              <HiCheck className="text-xl shrink-0" />
+              {book.status === "review"
+                ? "Terbitkan Buku"
+                : "Kirim untuk direview"}
             </button>
-          </div>
-        )}
+          )}
+
+          {/* Tampil hanya jika status TERBIT */}
+          {book.status === "terbit" && (
+            <button
+              onClick={() => handleUpdateStatus("arsip")}
+              className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold px-8 py-4 rounded-xl transition cursor-pointer"
+            >
+              Arsipkan Buku Ini
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

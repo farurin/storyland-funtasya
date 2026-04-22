@@ -479,7 +479,7 @@ const AdminAddBook = () => {
                 Kirim untuk direview
               </button>
               <button
-                onClick={() => handleSubmitFinal("draft")}
+                onClick={() => handleSubmitFinal("arsip")}
                 className="w-full bg-[#D1D5DB] hover:bg-gray-400 text-gray-700 font-bold py-4 rounded-xl shadow-sm"
               >
                 Simpan ke draft
