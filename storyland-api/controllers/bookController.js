@@ -11,7 +11,12 @@ const getCategories = async (req, res) => {
 
 const getBooks = async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM books");
+    // Hanya ambil buku dengan status 'terbit'
+    // urutkan dari yang paling baru ditambahkan
+    const sql =
+      "SELECT * FROM books WHERE status = 'terbit' ORDER BY created_at DESC";
+    const [results] = await db.query(sql);
+
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
