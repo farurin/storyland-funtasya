@@ -117,3 +117,7 @@ export const deleteCategory = (id, token) =>
   fetchAPI(`/admin/categories/${id}`, { method: "DELETE" }, token);
 
 export const getAdminBooks = (token) => fetchAPI("/admin/books", {}, token);
+
+// tambah buku admin
+export const createAdminBook = (formData, token) =>
+  fetchAPI("/admin/books", { method: "POST", body: formData }, token);

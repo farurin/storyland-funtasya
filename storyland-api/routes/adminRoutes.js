@@ -14,7 +14,10 @@ const {
   deleteCategory,
 } = require("../controllers/adminCategoryController");
 
-const { getAdminBooks } = require("../controllers/adminBookController");
+const {
+  getAdminBooks,
+  createBook,
+} = require("../controllers/adminBookController");
 
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
@@ -36,5 +39,6 @@ router.delete(
   deleteCategory,
 );
 router.get("/books", getAdminBooks);
+router.post("/books", upload.any(), createBook);
 
 module.exports = router;
