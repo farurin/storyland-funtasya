@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import {
   HiOutlineClock,
@@ -41,6 +42,7 @@ const getStatusFromTab = (tab) => {
 
 const AdminBooks = () => {
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   // States
   const [activeTab, setActiveTab] = useState("Proses Review");
@@ -169,7 +171,7 @@ const AdminBooks = () => {
         {statCards.map((stat) => (
           <div
             key={stat.id}
-            className={`bg-white rounded-2xl p-6 flex items-center gap-5 shadow-sm border-l-[12px] ${stat.borderColor}`}
+            className={`bg-white rounded-2xl p-6 flex items-center gap-5 shadow-sm border-l-12px ${stat.borderColor}`}
           >
             <div
               className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${stat.bgIcon}`}
@@ -235,7 +237,7 @@ const AdminBooks = () => {
 
       {/* TABLE */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto">
-        <table className="w-full text-left min-w-[800px]">
+        <table className="w-full text-left min-w-200">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
               <th className="py-5 px-6 text-sm font-bold text-gray-900 w-[35%]">
@@ -282,6 +284,7 @@ const AdminBooks = () => {
               paginatedBooks.map((book, index) => (
                 <tr
                   key={book.id}
+                  onClick={() => navigate(`/admin/books/${book.id}`)}
                   className={`group hover:bg-gray-50 transition cursor-pointer ${
                     index !== paginatedBooks.length - 1
                       ? "border-b border-gray-100"
