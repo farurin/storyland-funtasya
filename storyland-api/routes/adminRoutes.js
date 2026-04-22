@@ -17,6 +17,8 @@ const {
 const {
   getAdminBooks,
   createBook,
+  getAdminBookDetail,
+  updateBookStatus,
 } = require("../controllers/adminBookController");
 
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
@@ -40,5 +42,7 @@ router.delete(
 );
 router.get("/books", getAdminBooks);
 router.post("/books", upload.any(), createBook);
+router.get("/books/:id", getAdminBookDetail);
+router.put("/books/:id/status", updateBookStatus);
 
 module.exports = router;

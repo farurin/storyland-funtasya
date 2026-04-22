@@ -121,3 +121,13 @@ export const getAdminBooks = (token) => fetchAPI("/admin/books", {}, token);
 // tambah buku admin
 export const createAdminBook = (formData, token) =>
   fetchAPI("/admin/books", { method: "POST", body: formData }, token);
+
+export const getAdminBookDetail = (id, token) =>
+  fetchAPI(`/admin/books/${id}`, {}, token);
+
+export const updateAdminBookStatus = (id, status, token) =>
+  fetchAPI(
+    `/admin/books/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+    token,
+  );

@@ -111,12 +111,10 @@ const createBook = async (req, res) => {
     }
 
     await conn.commit();
-    res
-      .status(201)
-      .json({
-        message: "Buku berhasil ditambahkan beserta dua bahasanya!",
-        bookId: newBookId,
-      });
+    res.status(201).json({
+      message: "Buku berhasil ditambahkan beserta dua bahasanya!",
+      bookId: newBookId,
+    });
   } catch (err) {
     await conn.rollback();
     console.error("Database Error:", err);
@@ -126,7 +124,89 @@ const createBook = async (req, res) => {
   }
 };
 
+// GET ADMIN BOOK DETAIL (Buku + Scenes)
+const getAdminBookDetail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 1. Ambil data utama buku
+    const sqlBook = `
+      SELECT b.*, c.name AS category_name
+      FROM books b
+      LEFT JOIN categories c ON b.id_categories = c.id
+      WHERE b.id = ?
+    `;
+    const [bookResults] = await db.query(sqlBook, [id]);
+
+    if (bookResults.length === 0) {
+      return res.status(404).json({ message: "Buku tidak ditemukan" });
+    }
+
+    const book = bookResults[0];
+
+    // 2. Ambil data halamannya (scenes)
+    const sqlPages = `
+      SELECT * FROM book_pages 
+      WHERE id_book = ? 
+      ORDER BY page_number ASC
+    `;
+    const [pageResults] = await db.query(sqlPages, [id]);
+
+    // 3. Format data
+    const responseData = {
+      id: book.id,
+      title: book.title,
+      author: "Funtasya Team", // Hardcoded
+      date: new Date(book.created_at).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+      category: book.category_name,
+      status: book.status,
+      cover_image: book.image,
+      bg_music: book.bg_music_url,
+      scenes: pageResults.map((page) => ({
+        page_number: page.page_number,
+        image: page.image,
+        text_id: page.text_id,
+        text_en: page.text_en,
+        dubbing_id_url: page.dubbing_id_url,
+        dubbing_en_url: page.dubbing_en_url,
+        has_dubbing_id: !!page.dubbing_id_url,
+        has_dubbing_en: !!page.dubbing_en_url,
+      })),
+    };
+
+    res.json(responseData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// UPDATE BOOK STATUS (Terbit / Ditolak)
+const updateBookStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!["terbit", "ditolak", "review", "arsip", "dihapus"].includes(status)) {
+    return res.status(400).json({ message: "Status tidak valid" });
+  }
+
+  try {
+    const sql = "UPDATE books SET status = ? WHERE id = ?";
+    await db.query(sql, [status, id]);
+    res.json({
+      message: `Buku berhasil diubah menjadi ${status.toUpperCase()}!`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getAdminBooks,
   createBook,
+  getAdminBookDetail,
+  updateBookStatus,
 };
