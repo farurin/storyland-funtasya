@@ -5,6 +5,7 @@ import {
   HiMicrophone,
   HiUpload,
   HiOutlineUpload,
+  HiX,
 } from "react-icons/hi";
 import { getCategories, createAdminBook } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
@@ -22,7 +23,7 @@ const AdminAddBook = () => {
   const [categoryId, setCategoryId] = useState("");
   const [bgMusic, setBgMusic] = useState(null);
 
-  // STEP 2: SCENES
+  // STEP 2: SCENES (Mendukung 2 Bahasa)
   const [scenes, setScenes] = useState([
     {
       id: 1,
@@ -51,7 +52,7 @@ const AdminAddBook = () => {
     fetchCats();
   }, []);
 
-  // NAVIGASI
+  // NAVIGASI STEP
   const handleNextToStep2 = (e) => {
     e.preventDefault();
     if (!title || !description) return alert("Harap isi Judul dan Deskripsi!");
@@ -120,6 +121,16 @@ const AdminAddBook = () => {
     ]);
   };
 
+  // MENGHAPUS SCENE
+  const handleRemoveScene = (indexToRemove) => {
+    // Jangan biarkan scene habis, minimal harus ada 1
+    if (scenes.length <= 1) return;
+
+    // Filter array scenes untuk membuang scene pada index tertentu
+    const updatedScenes = scenes.filter((_, index) => index !== indexToRemove);
+    setScenes(updatedScenes);
+  };
+
   const handleCoverChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -168,7 +179,7 @@ const AdminAddBook = () => {
 
   return (
     <div className="p-8 md:p-12 w-full flex justify-center items-start min-h-screen bg-gray-50">
-      <div className="bg-white w-full max-w-250 rounded-4xl shadow-sm border border-gray-100 p-8 md:p-12 mt-4 relative">
+      <div className="bg-white w-full max-w-5xl rounded-4xl shadow-sm border border-gray-100 p-8 md:p-12 mt-4 relative">
         {currentStep > 1 && (
           <button
             onClick={handleBack}
@@ -189,7 +200,7 @@ const AdminAddBook = () => {
           </p>
         </div>
 
-        {/* STEP 1 */}
+        {/* STEP 1: INFORMASI DASAR */}
         {currentStep === 1 && (
           <form
             onSubmit={handleNextToStep2}
@@ -223,14 +234,14 @@ const AdminAddBook = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm mt-4"
+              className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm mt-4 cursor-pointer transition-colors"
             >
               Selanjutnya
             </button>
           </form>
         )}
 
-        {/* STEP 2 */}
+        {/* STEP 2: SCENES (GAMBAR & BILINGUAL) */}
         {currentStep === 2 && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,7 +268,7 @@ const AdminAddBook = () => {
                 <label className="block text-sm font-bold text-gray-900 mb-3">
                   Tambahkan Musik Latar
                 </label>
-                <label className="w-full inline-flex items-center justify-center gap-2 bg-[#F64C4C] hover:bg-red-600 text-white font-semibold text-sm px-6 py-4 rounded-xl cursor-pointer">
+                <label className="w-full inline-flex items-center justify-center gap-2 bg-[#F64C4C] hover:bg-red-600 text-white font-semibold text-sm px-6 py-4 rounded-xl cursor-pointer transition-colors">
                   <HiMusicNote className="text-lg" />{" "}
                   {bgMusic ? bgMusic.name : "Upload Musik (Opsional)"}
                   <input
@@ -289,11 +300,24 @@ const AdminAddBook = () => {
                   key={index}
                   className="pt-6 border-t border-gray-100 first:border-0 first:pt-0"
                 >
-                  <h4 className="text-sm font-extrabold text-gray-900 mb-4 bg-gray-100 inline-block px-4 py-1.5 rounded-md">
-                    Scene {index + 1}
-                  </h4>
+                  {/* HEADER SCENE & TOMBOL HAPUS */}
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-sm font-extrabold text-gray-900 bg-gray-100 inline-block px-4 py-1.5 rounded-md">
+                      Scene {index + 1}
+                    </h4>
+                    {scenes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveScene(index)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <HiX className="text-lg" /> Hapus Scene
+                      </button>
+                    )}
+                  </div>
+
                   <div className="flex flex-col md:flex-row gap-6">
-                    {/* GAMBAR */}
+                    {/* KIRI: UPLOAD GAMBAR */}
                     <div className="w-full md:w-1/3 aspect-4/3 bg-gray-200 rounded-2xl overflow-hidden relative group border border-gray-200 h-fit">
                       {scene.imagePreview ? (
                         <img
@@ -335,7 +359,7 @@ const AdminAddBook = () => {
                       )}
                     </div>
 
-                    {/* DUAL LANGUAGE INPUTS */}
+                    {/* KANAN: DUAL LANGUAGE INPUTS */}
                     <div className="w-full md:w-2/3 flex flex-col gap-6">
                       {/* BAHASA INDONESIA */}
                       <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
@@ -343,7 +367,7 @@ const AdminAddBook = () => {
                           <label className="text-sm font-bold text-orange-900">
                             Versi Indonesia
                           </label>
-                          <label className="flex items-center gap-2 bg-[#C97BFF] hover:bg-purple-500 text-white font-semibold text-xs px-4 py-2 rounded-lg cursor-pointer">
+                          <label className="flex items-center gap-2 bg-[#C97BFF] hover:bg-purple-500 text-white font-semibold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors">
                             <HiMicrophone />{" "}
                             {scene.dubbingIdFile
                               ? "Audio Terisi"
@@ -382,7 +406,7 @@ const AdminAddBook = () => {
                           <label className="text-sm font-bold text-blue-900">
                             Versi Inggris
                           </label>
-                          <label className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-xs px-4 py-2 rounded-lg cursor-pointer">
+                          <label className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors">
                             <HiMicrophone />{" "}
                             {scene.dubbingEnFile
                               ? "Audio Terisi"
@@ -415,10 +439,11 @@ const AdminAddBook = () => {
                         />
                       </div>
 
+                      {/* TOMBOL TAMBAH SCENE DI PALING BAWAH */}
                       {index === scenes.length - 1 && (
                         <button
                           onClick={handleAddOneScene}
-                          className="w-full bg-[#FEF0A5] hover:bg-yellow-200 text-amber-800 font-bold text-sm py-3 rounded-xl"
+                          className="w-full bg-[#FEF0A5] hover:bg-yellow-200 text-amber-800 font-bold text-sm py-3 rounded-xl cursor-pointer transition-colors"
                         >
                           + Tambah Scene Baru
                         </button>
@@ -431,17 +456,17 @@ const AdminAddBook = () => {
 
             <button
               onClick={handleNextToStep3}
-              className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm mt-8"
+              className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm mt-8 cursor-pointer transition-colors"
             >
               Selanjutnya
             </button>
           </div>
         )}
 
-        {/* STEP 3 */}
+        {/* STEP 3: UPLOAD SAMPUL & FINISH */}
         {currentStep === 3 && (
           <div className="flex flex-col items-center max-w-2xl mx-auto">
-            <label className="w-full aspect-16/10 md:aspect-5/3 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 hover:bg-yellow-50/30 transition-colors relative overflow-hidden group mb-8">
+            <label className="w-full aspect-16/10 md:aspect-5/8 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 hover:bg-yellow-50/30 transition-colors relative overflow-hidden group mb-8">
               {coverPreview ? (
                 <>
                   <img
@@ -474,15 +499,15 @@ const AdminAddBook = () => {
             <div className="w-full flex flex-col gap-3">
               <button
                 onClick={() => handleSubmitFinal("review")}
-                className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm"
+                className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm cursor-pointer transition-colors"
               >
                 Kirim untuk direview
               </button>
               <button
                 onClick={() => handleSubmitFinal("arsip")}
-                className="w-full bg-[#D1D5DB] hover:bg-gray-400 text-gray-700 font-bold py-4 rounded-xl shadow-sm"
+                className="w-full bg-[#D1D5DB] hover:bg-gray-400 text-gray-700 font-bold py-4 rounded-xl shadow-sm cursor-pointer transition-colors"
               >
-                Simpan ke draft
+                Simpan ke Arsip
               </button>
             </div>
           </div>
