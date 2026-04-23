@@ -144,3 +144,6 @@ export const updateAdminPassword = (data, token) =>
     { method: "PUT", body: JSON.stringify(data) },
     token,
   );
+
+export const getAdminDashboardStats = (token) =>
+  fetchAPI("/admin/dashboard", {}, token);

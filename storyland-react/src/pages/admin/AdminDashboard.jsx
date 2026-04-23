@@ -1,237 +1,225 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import {
   HiBookOpen,
   HiUsers,
-  HiGlobe,
+  HiTag,
   HiEye,
   HiCalendar,
   HiChevronRight,
 } from "react-icons/hi";
+import { Link } from "react-router-dom";
+
+// IMPORT API & UTILS
+import { useAuth } from "../../context/AuthContext";
+import { getAdminDashboardStats, getAdminProfile } from "../../services/api";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// ── DATA ──────────────────────────────────────────────────────────────────────
-
-const statCards = [
-  {
-    icon: <HiBookOpen className="w-7 h-7 text-orange-500" />,
-    iconBg: "bg-orange-100",
-    value: "300",
-    label: "Total Buku",
-  },
-  {
-    icon: <HiUsers className="w-7 h-7 text-orange-400" />,
-    iconBg: "bg-orange-50",
-    value: "1,2k",
-    label: "Pengguna",
-  },
-  {
-    icon: <HiGlobe className="w-7 h-7 text-orange-500" />,
-    iconBg: "bg-orange-100",
-    value: "20",
-    label: "Bahasa",
-  },
-  {
-    icon: <HiEye className="w-7 h-7 text-amber-500" />,
-    iconBg: "bg-amber-50",
-    value: "14k",
-    label: "Kunjungan",
-  },
-];
-
 const tabs = ["Paling Populer", "Terbaru", "Download"];
 
-const books = [
-  {
-    title: "Nelayan dan kendi ajaib",
-    author: "Jaka",
-    category: "Cerita Nusantara",
-    img: "/images/default.jpg",
-  },
-  {
-    title: "Bangau & Monyet yang egois",
-    author: "Jaka",
-    category: "Cerita Hewan",
-    img: "/images/default.jpg",
-  },
-  {
-    title: "Unta yang Malang",
-    author: "Jaka",
-    category: "Cerita Hewan",
-    img: "/images/default.jpg",
-  },
-  {
-    title: "Putri Peri & Pemuda Kayu Ma...",
-    author: "Jaka",
-    category: "Cerita Hewan",
-    img: "/images/default.jpg",
-  },
-];
-
-const recentBooks = [
-  { title: "Nabi Yusuf...", author: "Jaka", img: "/images/default.jpg" },
-  { title: "Putri Duyu...", author: "Doni", img: "/images/default.jpg" },
-  { title: "Berani Jujur", author: "Cika", img: "/images/default.jpg" },
-  { title: "Si Bijak Me...", author: "Raka", img: "/images/default.jpg" },
-  { title: "Mulan", author: "Kiput", img: "/images/default.jpg" },
-];
-
-const authors = [
-  { name: "Cika", jumlah: 40, img: "/images/default.jpg" },
-  { name: "Artur", jumlah: 40, img: "/images/default.jpg" },
-  { name: "James", jumlah: 40, img: "/images/default.jpg" },
-  { name: "Ria", jumlah: 40, img: "/images/default.jpg" },
-];
-
-const demography = [
-  { label: "Cerita Nusantara", pct: 60, color: "bg-yellow-400" },
-  { label: "Cerita Hewan", pct: 50, color: "bg-orange-400" },
-  { label: "Cerita Mancanegara", pct: 30, color: "bg-blue-500" },
-  { label: "Kisah Nabi & Rasul", pct: 60, color: "bg-blue-700" },
-  { label: "Kisah 1001 Malam", pct: 60, color: "bg-purple-500" },
-  { label: "Cerita Anak muslim", pct: 60, color: "bg-red-400" },
-  { label: "Cerita Anak Tauladan", pct: 40, color: "bg-red-500" },
-];
-
-const doughnutData = {
-  labels: [
-    "Nusantara",
-    "Hewan",
-    "Mancanegara",
-    "Nabi & Rasul",
-    "1001 Malam",
-    "Muslim",
-    "Tauladan",
-  ],
-  datasets: [
-    {
-      data: [60, 50, 30, 60, 60, 60, 40],
-      backgroundColor: [
-        "#FBBF24",
-        "#FB923C",
-        "#3B82F6",
-        "#1D4ED8",
-        "#A855F7",
-        "#F87171",
-        "#EF4444",
-      ],
-      borderWidth: 3,
-      borderColor: "#fff",
-    },
-  ],
-};
-
-const doughnutOptions = {
-  cutout: "62%",
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: true },
-  },
-};
-
-// ── COMPONENT ─────────────────────────────────────────────────────────────────
-
 export default function AdminDashboard() {
+  const { token } = useAuth();
+
   const [activeTab, setActiveTab] = useState("Paling Populer");
+  const [isLoading, setIsLoading] = useState(true);
+  const [adminProfile, setAdminProfile] = useState(null);
+
+  // State Data Dashboard
+  const [data, setData] = useState({
+    stats: { totalBooks: 0, totalUsers: 0, totalViews: 0, totalCategories: 0 },
+    bookStatus: { popular: [], latest: [], downloaded: [] },
+    demography: [],
+    recentSidebarBooks: [],
+    authors: [],
+  });
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [dashboardRes, profileRes] = await Promise.all([
+          getAdminDashboardStats(token),
+          getAdminProfile(token),
+        ]);
+        setData(dashboardRes);
+        setAdminProfile(profileRes);
+      } catch (err) {
+        console.error("Gagal memuat dashboard:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (token) fetchDashboardData();
+  }, [token]);
+
+  // Siapkan Data untuk Doughnut Chart
+  const doughnutData = {
+    labels: data.demography.map((d) => d.label),
+    datasets: [
+      {
+        data: data.demography.map((d) => d.count),
+        backgroundColor: data.demography.map((d) => d.color),
+        borderWidth: 3,
+        borderColor: "#fff",
+      },
+    ],
+  };
+
+  const doughnutOptions = {
+    cutout: "65%",
+    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+  };
+
+  // Tentukan list buku berdasarkan tab aktif
+  const displayedBooks =
+    activeTab === "Paling Populer"
+      ? data.bookStatus.popular
+      : activeTab === "Terbaru"
+        ? data.bookStatus.latest
+        : data.bookStatus.downloaded;
+
+  if (isLoading)
+    return (
+      <div className="p-12 text-center text-gray-500 font-bold">
+        Memuat Dashboard...
+      </div>
+    );
 
   return (
-    <div className="flex gap-5 p-5 min-h-screen bg-gray-50">
-      {/* ════ LEFT COLUMN ════ */}
-      <div className="flex-1 flex flex-col gap-5 min-w-0">
+    <div className="flex flex-col lg:flex-row gap-6 p-6 md:p-8 min-h-screen bg-gray-50 w-full max-w-400 mx-auto">
+      {/* ════ LEFT COLUMN (Utama) ════ */}
+      <div className="flex-1 flex flex-col gap-6 min-w-0">
         {/* Stat Cards */}
-        <div className="grid grid-cols-4 gap-4">
-          {statCards.map((s) => (
-            <div
-              key={s.label}
-              className="bg-white rounded-2xl p-4 flex items-center gap-3 border border-gray-100"
-            >
-              <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${s.iconBg}`}
-              >
-                {s.icon}
-              </div>
-              <div>
-                <p className="text-xl font-black text-slate-800 leading-tight">
-                  {s.value}
-                </p>
-                <p className="text-xs text-slate-500 font-semibold">
-                  {s.label}
-                </p>
-              </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-[20px] p-5 flex items-center gap-4 shadow-sm border border-gray-100">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-red-50 text-red-500">
+              <HiBookOpen className="w-8 h-8" />
             </div>
-          ))}
+            <div>
+              <p className="text-2xl font-black text-slate-800 leading-tight">
+                {data.stats.totalBooks}
+              </p>
+              <p className="text-xs text-slate-500 font-semibold">Total Buku</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-[20px] p-5 flex items-center gap-4 shadow-sm border border-gray-100">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-orange-50 text-orange-400">
+              <HiUsers className="w-8 h-8" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-800 leading-tight">
+                {data.stats.totalUsers > 1000
+                  ? (data.stats.totalUsers / 1000).toFixed(1) + "k"
+                  : data.stats.totalUsers}
+              </p>
+              <p className="text-xs text-slate-500 font-semibold">Pengguna</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-[20px] p-5 flex items-center gap-4 shadow-sm border border-gray-100">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-yellow-50 text-yellow-500">
+              <HiTag className="w-8 h-8" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-800 leading-tight">
+                {data.stats.totalCategories}
+              </p>
+              <p className="text-xs text-slate-500 font-semibold">Kategori</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-[20px] p-5 flex items-center gap-4 shadow-sm border border-gray-100">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-blue-50 text-blue-500">
+              <HiEye className="w-8 h-8" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-800 leading-tight">
+                {data.stats.totalViews > 1000
+                  ? (data.stats.totalViews / 1000).toFixed(1) + "k"
+                  : data.stats.totalViews}
+              </p>
+              <p className="text-xs text-slate-500 font-semibold">Kunjungan</p>
+            </div>
+          </div>
         </div>
 
         {/* Status Buku */}
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <h2 className="text-lg font-black text-slate-800 mb-3">
-            Statuts Buku
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-black text-slate-800 mb-4">
+            Status Buku
           </h2>
 
-          {/* Tabs */}
-          <div className="flex gap-5 mb-4 border-b border-gray-100">
+          <div className="flex gap-6 mb-6 border-b border-gray-100">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-2 text-sm font-bold transition-colors border-b-2 -mb-px ${
-                  activeTab === tab
-                    ? "border-orange-400 text-orange-500"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
+                className={`pb-3 text-sm font-bold transition-all border-b-[3px] -mb-px ${activeTab === tab ? "border-orange-400 text-orange-500" : "border-transparent text-slate-400 hover:text-slate-600"}`}
               >
                 {tab}
               </button>
             ))}
           </div>
 
-          {/* Book Grid */}
-          <div className="grid grid-cols-4 gap-4">
-            {books.map((book, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {displayedBooks.map((book) => (
+              <Link
+                to={`/admin/books/${book.id}`}
+                key={book.id}
+                className="flex flex-col gap-3 group cursor-pointer"
+              >
+                <div className="w-full aspect-3/4 rounded-2xl overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-all">
                   <img
-                    src={book.img}
+                    src={getImageUrl(book.img)}
                     alt={book.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/300x400?text=Cover";
+                    }}
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-slate-800 leading-snug line-clamp-2">
+                  <p className="text-sm font-black text-slate-800 leading-snug line-clamp-2 group-hover:text-orange-500 transition-colors">
                     {book.title}
                   </p>
-                  <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                    {book.author}
+                  <p className="text-xs text-slate-500 font-bold mt-1">
+                    {book.author || "Funtasya Team"}
                   </p>
-                  <p className="text-xs text-slate-400">{book.category}</p>
+                  <p className="text-[11px] text-slate-400 font-semibold italic truncate">
+                    {book.category}
+                  </p>
                 </div>
-              </div>
+              </Link>
             ))}
+            {displayedBooks.length === 0 && (
+              <p className="col-span-4 text-center text-sm text-gray-400 py-10">
+                Belum ada buku di kategori ini.
+              </p>
+            )}
           </div>
         </div>
 
         {/* Statistik Demography */}
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <h2 className="text-lg font-black text-slate-800 mb-4">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-black text-slate-800 mb-6">
             Statistik Demography
           </h2>
-          <div className="flex gap-8 items-center">
-            {/* Bar list */}
-            <div className="flex-1 flex flex-col gap-3">
-              {demography.map((d) => (
-                <div key={d.label} className="flex items-center gap-3">
-                  <p className="w-40 text-xs text-slate-600 font-semibold flex-shrink-0">
+          <div className="flex flex-col md:flex-row gap-10 items-center justify-between">
+            {/* Bar List */}
+            <div className="flex-1 w-full flex flex-col gap-4">
+              {data.demography.map((d) => (
+                <div key={d.label} className="flex items-center gap-4">
+                  <p className="w-32 md:w-40 text-[13px] text-slate-600 font-bold truncate">
                     {d.label}
                   </p>
-                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${d.color}`}
-                      style={{ width: `${d.pct}%` }}
+                      className="h-full rounded-full transition-all duration-1000"
+                      style={{ width: `${d.pct}%`, backgroundColor: d.color }}
                     />
                   </div>
-                  <p className="w-10 text-xs font-bold text-slate-600 text-right">
+                  <p className="w-12 text-sm font-black text-slate-700 text-right">
                     {d.pct}%
                   </p>
                 </div>
@@ -239,95 +227,121 @@ export default function AdminDashboard() {
             </div>
 
             {/* Doughnut Chart */}
-            <div className="w-52 h-52 flex-shrink-0 relative">
+            <div className="w-56 h-56 shrink-0 relative">
               <Doughnut data={doughnutData} options={doughnutOptions} />
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <p className="text-xs text-slate-500 font-semibold">
-                  total buku
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                  Total Buku
                 </p>
-                <p className="text-2xl font-black text-slate-800">540</p>
+                <p className="text-3xl font-black text-slate-800">
+                  {data.stats.totalBooks}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ════ RIGHT COLUMN ════ */}
-      <div className="w-56 flex flex-col gap-4 flex-shrink-0">
+      {/* ════ RIGHT COLUMN (Sidebar) ════ */}
+      <div className="w-full lg:w-72 flex flex-col gap-6 shrink-0">
         {/* User Profile */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <div className="flex items-center gap-3 mb-3">
+        <Link
+          to="/admin/settings"
+          className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow block"
+        >
+          <div className="flex items-center gap-4 mb-4">
             <img
-              src="/images/default.jpg"
-              alt="avatar"
-              className="w-10 h-10 rounded-full object-cover bg-gray-100"
+              src={
+                adminProfile?.avatar_url
+                  ? getImageUrl(adminProfile.avatar_url)
+                  : "https://via.placeholder.com/150"
+              }
+              alt="Admin Avatar"
+              className="w-12 h-12 rounded-full object-cover bg-gray-100 shadow-sm"
             />
             <div className="min-w-0">
               <p className="text-sm font-black text-slate-800 truncate">
-                Aji Fahreza
+                {adminProfile?.first_name
+                  ? `${adminProfile.first_name} ${adminProfile.last_name}`
+                  : "Admin Funtasya"}
               </p>
-              <p className="text-xs text-slate-400 truncate">
-                Fahrezaajinr@gmail.com
+              <p className="text-[11px] text-slate-400 font-semibold truncate">
+                {adminProfile?.email || "admin@funtasya.com"}
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-            <p className="text-xs font-bold text-slate-600">12 Februari 2026</p>
-            <HiCalendar className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <p className="text-[11px] font-black text-slate-500">
+              {new Date().toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <HiCalendar className="w-5 h-5 text-slate-300" />
           </div>
-        </div>
+        </Link>
 
-        {/* Manajemen Buku */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 flex-1">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] font-black text-slate-800">
+        {/* Manajemen Buku (Recent) */}
+        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex-1">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-black text-slate-800">
               Manajemen Buku
             </h3>
-            <button className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5">
-              Lihat Semua <HiChevronRight className="w-3.5 h-3.5" />
-            </button>
+            <Link
+              to="/admin/perpustakaan"
+              className="text-[10px] font-black text-orange-500 hover:text-orange-600 flex items-center uppercase tracking-wider"
+            >
+              Lihat Semua <HiChevronRight className="w-4 h-4 ml-0.5" />
+            </Link>
           </div>
-          <div className="flex flex-col gap-3">
-            {recentBooks.map((b, i) => (
-              <div key={i} className="flex items-center gap-3">
+          <div className="flex flex-col gap-4">
+            {data.recentSidebarBooks.map((b) => (
+              <Link
+                to={`/admin/books/${b.id}`}
+                key={b.id}
+                className="flex items-center gap-3 group"
+              >
                 <img
-                  src={b.img}
+                  src={getImageUrl(b.img)}
                   alt={b.title}
-                  className="w-10 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0"
+                  className="w-12 h-14 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/100x140?text=Cover";
+                  }}
                 />
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-black text-slate-800 truncate group-hover:text-orange-500 transition-colors">
                     {b.title}
                   </p>
-                  <p className="text-xs text-slate-400">{b.author}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                    {b.author || "Funtasya Team"}
+                  </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
         {/* Manajemen Autor */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] font-black text-slate-800">
+        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-black text-slate-800">
               Manajemen Autor
             </h3>
-            <button className="text-[8px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5">
-              Lihat Semua <HiChevronRight className="w-3.5 h-3.5" />
-            </button>
           </div>
-          <div className="flex flex-col gap-3">
-            {authors.map((a, i) => (
+          <div className="flex flex-col gap-4">
+            {data.authors.map((a, i) => (
               <div key={i} className="flex items-center gap-3">
-                <img
-                  src={a.img}
-                  alt={a.name}
-                  className="w-9 h-9 rounded-full object-cover bg-gray-100 flex-shrink-0"
-                />
+                <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center font-black text-sm">
+                  {a.name.charAt(0).toUpperCase()}
+                </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">{a.name}</p>
-                  <p className="text-xs text-slate-400">
-                    Jumlah Buku : {a.jumlah}
+                  <p className="text-xs font-black text-slate-800">{a.name}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                    Jumlah Buku:{" "}
+                    <span className="text-slate-600">{a.jumlah}</span>
                   </p>
                 </div>
               </div>

@@ -28,6 +28,10 @@ const {
   updateAdminPassword,
 } = require("../controllers/adminProfileController");
 
+const {
+  getDashboardStats,
+} = require("../controllers/adminDashboardController");
+
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
 // Konfigurasi field form gambar yang diterima
@@ -61,5 +65,8 @@ router.put("/books/:id", upload.any(), updateBook);
 router.get("/profile", getAdminProfile);
 router.put("/profile", upload.any(), updateAdminProfile);
 router.put("/profile/password", updateAdminPassword);
+
+// dashboard
+router.get("/dashboard", getDashboardStats);
 
 module.exports = router;
