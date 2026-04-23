@@ -156,6 +156,7 @@ const getAdminBookDetail = async (req, res) => {
     const responseData = {
       id: book.id,
       title: book.title,
+      description: book.description,
       author: "Funtasya Team", // Hardcoded
       date: new Date(book.created_at).toLocaleDateString("id-ID", {
         day: "numeric",
@@ -204,9 +205,106 @@ const updateBookStatus = async (req, res) => {
   }
 };
 
+// UPDATE BOOK (Edit Buku & Scenes)
+const updateBook = async (req, res) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    id_categories,
+    status,
+    existing_cover,
+    existing_bg_music,
+  } = req.body;
+  const scenes = JSON.parse(req.body.scenes || "[]");
+
+  let coverImageUrl = existing_cover;
+  let bgMusicUrl =
+    existing_bg_music !== "null" && existing_bg_music !== "undefined"
+      ? existing_bg_music
+      : null;
+
+  // Tangkap file baru jika ada
+  if (req.files && req.files.length > 0) {
+    req.files.forEach((file) => {
+      if (file.fieldname === "cover_image") coverImageUrl = file.path;
+      if (file.fieldname === "bg_music") bgMusicUrl = file.path;
+
+      if (file.fieldname.startsWith("scene_image_")) {
+        const index = parseInt(file.fieldname.split("_")[2]);
+        if (scenes[index]) scenes[index].imageUrl = file.path;
+      }
+      if (file.fieldname.startsWith("scene_dubbing_id_")) {
+        const index = parseInt(file.fieldname.split("_")[3]);
+        if (scenes[index]) scenes[index].dubbingIdUrl = file.path;
+      }
+      if (file.fieldname.startsWith("scene_dubbing_en_")) {
+        const index = parseInt(file.fieldname.split("_")[3]);
+        if (scenes[index]) scenes[index].dubbingEnUrl = file.path;
+      }
+    });
+  }
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1. Update data buku utama
+    const sqlBook = `UPDATE books SET id_categories=?, title=?, description=?, image=?, bg_music_url=?, status=? WHERE id=?`;
+    await conn.query(sqlBook, [
+      id_categories,
+      title,
+      description,
+      coverImageUrl,
+      bgMusicUrl,
+      status,
+      id,
+    ]);
+
+    // 2. Hapus semua scene lama
+    await conn.query(`DELETE FROM book_pages WHERE id_book=?`, [id]);
+
+    // 3. Masukkan scene yang sudah diperbarui
+    if (scenes.length > 0) {
+      const sqlPage = `INSERT INTO book_pages (id_book, page_number, image, dubbing_id_url, dubbing_en_url, text_id, text_en) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      for (let i = 0; i < scenes.length; i++) {
+        const scene = scenes[i];
+        const text_id = scene.subtitleId || "";
+        const text_en = scene.subtitleEn || "";
+
+        // Prioritaskan file baru, jika tidak ada pakai file lama
+        const imgUrl =
+          scene.imageUrl || scene.existingImage || "default-scene.png";
+        const dubIdUrl = scene.dubbingIdUrl || scene.existingDubbingId || null;
+        const dubEnUrl = scene.dubbingEnUrl || scene.existingDubbingEn || null;
+
+        await conn.query(sqlPage, [
+          id,
+          i + 1,
+          imgUrl,
+          dubIdUrl,
+          dubEnUrl,
+          text_id,
+          text_en,
+        ]);
+      }
+    }
+
+    await conn.commit();
+    res.json({ message: "Buku berhasil diperbarui!" });
+  } catch (err) {
+    await conn.rollback();
+    console.error("Update Error:", err);
+    res.status(500).json({ error: "Gagal memperbarui buku: " + err.message });
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   getAdminBooks,
   createBook,
   getAdminBookDetail,
   updateBookStatus,
+  updateBook,
 };

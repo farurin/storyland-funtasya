@@ -131,3 +131,6 @@ export const updateAdminBookStatus = (id, status, token) =>
     { method: "PUT", body: JSON.stringify({ status }) },
     token,
   );
+
+export const updateAdminBook = (id, formData, token) =>
+  fetchAPI(`/admin/books/${id}`, { method: "PUT", body: formData }, token);

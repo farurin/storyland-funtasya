@@ -6,6 +6,7 @@ import {
   HiChevronRight,
   HiCheck,
   HiX,
+  HiPencil,
 } from "react-icons/hi";
 
 // IMPORT context & api
@@ -181,6 +182,12 @@ const AdminBookDetail = () => {
               >
                 <HiMusicNote className="text-lg shrink-0" /> Putar Musik Latar
               </button>
+              <Link
+                to={`/admin/books/${id}/edit`}
+                className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
+              >
+                <HiPencil className="text-lg shrink-0" /> Edit Buku
+              </Link>
             </div>
           </div>
         </div>
