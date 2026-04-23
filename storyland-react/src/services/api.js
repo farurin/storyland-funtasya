@@ -134,3 +134,13 @@ export const updateAdminBookStatus = (id, status, token) =>
 
 export const updateAdminBook = (id, formData, token) =>
   fetchAPI(`/admin/books/${id}`, { method: "PUT", body: formData }, token);
+
+export const getAdminProfile = (token) => fetchAPI("/admin/profile", {}, token);
+export const updateAdminProfile = (formData, token) =>
+  fetchAPI("/admin/profile", { method: "PUT", body: formData }, token);
+export const updateAdminPassword = (data, token) =>
+  fetchAPI(
+    "/admin/profile/password",
+    { method: "PUT", body: JSON.stringify(data) },
+    token,
+  );

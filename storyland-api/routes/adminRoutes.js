@@ -22,6 +22,12 @@ const {
   updateBook,
 } = require("../controllers/adminBookController");
 
+const {
+  getAdminProfile,
+  updateAdminProfile,
+  updateAdminPassword,
+} = require("../controllers/adminProfileController");
+
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
 // Konfigurasi field form gambar yang diterima
@@ -32,6 +38,8 @@ const uploadFields = upload.fields([
 ]);
 
 // router
+
+// category
 router.get("/categories", getAdminCategories);
 router.post("/categories", uploadFields, createCategory);
 router.put("/categories/:id", uploadFields, updateCategory);
@@ -41,10 +49,17 @@ router.delete(
   authorizeRoles("admin", "super_admin"),
   deleteCategory,
 );
+
+// books
 router.get("/books", getAdminBooks);
 router.post("/books", upload.any(), createBook);
 router.get("/books/:id", getAdminBookDetail);
 router.put("/books/:id/status", updateBookStatus);
 router.put("/books/:id", upload.any(), updateBook);
+
+// profile
+router.get("/profile", getAdminProfile);
+router.put("/profile", upload.any(), updateAdminProfile);
+router.put("/profile/password", updateAdminPassword);
 
 module.exports = router;

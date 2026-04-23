@@ -198,7 +198,7 @@ const AdminEditBook = () => {
 
   return (
     <div className="p-8 md:p-12 w-full flex justify-center items-start min-h-screen bg-gray-50">
-      <div className="bg-white w-full max-w-5xl rounded-[32px] shadow-sm border border-gray-100 p-8 md:p-12 mt-4 relative">
+      <div className="bg-white w-full max-w-5xl rounded-4xl shadow-sm border border-gray-100 p-8 md:p-12 mt-4 relative">
         {currentStep > 1 && (
           <button
             onClick={handleBack}
@@ -318,7 +318,7 @@ const AdminEditBook = () => {
                     )}
                   </div>
                   <div className="flex flex-col md:flex-row gap-6">
-                    <div className="w-full md:w-1/3 aspect-[4/3] bg-gray-200 rounded-2xl overflow-hidden relative group">
+                    <div className="w-full md:w-1/3 aspect-4/3 bg-gray-200 rounded-2xl overflow-hidden relative group">
                       <img
                         src={scene.imagePreview}
                         alt="Scene"
@@ -376,7 +376,7 @@ const AdminEditBook = () => {
                               e.target.value,
                             )
                           }
-                          className="w-full bg-white rounded-xl px-4 py-3 text-sm min-h-[80px]"
+                          className="w-full bg-white rounded-xl px-4 py-3 text-sm min-h-20"
                         />
                       </div>
 
@@ -415,7 +415,7 @@ const AdminEditBook = () => {
                               e.target.value,
                             )
                           }
-                          className="w-full bg-white rounded-xl px-4 py-3 text-sm min-h-[80px]"
+                          className="w-full bg-white rounded-xl px-4 py-3 text-sm min-h-20"
                         />
                       </div>
 
@@ -444,7 +444,7 @@ const AdminEditBook = () => {
         {/* STEP 3 */}
         {currentStep === 3 && (
           <div className="flex flex-col items-center max-w-2xl mx-auto">
-            <label className="w-full aspect-[16/10] md:aspect-[5/8] border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer group mb-8 overflow-hidden">
+            <label className="w-full aspect-16/10 md:aspect-5/8 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer group mb-8 overflow-hidden">
               <img
                 src={coverPreview}
                 alt="Cover"

@@ -22,6 +22,7 @@ import AdminBooks from "./pages/admin/AdminBooks";
 import AdminAddBook from "./pages/admin/AdminAddBook";
 import AdminBookDetail from "./pages/admin/AdminBookDetail";
 import AdminEditBook from "./pages/admin/AdminEditBook";
+import AdminProfileSettings from "./pages/admin/AdminProfileSettings";
 
 // Components/Guards
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -67,6 +68,7 @@ export default function App() {
             <Route path="books/:id" element={<AdminBookDetail />} />
             <Route path="tambah" element={<AdminAddBook />} />
             <Route path="books/:id/edit" element={<AdminEditBook />} />
+            <Route path="settings" element={<AdminProfileSettings />} />
           </Route>
         </Route>
       </Routes>
