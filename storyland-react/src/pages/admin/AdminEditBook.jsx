@@ -444,15 +444,17 @@ const AdminEditBook = () => {
         {/* STEP 3 */}
         {currentStep === 3 && (
           <div className="flex flex-col items-center max-w-2xl mx-auto">
-            <label className="w-full aspect-16/10 md:aspect-5/8 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer group mb-8 overflow-hidden">
+            <label className="w-48 md:w-56 aspect-2/3 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer group mb-8 overflow-hidden relative hover:border-yellow-400 transition-colors">
               <img
                 src={coverPreview}
                 alt="Cover"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
-                <HiOutlineUpload className="text-4xl text-white mb-2" />
-                <span className="text-white font-bold">Ganti Sampul</span>
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <HiOutlineUpload className="text-3xl text-white mb-2" />
+                <span className="text-white font-bold text-sm">
+                  Ganti Sampul
+                </span>
               </div>
               <input
                 type="file"
@@ -465,13 +467,13 @@ const AdminEditBook = () => {
             <div className="w-full flex flex-col gap-3">
               <button
                 onClick={() => handleSubmitFinal("review")}
-                className="w-full bg-[#F8AF2F] text-white font-bold py-4 rounded-xl cursor-pointer"
+                className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-4 rounded-xl shadow-sm cursor-pointer transition-colors"
               >
                 Update & Kirim untuk direview
               </button>
               <button
                 onClick={() => handleSubmitFinal("arsip")}
-                className="w-full bg-[#D1D5DB] text-gray-700 font-bold py-4 rounded-xl cursor-pointer"
+                className="w-full bg-[#D1D5DB] hover:bg-gray-400 text-gray-700 font-bold py-4 rounded-xl shadow-sm cursor-pointer transition-colors"
               >
                 Update & Simpan ke Arsip
               </button>

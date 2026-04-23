@@ -466,26 +466,30 @@ const AdminAddBook = () => {
         {/* STEP 3: UPLOAD SAMPUL & FINISH */}
         {currentStep === 3 && (
           <div className="flex flex-col items-center max-w-2xl mx-auto">
-            <label className="w-full aspect-16/10 md:aspect-5/8 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 hover:bg-yellow-50/30 transition-colors relative overflow-hidden group mb-8">
+            <label className="w-48 md:w-56 aspect-2/3 border-[3px] border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 hover:bg-yellow-50/30 transition-colors relative overflow-hidden group mb-8">
               {coverPreview ? (
                 <>
                   <img
                     src={coverPreview}
                     alt="Cover"
-                    className="w-full h-full object-contain bg-gray-50"
+                    className="w-full h-full object-cover bg-gray-50"
                   />
                   <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <HiOutlineUpload className="text-4xl text-white mb-2" />
-                    <span className="text-white font-bold">Ganti Sampul</span>
+                    <HiOutlineUpload className="text-3xl text-white mb-2" />
+                    <span className="text-white font-bold text-sm">
+                      Ganti Sampul
+                    </span>
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center text-gray-400 group-hover:text-yellow-600 transition-colors">
-                  <HiOutlineUpload className="text-5xl mb-4" />
-                  <span className="text-lg font-bold text-gray-600 group-hover:text-yellow-600 mb-1">
+                <div className="flex flex-col items-center text-center p-4 text-gray-400 group-hover:text-yellow-600 transition-colors">
+                  <HiOutlineUpload className="text-4xl mb-3" />
+                  <span className="text-sm font-bold text-gray-600 group-hover:text-yellow-600 mb-1">
                     Upload Thumbnail
                   </span>
-                  <span className="text-sm font-medium">PNG, JPG maks 2MB</span>
+                  <span className="text-[10px] font-medium">
+                    PNG, JPG maks 2MB
+                  </span>
                 </div>
               )}
               <input
