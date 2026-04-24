@@ -5,6 +5,7 @@ import {
   HiOutlineExternalLink,
   HiChevronDown,
 } from "react-icons/hi";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 // IMPORT API & AUTH
 import { useAuth } from "../../context/AuthContext";
@@ -355,24 +356,30 @@ const AdminBackupExport = () => {
                       key={idx}
                       className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors cursor-default"
                     >
+                      {/* id */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.id}
                       </td>
-                      <td className="py-4 px-6 text-sm font-bold text-gray-800 flex items-center gap-3">
+                      {/* nama */}
+                      <td className="py-4 px-6 text-sm font-bold text-gray-800">
+                        {user.name}
+                      </td>
+                      {/* ava + email */}
+                      <td className="py-4 px-6 text-sm font-bold text-gray-600 flex items-center gap-3">
                         <img
-                          src={user.avatar}
+                          src={getImageUrl(user.avatar)}
                           alt={user.name}
                           className="w-8 h-8 rounded-full object-cover bg-gray-200"
                         />
-                        {user.name}
-                      </td>
-                      <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.email}
                       </td>
+                      {/* jumlah baca */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.readCount}
                       </td>
+                      {/* status */}
                       <td className="py-4 px-6">{renderStatus(user.status)}</td>
+                      {/* tgl daftar */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.date}
                       </td>

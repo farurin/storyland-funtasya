@@ -3,10 +3,10 @@ const db = require("../config/db");
 // GET ALL USERS (End-Users & Admins)
 const getAllUsers = async (req, res) => {
   try {
-    // Sesuaikan nama kolom dengan struktur tabel users aslimu
     const sql = `
       SELECT 
         id, 
+        username,
         first_name, 
         last_name, 
         email, 
@@ -19,12 +19,16 @@ const getAllUsers = async (req, res) => {
     `;
     const [users] = await db.query(sql);
 
-    // Format data agar lebih rapi saat diterima Frontend
     const formattedUsers = users.map((u) => ({
       id: u.id,
-      name: u.last_name ? `${u.first_name} ${u.last_name}` : u.first_name,
+      // Jika first_name null, otomatis gunakan username
+      name: u.first_name
+        ? u.last_name
+          ? `${u.first_name} ${u.last_name}`
+          : u.first_name
+        : u.username,
       email: u.email,
-      role: u.role || "user", // user, admin, super_admin, editor
+      role: u.role || "user",
       status: u.status || "active",
       avatar: u.avatar_url || "https://via.placeholder.com/150",
       date: new Date(u.created_at).toLocaleDateString("id-ID", {
