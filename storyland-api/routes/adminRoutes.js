@@ -32,6 +32,8 @@ const {
   getDashboardStats,
 } = require("../controllers/adminDashboardController");
 
+const { getAllUsers } = require("../controllers/adminUserController");
+
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
 // Konfigurasi field form gambar yang diterima
@@ -68,5 +70,8 @@ router.put("/profile/password", updateAdminPassword);
 
 // dashboard
 router.get("/dashboard", getDashboardStats);
+
+// Manajemen Pengguna
+router.get("/users", getAllUsers);
 
 module.exports = router;

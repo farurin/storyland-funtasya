@@ -147,3 +147,6 @@ export const updateAdminPassword = (data, token) =>
 
 export const getAdminDashboardStats = (token) =>
   fetchAPI("/admin/dashboard", {}, token);
+
+// Manajemen Pengguna Admin
+export const getAdminUsers = (token) => fetchAPI("/admin/users", {}, token);

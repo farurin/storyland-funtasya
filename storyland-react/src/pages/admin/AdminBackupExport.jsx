@@ -8,8 +8,7 @@ import {
 
 // IMPORT API & AUTH
 import { useAuth } from "../../context/AuthContext";
-import { getAdminBooks } from "../../services/api";
-// export const getAdminUsers = (token) => fetchAPI("/admin/users", {}, token); <-- Nanti tambahkan ini di api.js
+import { getAdminBooks, getAdminUsers } from "../../services/api";
 
 const AdminBackupExport = () => {
   const { token } = useAuth();
@@ -38,10 +37,8 @@ const AdminBackupExport = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 1. Fetch Data Buku (Sudah ada API-nya)
+        // 1. Fetch Data Buku
         const books = await getAdminBooks(token);
-
-        // Format data buku agar sesuai tabel
         const formattedBooks = books.map((b) => ({
           id: b.id,
           title: b.title,
@@ -56,42 +53,24 @@ const AdminBackupExport = () => {
         }));
         setBooksData(formattedBooks);
 
-        // 2. Fetch Data User (Nanti nyalakan jika API admin/users sudah dibuat)
-        /*
+        // 2. Fetch Data User Asli
         const users = await getAdminUsers(token);
-        const formattedUsers = users.map(u => ({
-          id: u.id,
-          name: u.username,
-          avatar: u.avatar_url || "https://via.placeholder.com/150",
-          email: u.email,
-          readCount: `${u.total_pages || 0} Buku`, // Asumsi ada kolom ini
-          status: u.status === "active" ? "Aktif" : "Non Aktif",
-          date: new Date(u.created_at).toLocaleDateString("id-ID")
-        }));
-        setUsersData(formattedUsers);
-        */
 
-        // MOCK USER SEMENTARA (Hapus jika API user sudah jalan)
-        setUsersData([
-          {
-            id: "01",
-            name: "Ahmad Fauzi",
-            avatar: "https://i.pravatar.cc/150?u=1",
-            email: "Ahmad@mail.com",
-            readCount: "23 Buku",
-            status: "Aktif",
-            date: "12 Jan 2026",
-          },
-          {
-            id: "02",
-            name: "Citra Kirana",
-            avatar: "https://i.pravatar.cc/150?u=2",
-            email: "citra@mail.com",
-            readCount: "10 Buku",
-            status: "Non Aktif",
-            date: "10 Jan 2026",
-          },
-        ]);
+        // Filter khusus pembaca
+        const normalUsers = users.filter((u) => u.role === "user");
+
+        const formattedUsers = normalUsers.map((u) => ({
+          id: `0${u.id}`.slice(-2),
+          name: u.name,
+          avatar: u.avatar,
+          email: u.email,
+          readCount: "0 Buku",
+          status: u.status === "active" ? "Aktif" : "Non Aktif",
+          date: u.date,
+        }));
+
+        // Simpan data asli ke state (dan tidak ditimpa lagi)
+        setUsersData(formattedUsers);
       } catch (err) {
         console.error("Gagal mengambil data:", err);
       } finally {
@@ -104,12 +83,13 @@ const AdminBackupExport = () => {
 
   // Logika Filter Pencarian
   const filteredBooks = booksData.filter((b) =>
-    b.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    (b.title || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
   const filteredUsers = usersData.filter(
     (u) =>
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()),
+      (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // LOGIKA EXPORT CSV (Javascript Murni)
