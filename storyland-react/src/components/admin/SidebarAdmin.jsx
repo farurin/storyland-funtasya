@@ -1,3 +1,4 @@
+import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   HiChartPie,
@@ -6,10 +7,11 @@ import {
   HiTag,
   HiDatabase,
   HiCog,
+  HiUsers,
 } from "react-icons/hi";
 
-// IMPORT LOGO DARI FOLDER SRC/ASSETS
-import logoFuntasya from "../../assets/logo-funtasya.png";
+import logoFuntasya from "../../assets/logo-funtasya.png"; // assets logo
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
   { to: "/admin/dashboard", icon: HiChartPie, label: "Dashboard" },
@@ -20,64 +22,82 @@ const navItems = [
 ];
 
 export default function SidebarAdmin() {
+  const { user } = useAuth();
+
+  // Sisipkan menu Manajemen Pengguna setelah Dashboard JIKA user adalah super_admin
+  const renderNavItems = () => {
+    let finalNavItems = [...navItems];
+
+    // Cek apakah user ada dan rolenya super_admin
+    if (user && user.role === "super_admin") {
+      finalNavItems.splice(1, 0, {
+        // Masukkan di index ke-1 (setelah dashboard)
+        to: "/admin/users",
+        icon: HiUsers,
+        label: "Manajemen Pengguna",
+      });
+    }
+
+    return finalNavItems;
+  };
+
   return (
-    <aside className="flex flex-col w-52 min-h-screen bg-white border-r border-gray-100">
+    <aside className="flex flex-col w-56 min-h-screen bg-white border-r border-gray-100 shrink-0 sticky top-0">
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-gray-100">
-        {/* PANGGIL VARIABLE LOGO DI SINI */}
-        <img src={logoFuntasya} alt="Logo Funtasya" />
+      <div className="px-4 py-5 border-b border-gray-100 flex justify-center">
+        <img src={logoFuntasya} alt="Logo Funtasya" className="w-40" />
       </div>
 
       {/* Tambah Cerita Baru */}
-      <div className="px-3 pt-3">
+      <div className="px-4 pt-5 pb-2">
         <NavLink
           to="/admin/tambah"
-          className="flex items-center gap-3 bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-2.5 hover:bg-amber-100 transition-colors"
+          className="flex items-center justify-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-3 hover:bg-amber-100 transition-colors shadow-sm"
         >
-          <span className="flex items-center justify-center w-7 h-7 bg-orange-500 rounded-lg text-white text-lg font-black">
+          <span className="flex items-center justify-center w-6 h-6 bg-orange-500 rounded-md text-white text-lg font-black leading-none">
             +
           </span>
-          <span className="text-xs font-extrabold text-amber-900 leading-tight">
+          <span className="text-sm font-black text-amber-900 leading-tight">
             Tambah Cerita Baru
           </span>
         </NavLink>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-2">
-        {navItems.map(({ to, icon: Icon, label }) => (
+      <nav className="flex-1 py-4 flex flex-col gap-1">
+        {renderNavItems().map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               [
-                "flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold border-l-[3px] transition-all",
+                "flex items-center gap-3 px-5 py-3 text-sm font-semibold border-l-4 transition-all",
                 isActive
-                  ? "bg-orange-50 text-orange-600 border-orange-500 font-extrabold"
+                  ? "bg-orange-50 text-orange-500 border-orange-500 font-black"
                   : "text-slate-500 border-transparent hover:bg-gray-50 hover:text-slate-700",
               ].join(" ")
             }
           >
-            <Icon className="w-4 h-4 shrink-0" />
+            <Icon className="w-5 h-5 shrink-0" />
             {label}
           </NavLink>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 py-2">
+      <div className="border-t border-gray-100 py-3">
         <NavLink
           to="/admin/settings"
           className={({ isActive }) =>
             [
-              "flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold border-l-[3px] transition-all",
+              "flex items-center gap-3 px-5 py-3 text-sm font-semibold border-l-4 transition-all",
               isActive
-                ? "bg-orange-50 text-orange-600 border-orange-500 font-extrabold"
+                ? "bg-orange-50 text-orange-500 border-orange-500 font-black"
                 : "text-slate-500 border-transparent hover:bg-gray-50",
             ].join(" ")
           }
         >
-          <HiCog className="w-4 h-4 shrink-0" />
+          <HiCog className="w-5 h-5 shrink-0" />
           Profile Settings
         </NavLink>
       </div>
