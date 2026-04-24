@@ -118,8 +118,7 @@ const AdminPerpustakaan = () => {
       const activeCatName = activeCatObj ? activeCatObj.name : "";
 
       // Cek apakah nama kategorinya sama
-      const matchByName =
-        book.category === activeCatName || book.category_name === activeCatName;
+      const matchByName = book.category === activeCatName;
 
       matchCategory = matchById || matchByName;
     }

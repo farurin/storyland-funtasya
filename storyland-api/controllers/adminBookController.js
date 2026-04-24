@@ -12,7 +12,7 @@ const getAdminBooks = async (req, res) => {
         b.status, 
         b.views_count,
         b.created_at,
-        c.name AS category_name
+        c.name AS category
       FROM books b
       LEFT JOIN categories c ON b.id_categories = c.id
       ORDER BY b.created_at DESC
@@ -131,7 +131,7 @@ const getAdminBookDetail = async (req, res) => {
   try {
     // 1. Ambil data utama buku
     const sqlBook = `
-      SELECT b.*, c.name AS category_name
+      SELECT b.*, c.name AS category
       FROM books b
       LEFT JOIN categories c ON b.id_categories = c.id
       WHERE b.id = ?
@@ -163,7 +163,7 @@ const getAdminBookDetail = async (req, res) => {
         month: "long",
         year: "numeric",
       }),
-      category: book.category_name,
+      category: book.category,
       status: book.status,
       cover_image: book.image,
       bg_music: book.bg_music_url,
