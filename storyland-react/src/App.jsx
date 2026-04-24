@@ -25,6 +25,7 @@ import AdminEditBook from "./pages/admin/AdminEditBook";
 import AdminProfileSettings from "./pages/admin/AdminProfileSettings";
 import AdminPerpustakaan from "./pages/admin/AdminPerpustakaan";
 import AdminBackupExport from "./pages/admin/AdminBackupExport";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 // Components/Guards
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -65,7 +66,6 @@ export default function App() {
 
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="categories" element={<AdminCategories />} />
-            {/* halaman manajemen buku */}
             <Route path="books" element={<AdminBooks />} />
             <Route path="books/:id" element={<AdminBookDetail />} />
             <Route path="tambah" element={<AdminAddBook />} />
@@ -73,6 +73,7 @@ export default function App() {
             <Route path="settings" element={<AdminProfileSettings />} />
             <Route path="perpustakaan" element={<AdminPerpustakaan />} />
             <Route path="backup" element={<AdminBackupExport />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
         </Route>
       </Routes>
