@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import {
   HiOutlineClock,
@@ -67,7 +67,6 @@ const AdminBooks = () => {
         setIsLoading(false);
       }
     };
-
     fetchBooks();
   }, [token]);
 
@@ -76,7 +75,7 @@ const AdminBooks = () => {
     setCurrentPage(1);
   }, [activeTab, searchQuery]);
 
-  // --- 1. LOGIKA STATISTIK DINAMIS ---
+  // LOGIKA STATISTIK DINAMIS
   const reviewCount = books.filter(
     (b) => (b.status || "review").toLowerCase() === "review",
   ).length;
@@ -114,25 +113,21 @@ const AdminBooks = () => {
     },
   ];
 
-  // --- 2. LOGIKA FILTER (TAB & SEARCH) ---
+  // LOGIKA FILTER (TAB & SEARCH)
   const currentStatusTarget = getStatusFromTab(activeTab);
 
   const filteredBooks = books.filter((book) => {
-    // Filter berdasarkan status
     const matchStatus =
       (book.status || "review").toLowerCase() === currentStatusTarget;
-    // Filter berdasarkan pencarian judul
     const matchSearch = book.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-
     return matchStatus && matchSearch;
   });
 
-  // --- 3. LOGIKA PAGINASI ---
+  // LOGIKA PAGINASI
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  // Memotong array hanya 10 item sesuai halaman saat ini
   const paginatedBooks = filteredBooks.slice(
     startIndex,
     startIndex + itemsPerPage,
@@ -161,12 +156,15 @@ const AdminBooks = () => {
             className="w-full bg-white border-none pl-12 pr-4 py-3.5 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 outline-none text-gray-700 font-medium"
           />
         </div>
-        <button className="w-full sm:w-auto shrink-0 bg-[#FDECA2] hover:bg-yellow-200 text-amber-700 font-bold px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+        <Link
+          to="/admin/tambah"
+          className="w-full sm:w-auto shrink-0 bg-[#FDECA2] hover:bg-yellow-200 text-amber-700 font-bold px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 transition shadow-sm cursor-pointer"
+        >
           <HiUpload className="text-lg" /> Tambah Cerita
-        </button>
+        </Link>
       </div>
 
-      {/* STAT CARDS (Sekarang Dinamis) */}
+      {/* STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {statCards.map((stat) => (
           <div
@@ -240,7 +238,7 @@ const AdminBooks = () => {
         <table className="w-full text-left min-w-200">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="py-5 px-6 text-sm font-bold text-gray-900 w-[35%]">
+              <th className="py-5 px-6 text-sm font-bold text-gray-900 w-[40%]">
                 Konten
               </th>
               <th className="py-5 px-6 text-sm font-bold text-gray-900">
@@ -253,9 +251,6 @@ const AdminBooks = () => {
                 Kategori
               </th>
               <th className="py-5 px-6 text-sm font-bold text-gray-900">
-                Bahasa
-              </th>
-              <th className="py-5 px-6 text-sm font-bold text-gray-900">
                 Status
               </th>
             </tr>
@@ -264,7 +259,7 @@ const AdminBooks = () => {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan="6"
+                  colSpan="5"
                   className="py-10 text-center text-gray-500 font-medium"
                 >
                   Memuat data buku...
@@ -273,23 +268,18 @@ const AdminBooks = () => {
             ) : paginatedBooks.length === 0 ? (
               <tr>
                 <td
-                  colSpan="6"
+                  colSpan="5"
                   className="py-10 text-center text-gray-500 font-medium"
                 >
-                  Belum ada buku di kategori ini.
+                  Belum ada buku di tab ini.
                 </td>
               </tr>
             ) : (
-              // Gunakan paginatedBooks di sini, bukan filteredBooks
               paginatedBooks.map((book, index) => (
                 <tr
                   key={book.id}
                   onClick={() => navigate(`/admin/books/${book.id}`)}
-                  className={`group hover:bg-gray-50 transition cursor-pointer ${
-                    index !== paginatedBooks.length - 1
-                      ? "border-b border-gray-100"
-                      : ""
-                  }`}
+                  className={`group hover:bg-orange-50/30 transition cursor-pointer ${index !== paginatedBooks.length - 1 ? "border-b border-gray-100" : ""}`}
                 >
                   <td className="py-4 px-6 flex items-center gap-4">
                     <div className="w-12 h-16 rounded-md overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
@@ -304,7 +294,7 @@ const AdminBooks = () => {
                       />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900 mb-1 leading-snug">
+                      <h4 className="text-sm font-bold text-gray-900 mb-1 leading-snug group-hover:text-orange-500 transition-colors">
                         {book.title}
                       </h4>
                       <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
@@ -313,7 +303,7 @@ const AdminBooks = () => {
                     </div>
                   </td>
                   <td className="py-4 px-6 text-xs font-semibold text-gray-600">
-                    Funtasya Team
+                    {book.author || "Funtasya Team"}
                   </td>
                   <td className="py-4 px-6 text-xs font-semibold text-gray-600">
                     {book.created_at
@@ -324,23 +314,20 @@ const AdminBooks = () => {
                         })
                       : "-"}
                   </td>
-                  <td className="py-4 px-6 text-xs font-semibold text-gray-600">
-                    {book.category_name || "-"}
-                  </td>
-                  <td className="py-4 px-6 text-xs font-semibold text-gray-600">
-                    Indonesia
+                  <td className="py-4 px-6 text-xs font-bold text-orange-500">
+                    {book.category || "-"}
                   </td>
                   <td className="py-4 px-6 text-xs font-bold">
                     <span
-                      className={`px-2 py-1 rounded-md ${
+                      className={`px-3 py-1.5 rounded-lg border ${
                         book.status === "terbit"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-50 text-green-700 border-green-200"
                           : book.status === "review"
-                            ? "bg-yellow-100 text-yellow-700"
+                            ? "bg-yellow-50 text-yellow-700 border-yellow-200"
                             : book.status === "ditolak" ||
                                 book.status === "dihapus"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-700"
+                              ? "bg-red-50 text-red-700 border-red-200"
+                              : "bg-gray-50 text-gray-700 border-gray-200"
                       }`}
                     >
                       {book.status ? book.status.toUpperCase() : "REVIEW"}
@@ -352,6 +339,13 @@ const AdminBooks = () => {
           </tbody>
         </table>
       </div>
+
+      {/* CSS untuk menyembunyikan scrollbar */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`,
+        }}
+      />
     </div>
   );
 };
