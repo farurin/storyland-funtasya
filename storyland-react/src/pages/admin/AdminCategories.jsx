@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { FiSearch } from "react-icons/fi";
-import { HiExclamation } from "react-icons/hi";
 import CardCategories from "../../components/admin/CardCategories";
 import DetailCategories from "../../components/admin/DetailCategories";
+import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
 import { useAuth } from "../../context/AuthContext";
-import { useAdminToast } from "../../context/AdminToastContext"; // 1. IMPORT TOAST
+import { useAdminToast } from "../../context/AdminToastContext";
 import {
   getAdminCategories,
   createCategory,
@@ -15,7 +15,7 @@ import {
 
 const AdminCategories = () => {
   const { token } = useAuth();
-  const { showSuccess, showError, showLoading } = useAdminToast(); // 2. PANGGIL FUNGSI TOAST
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -26,7 +26,7 @@ const AdminCategories = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [targetCategory, setTargetCategory] = useState(null);
 
-  // Form States (Text)
+  // Form States
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
@@ -34,7 +34,7 @@ const AdminCategories = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Form States (Files)
+  // Form Files
   const [imageIcon, setImageIcon] = useState(null);
   const [imageBanner, setImageBanner] = useState(null);
   const [imageCard, setImageCard] = useState(null);
@@ -60,8 +60,7 @@ const AdminCategories = () => {
     setName("");
     setDescription("");
     setStatus("active");
-    setColorHex("#6B4EFF"); // Reset ke default
-    // Reset File
+    setColorHex("#6B4EFF");
     setImageIcon(null);
     setImageBanner(null);
     setImageCard(null);
@@ -102,13 +101,12 @@ const AdminCategories = () => {
     setImageCard(null);
   };
 
-  // SUBMIT DENGAN FORMDATA
   const handleSubmitForm = async () => {
     if (!name || !description)
-      return showError("Nama dan Deskripsi harus diisi!"); // TOAST
+      return showError("Nama dan Deskripsi harus diisi!");
 
     setIsProcessing(true);
-    showLoading(true); // GLOBAL LOADING BUKA
+    showLoading(true);
     try {
       const formData = new FormData();
       formData.append("name", name);
@@ -160,7 +158,7 @@ const AdminCategories = () => {
 
   const handleConfirmDelete = async () => {
     setIsProcessing(true);
-    showLoading(true); // GLOBAL LOADING BUKA
+    showLoading(true);
     try {
       await deleteCategory(targetCategory.id, token);
       await fetchCategories();
@@ -175,6 +173,7 @@ const AdminCategories = () => {
     } finally {
       setIsProcessing(false);
       showLoading(false);
+      setIsDeleteOpen(false);
     }
   };
 
@@ -243,7 +242,7 @@ const AdminCategories = () => {
         )}
       </div>
 
-      {/* MODAL CREATE/EDIT */}
+      {/* MODAL CREATE/EDIT FORM */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white w-125 max-w-[90vw] rounded-2xl p-6">
@@ -345,95 +344,37 @@ const AdminCategories = () => {
         </div>
       )}
 
-      {/* MODAL STATUS (KUNING) */}
-      {isStatusOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-105 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-2">
-              {targetCategory?.status === "active"
-                ? "Nonaktifkan Kategori?"
-                : "Aktifkan Kategori?"}
-            </h2>
+      {/* MODAL STATUS COMPONENT */}
+      <AdminConfirmModal
+        isOpen={isStatusOpen}
+        onClose={() => setIsStatusOpen(false)}
+        onConfirm={handleConfirmStatus}
+        title={
+          targetCategory?.status === "active"
+            ? "Nonaktifkan Kategori?"
+            : "Aktifkan Kategori?"
+        }
+        description={`Apakah anda yakin ingin ${targetCategory?.status === "active" ? "menonaktifkan" : "mengaktifkan"} kategori "${targetCategory?.name}"?`}
+        warningText={
+          targetCategory?.status === "active"
+            ? "Buku yang menggunakan kategori ini tetap tersedia, tetapi kategorinya tidak akan ditampilkan ke pengguna."
+            : null
+        }
+        variant="primary"
+        confirmText="Ya, Lanjutkan"
+      />
 
-            <p className="text-sm text-gray-600 mb-4">
-              Apakah anda yakin ingin{" "}
-              {targetCategory?.status === "active"
-                ? "menonaktifkan"
-                : "mengaktifkan"}{" "}
-              kategori{" "}
-              <span className="font-semibold">{targetCategory?.name}</span>?
-            </p>
-
-            {targetCategory?.status === "active" && (
-              <div className="border border-yellow-300 bg-yellow-50 rounded-xl p-4 flex gap-3 mb-4">
-                <div className="w-10 h-10 shrink-0 rounded-full bg-yellow-200 flex items-center justify-center">
-                  <HiExclamation className="text-yellow-700" />
-                </div>
-                <p className="text-sm text-yellow-800 leading-relaxed">
-                  Buku yang menggunakan kategori ini tetap tersedia, tetapi
-                  kategorinya tidak akan ditampilkan ke pengguna.
-                </p>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setIsStatusOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleConfirmStatus}
-                disabled={isProcessing}
-                className="px-4 py-2 bg-[#F8AF2F] text-white rounded-md cursor-pointer hover:bg-yellow-500 disabled:opacity-50"
-              >
-                {isProcessing ? "Memproses..." : "Ya, Lanjutkan"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DELETE (MERAH) */}
-      {isDeleteOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-105 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-2">Hapus Kategori?</h2>
-
-            <p className="text-sm text-gray-600 mb-4">
-              Apakah anda yakin ingin menghapus kategori{" "}
-              <span className="font-semibold">{targetCategory?.name}</span>?
-            </p>
-
-            <div className="border border-red-300 bg-red-50 rounded-xl p-4 flex gap-3 mb-4">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-red-200 flex items-center justify-center">
-                <HiExclamation className="text-red-700" />
-              </div>
-              <p className="text-sm text-red-800 leading-relaxed">
-                Kategori hanya bisa dihapus jika tidak ada buku yang tertaut.
-                Jika dihapus, data tidak dapat dikembalikan.
-              </p>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setIsDeleteOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={isProcessing}
-                className="px-4 py-2 bg-red-500 text-white rounded-md cursor-pointer hover:bg-red-600 disabled:opacity-50"
-              >
-                {isProcessing ? "Menghapus..." : "Hapus Permanen"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL DELETE COMPONENT */}
+      <AdminConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Hapus Kategori?"
+        description={`Apakah anda yakin ingin menghapus kategori "${targetCategory?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        warningText="Kategori hanya bisa dihapus jika tidak ada buku yang tertaut. Jika dihapus, data tidak dapat dikembalikan."
+        variant="danger"
+        confirmText="Hapus Permanen"
+      />
     </div>
   );
 };

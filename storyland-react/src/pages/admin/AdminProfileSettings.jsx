@@ -93,7 +93,7 @@ const AdminProfileSettings = () => {
   // SUBMIT UPDATE PROFILE
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    showLoading(true); // GLOBAL LOADING
+    showLoading(true); // loading overlay
     const formData = new FormData();
     formData.append("firstName", profileData.firstName);
     formData.append("lastName", profileData.lastName);
@@ -122,7 +122,7 @@ const AdminProfileSettings = () => {
       return showError("Password baru dan konfirmasi tidak cocok!"); // TOAST ERROR
     }
 
-    showLoading(true); // GLOBAL LOADING
+    showLoading(true); // loading overlay
     try {
       const payload = {
         currentPassword: passwordData.current,

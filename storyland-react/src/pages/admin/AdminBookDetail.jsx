@@ -9,11 +9,11 @@ import {
   HiPencil,
 } from "react-icons/hi";
 
-// IMPORT context & api
 import { useAuth } from "../../context/AuthContext";
 import { getAdminBookDetail, updateAdminBookStatus } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { useAdminToast } from "../../context/AdminToastContext";
+import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
 
 const AdminBookDetail = () => {
   const { id } = useParams();
@@ -23,6 +23,12 @@ const AdminBookDetail = () => {
 
   const [book, setBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // STATE UNTUK MODAL STATUS
+  const [statusModal, setStatusModal] = useState({
+    isOpen: false,
+    targetStatus: "", // 'terbit', 'ditolak', 'arsip', 'review'
+  });
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -39,20 +45,11 @@ const AdminBookDetail = () => {
     fetchDetail();
   }, [id, token, showError]);
 
-  // AKSI MENGUBAH STATUS
-  const handleUpdateStatus = async (newStatus) => {
-    let confirmMsg = `Yakin ingin mengubah status buku ini menjadi ${newStatus.toUpperCase()}?`;
-
-    if (newStatus === "terbit")
-      confirmMsg = "Yakin ingin menerbitkan cerita ini ke publik?";
-    if (newStatus === "ditolak") confirmMsg = "Yakin ingin menolak cerita ini?";
-    if (newStatus === "arsip")
-      confirmMsg =
-        "Yakin ingin menarik buku ini dari publik dan menyimpannya ke Arsip?";
-
-    if (!window.confirm(confirmMsg)) return;
-
-    showLoading(true); // loading
+  // EXECUTE UPDATE STATUS
+  const confirmUpdateStatus = async () => {
+    const newStatus = statusModal.targetStatus;
+    setStatusModal({ isOpen: false, targetStatus: "" }); // Tutup modal duluan
+    showLoading(true);
     try {
       await updateAdminBookStatus(id, newStatus, token);
       showSuccess(
@@ -62,7 +59,7 @@ const AdminBookDetail = () => {
     } catch (err) {
       showError("Gagal mengubah status: " + err.message);
     } finally {
-      showLoading(false); // MATIKAN LOADING
+      showLoading(false);
     }
   };
 
@@ -75,7 +72,50 @@ const AdminBookDetail = () => {
     });
   };
 
-  if (isLoading) {
+  // Konfigurasi dinamis teks Modal berdasarkan target status
+  const getModalConfig = () => {
+    switch (statusModal.targetStatus) {
+      case "terbit":
+        return {
+          title: "Terbitkan Cerita?",
+          desc: "Cerita akan langsung tersedia di aplikasi User dan dapat dibaca oleh publik.",
+          variant: "primary",
+          btn: "Terbitkan",
+        };
+      case "ditolak":
+        return {
+          title: "Tolak Cerita?",
+          desc: "Cerita ini akan ditolak dan dikembalikan ke penulis/editor untuk diperbaiki.",
+          variant: "danger",
+          btn: "Tolak Cerita",
+        };
+      case "arsip":
+        return {
+          title: "Arsipkan Cerita?",
+          desc: "Buku akan ditarik dari publik dan masuk ke daftar Arsip.",
+          variant: "primary",
+          btn: "Arsipkan",
+        };
+      case "review":
+        return {
+          title: "Kirim Ulang ke Review?",
+          desc: "Buku ini akan dimasukkan kembali ke antrean Review.",
+          variant: "primary",
+          btn: "Kirim",
+        };
+      default:
+        return {
+          title: "Ubah Status?",
+          desc: "Lanjutkan aksi ini?",
+          variant: "primary",
+          btn: "Lanjutkan",
+        };
+    }
+  };
+
+  const currentModalConfig = getModalConfig();
+
+  if (isLoading)
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-xl font-bold text-gray-500 animate-pulse">
@@ -83,9 +123,7 @@ const AdminBookDetail = () => {
         </div>
       </div>
     );
-  }
-
-  if (!book) {
+  if (!book)
     return (
       <div className="flex flex-col h-screen items-center justify-center gap-4">
         <div className="text-xl font-bold text-red-500">
@@ -99,11 +137,9 @@ const AdminBookDetail = () => {
         </button>
       </div>
     );
-  }
 
   return (
     <div className="p-8 md:p-12 max-w-6xl mx-auto w-full">
-      {/* BREADCRUMB */}
       <div className="flex items-center gap-2 text-sm font-bold mb-8">
         <Link
           to="/admin/books"
@@ -116,7 +152,6 @@ const AdminBookDetail = () => {
       </div>
 
       <div className="bg-white w-full rounded-4xl shadow-sm border border-gray-100 p-8">
-        {/* HEADER: COVER & METADATA */}
         <div className="flex flex-col md:flex-row gap-8 mb-12">
           <div className="w-full md:w-64 shrink-0 rounded-2xl overflow-hidden shadow-md bg-gray-100">
             <img
@@ -137,20 +172,11 @@ const AdminBookDetail = () => {
                   {book.title}
                 </h1>
                 <span
-                  className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider ${
-                    book.status === "review"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : book.status === "terbit"
-                        ? "bg-green-100 text-green-700"
-                        : book.status === "ditolak" || book.status === "arsip"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
-                  }`}
+                  className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider ${book.status === "review" ? "bg-yellow-100 text-yellow-700" : book.status === "terbit" ? "bg-green-100 text-green-700" : book.status === "ditolak" || book.status === "arsip" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"}`}
                 >
                   {book.status}
                 </span>
               </div>
-
               <div className="space-y-3 text-sm font-semibold text-gray-600">
                 <p>
                   Diajukan tanggal :{" "}
@@ -181,7 +207,7 @@ const AdminBookDetail = () => {
               </button>
               <Link
                 to={`/admin/books/${id}/edit`}
-                className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-6 py-3 rounded-xl transition shadow-sm cursor-pointer ml-3"
               >
                 <HiPencil className="text-lg shrink-0" /> Edit Buku
               </Link>
@@ -191,7 +217,6 @@ const AdminBookDetail = () => {
 
         <hr className="border-gray-100 mb-10" />
 
-        {/* DAFTAR SCENE */}
         <div className="space-y-12">
           {book.scenes.map((scene) => (
             <div
@@ -211,13 +236,10 @@ const AdminBookDetail = () => {
                   />
                 </div>
               </div>
-
               <div className="w-full lg:w-2/3 flex flex-col gap-5 min-w-0">
                 <h3 className="text-lg font-black text-gray-900">
                   Scene {scene.page_number}
                 </h3>
-
-                {/* Bahasa Indonesia */}
                 <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
@@ -231,19 +253,13 @@ const AdminBookDetail = () => {
                     <button
                       onClick={() => playAudio(scene.dubbing_id_url)}
                       disabled={!scene.has_dubbing_id}
-                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${
-                        scene.has_dubbing_id
-                          ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white"
-                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      }`}
+                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${scene.has_dubbing_id ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                     >
                       <HiOutlineVolumeUp className="text-base shrink-0" />
                       {scene.has_dubbing_id ? "Putar Dubbing" : "Audio Kosong"}
                     </button>
                   </div>
                 </div>
-
-                {/* Bahasa Inggris */}
                 <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
@@ -259,11 +275,7 @@ const AdminBookDetail = () => {
                     <button
                       onClick={() => playAudio(scene.dubbing_en_url)}
                       disabled={!scene.has_dubbing_en}
-                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${
-                        scene.has_dubbing_en
-                          ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white"
-                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      }`}
+                      className={`shrink-0 inline-flex items-center justify-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-lg transition w-full sm:w-auto mt-2 sm:mt-0 cursor-pointer ${scene.has_dubbing_en ? "bg-[#6B4EFF] hover:bg-indigo-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                     >
                       <HiOutlineVolumeUp className="text-base shrink-0" />{" "}
                       {scene.has_dubbing_en ? "Putar Dubbing" : "Audio Kosong"}
@@ -275,11 +287,12 @@ const AdminBookDetail = () => {
           ))}
         </div>
 
-        {/* BOTTOM ACTIONS */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-4">
           {book.status === "review" && (
             <button
-              onClick={() => handleUpdateStatus("ditolak")}
+              onClick={() =>
+                setStatusModal({ isOpen: true, targetStatus: "ditolak" })
+              }
               className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-8 py-4 rounded-xl transition cursor-pointer"
             >
               <HiX className="text-xl shrink-0" /> Tolak Cerita
@@ -291,9 +304,10 @@ const AdminBookDetail = () => {
             book.status === "ditolak") && (
             <button
               onClick={() =>
-                handleUpdateStatus(
-                  book.status === "review" ? "terbit" : "review",
-                )
+                setStatusModal({
+                  isOpen: true,
+                  targetStatus: book.status === "review" ? "terbit" : "review",
+                })
               }
               className="flex items-center justify-center gap-2 bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold px-8 py-4 rounded-xl transition cursor-pointer shadow-sm"
             >
@@ -306,7 +320,9 @@ const AdminBookDetail = () => {
 
           {book.status === "terbit" && (
             <button
-              onClick={() => handleUpdateStatus("arsip")}
+              onClick={() =>
+                setStatusModal({ isOpen: true, targetStatus: "arsip" })
+              }
               className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold px-8 py-4 rounded-xl transition cursor-pointer"
             >
               Arsipkan Buku Ini
@@ -314,6 +330,17 @@ const AdminBookDetail = () => {
           )}
         </div>
       </div>
+
+      {/* COMPONENT MODAL DINAMIS */}
+      <AdminConfirmModal
+        isOpen={statusModal.isOpen}
+        onClose={() => setStatusModal({ isOpen: false, targetStatus: "" })}
+        onConfirm={confirmUpdateStatus}
+        title={currentModalConfig.title}
+        description={currentModalConfig.desc}
+        variant={currentModalConfig.variant}
+        confirmText={currentModalConfig.btn}
+      />
     </div>
   );
 };

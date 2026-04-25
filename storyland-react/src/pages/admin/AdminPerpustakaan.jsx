@@ -10,12 +10,10 @@ import {
   HiX,
 } from "react-icons/hi";
 
-// IMPORT SWIPER
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 
-// IMPORT API & UTILS
 import { useAuth } from "../../context/AuthContext";
 import {
   getAdminBooks,
@@ -24,10 +22,10 @@ import {
 } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { useAdminToast } from "../../context/AdminToastContext";
+import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
 
 import bannerImg from "../../assets/banner_corner.png";
 
-// Ikon Panah Slider
 const IconArrowLeft = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -63,21 +61,23 @@ const AdminPerpustakaan = () => {
   const { token } = useAuth();
   const { showSuccess, showError, showLoading } = useAdminToast();
 
-  // States
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter & Pagination States
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-
-  // State untuk Panel Master-Detail
   const [selectedBook, setSelectedBook] = useState(null);
 
-  // FETCH DATA
+  // STATE UNTUK MODAL KONFIRMASI
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    type: "", // 'arsip' atau 'dihapus'
+    bookId: null,
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,12 +85,10 @@ const AdminPerpustakaan = () => {
           getAdminBooks(token),
           getAdminCategories(token),
         ]);
-
-        const publishedBooks = booksData.filter((b) => b.status === "terbit");
-        setBooks(publishedBooks);
+        setBooks(booksData.filter((b) => b.status === "terbit"));
         setCategories(catsData.filter((c) => c.image_icon));
       } catch (err) {
-        showError("Gagal mengambil data perpustakaan: " + err.message); // TOAST ERROR
+        showError("Gagal mengambil data perpustakaan: " + err.message);
       } finally {
         setIsLoading(false);
       }
@@ -98,12 +96,10 @@ const AdminPerpustakaan = () => {
     if (token) fetchData();
   }, [token, showError]);
 
-  // LOGIKA FILTER
   const filteredBooks = books.filter((book) => {
     const matchSearch = book.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-
     let matchCategory = false;
     if (activeCategoryId === "all") {
       matchCategory = true;
@@ -114,49 +110,31 @@ const AdminPerpustakaan = () => {
       const matchByName = book.category === activeCatName;
       matchCategory = matchById || matchByName;
     }
-
     return matchSearch && matchCategory;
   });
 
-  // LOGIKA PAGINATION
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
   const currentBooks = filteredBooks.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
-  // HANDLERS UNTUK AKSI
-  const handleArchive = async (bookId) => {
-    if (!window.confirm("Yakin ingin mengarsipkan buku ini dari publik?"))
-      return;
-
-    showLoading(true); // GLOBAL LOADING
+  // EXECUTE ACTION DARI DALAM MODAL
+  const executeAction = async () => {
+    const { type, bookId } = modalConfig;
+    setModalConfig({ isOpen: false, type: "", bookId: null });
+    showLoading(true);
     try {
-      await updateAdminBookStatus(bookId, "arsip", token);
+      await updateAdminBookStatus(bookId, type, token);
       setBooks(books.filter((b) => b.id !== bookId));
       setSelectedBook(null);
-      showSuccess("Buku berhasil diarsipkan!"); // TOAST SUKSES
+      showSuccess(
+        `Buku berhasil ${type === "arsip" ? "diarsipkan" : "dihapus permanen"}!`,
+      );
     } catch (err) {
-      showError("Gagal mengarsipkan: " + err.message); // TOAST ERROR
+      showError(`Gagal memproses: ${err.message}`);
     } finally {
-      showLoading(false); // MATIKAN LOADING
-    }
-  };
-
-  const handleDelete = async (bookId) => {
-    if (!window.confirm("Yakin ingin menghapus buku ini secara permanen?"))
-      return;
-
-    showLoading(true); // GLOBAL LOADING
-    try {
-      await updateAdminBookStatus(bookId, "dihapus", token);
-      setBooks(books.filter((b) => b.id !== bookId));
-      setSelectedBook(null);
-      showSuccess("Buku berhasil dihapus permanen!"); // TOAST SUKSES
-    } catch (err) {
-      showError("Gagal menghapus: " + err.message); // TOAST ERROR
-    } finally {
-      showLoading(false); // MATIKAN LOADING
+      showLoading(false);
     }
   };
 
@@ -170,11 +148,10 @@ const AdminPerpustakaan = () => {
   return (
     <div className="p-6 md:p-10 w-full min-h-screen bg-gray-50 flex flex-col items-center">
       <div className="w-full max-w-350">
-        {/* BANNER ATAS */}
         <div className="w-full bg-gray-300 rounded-4xl h-32 md:h-40 mb-8 overflow-hidden relative shadow-sm flex items-center justify-center">
           <img
             src={bannerImg}
-            alt="Banner Perpustakaan"
+            alt="Banner"
             className="w-full h-full object-cover opacity-80"
             onError={(e) => {
               e.target.style.display = "none";
@@ -185,10 +162,8 @@ const AdminPerpustakaan = () => {
           </h2>
         </div>
 
-        {/* HEADER: TITLE, SEARCH & LANG TOGGLE */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-3xl font-black text-gray-900">Perpustakaan</h1>
-
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="relative w-full md:w-80">
               <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
@@ -209,12 +184,10 @@ const AdminPerpustakaan = () => {
           </div>
         </div>
 
-        {/* CATEGORY SLIDER */}
         <div className="relative flex items-center w-full mb-8">
           <button className="admin-cat-prev absolute -left-4 md:-left-8 z-20 hover:scale-110 cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
             <IconArrowLeft />
           </button>
-
           <div className="w-full px-2">
             <Swiper
               modules={[Navigation]}
@@ -231,24 +204,17 @@ const AdminPerpustakaan = () => {
               }}
               className="py-2"
             >
-              {/* Tombol "Semua Kategori" */}
               <SwiperSlide>
                 <button
                   onClick={() => {
                     setActiveCategoryId("all");
                     setCurrentPage(1);
                   }}
-                  className={`w-full h-15 flex items-center justify-center rounded-2xl font-bold text-sm transition-all border-2 cursor-pointer ${
-                    activeCategoryId === "all"
-                      ? "bg-[#eaf9e9] text-green-900 border-[#84E280] shadow-md scale-105"
-                      : "bg-white text-gray-500 border-gray-100 hover:border-gray-300"
-                  }`}
+                  className={`w-full h-15 flex items-center justify-center rounded-2xl font-bold text-sm transition-all border-2 cursor-pointer ${activeCategoryId === "all" ? "bg-[#eaf9e9] text-green-900 border-[#84E280] shadow-md scale-105" : "bg-white text-gray-500 border-gray-100 hover:border-gray-300"}`}
                 >
                   Semua Cerita
                 </button>
               </SwiperSlide>
-
-              {/* Mapping Kategori dari API */}
               {categories.map((cat) => (
                 <SwiperSlide key={cat.id}>
                   <button
@@ -256,11 +222,7 @@ const AdminPerpustakaan = () => {
                       setActiveCategoryId(cat.id);
                       setCurrentPage(1);
                     }}
-                    className={`w-full block transition-all duration-300 rounded-2xl relative cursor-pointer ${
-                      activeCategoryId === cat.id
-                        ? "ring-4 ring-[#84E280] ring-offset-2 scale-105 shadow-xl"
-                        : "hover:scale-105 shadow-sm"
-                    }`}
+                    className={`w-full block transition-all duration-300 rounded-2xl relative cursor-pointer ${activeCategoryId === cat.id ? "ring-4 ring-[#84E280] ring-offset-2 scale-105 shadow-xl" : "hover:scale-105 shadow-sm"}`}
                   >
                     <img
                       src={getImageUrl(cat.image_icon)}
@@ -275,15 +237,12 @@ const AdminPerpustakaan = () => {
               ))}
             </Swiper>
           </div>
-
           <button className="admin-cat-next absolute -right-4 md:-right-8 z-20 hover:scale-110 cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed">
             <IconArrowRight />
           </button>
         </div>
 
-        {/* AREA KONTEN: GRID BUKU & PANEL DETAIL */}
         <div className="flex flex-col xl:flex-row gap-8 items-start relative">
-          {/* KIRI: GRID CERITA */}
           <div
             className={`transition-all duration-500 flex-1 ${selectedBook ? "xl:w-2/3" : "w-full"}`}
           >
@@ -329,11 +288,7 @@ const AdminPerpustakaan = () => {
                   <div
                     key={book.id}
                     onClick={() => setSelectedBook(book)}
-                    className={`bg-white rounded-3xl p-3 shadow-sm border-2 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${
-                      selectedBook?.id === book.id
-                        ? "border-[#84E280] bg-[#f0fcf0] ring-2 ring-[#eaf9e9]"
-                        : "border-gray-50 hover:border-gray-200"
-                    }`}
+                    className={`bg-white rounded-3xl p-3 shadow-sm border-2 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${selectedBook?.id === book.id ? "border-[#84E280] bg-[#f0fcf0] ring-2 ring-[#eaf9e9]" : "border-gray-50 hover:border-gray-200"}`}
                   >
                     <div className="w-full aspect-2/3 bg-gray-100 rounded-2xl overflow-hidden mb-4">
                       <img
@@ -370,7 +325,6 @@ const AdminPerpustakaan = () => {
             )}
           </div>
 
-          {/* KANAN: PANEL DETAIL BUKU (Sticky) */}
           {selectedBook && (
             <div className="w-full xl:w-95 shrink-0 bg-white rounded-4xl p-6 shadow-xl border border-gray-100 xl:sticky xl:top-8 transition-all animate-fade-in z-10">
               <div className="flex justify-between items-start mb-6">
@@ -440,13 +394,25 @@ const AdminPerpustakaan = () => {
 
               <div className="flex gap-3 mt-auto">
                 <button
-                  onClick={() => handleArchive(selectedBook.id)}
+                  onClick={() =>
+                    setModalConfig({
+                      isOpen: true,
+                      type: "arsip",
+                      bookId: selectedBook.id,
+                    })
+                  }
                   className="flex-1 bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-3.5 rounded-xl shadow-sm transition-colors cursor-pointer"
                 >
                   Arsipkan
                 </button>
                 <button
-                  onClick={() => handleDelete(selectedBook.id)}
+                  onClick={() =>
+                    setModalConfig({
+                      isOpen: true,
+                      type: "dihapus",
+                      bookId: selectedBook.id,
+                    })
+                  }
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-3.5 rounded-xl transition-colors cursor-pointer"
                 >
                   Hapus
@@ -457,13 +423,30 @@ const AdminPerpustakaan = () => {
         </div>
       </div>
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `,
-        }}
+      {/* COMPONENT MODAL DINAMIS */}
+      <AdminConfirmModal
+        isOpen={modalConfig.isOpen}
+        onClose={() =>
+          setModalConfig({ isOpen: false, type: "", bookId: null })
+        }
+        onConfirm={executeAction}
+        title={
+          modalConfig.type === "arsip" ? "Arsipkan Buku?" : "Hapus Permanen?"
+        }
+        description={
+          modalConfig.type === "arsip"
+            ? "Buku akan ditarik dari publik (User App) dan masuk ke daftar Arsip. Anda bisa menerbitkannya kembali kapan saja."
+            : "Apakah anda yakin ingin menghapus buku ini secara permanen? Tindakan ini tidak dapat dibatalkan."
+        }
+        warningText={
+          modalConfig.type === "dihapus"
+            ? "Seluruh data scene, gambar, audio, dan histori pembaca akan ikut terhapus."
+            : null
+        }
+        variant={modalConfig.type === "arsip" ? "primary" : "danger"}
+        confirmText={
+          modalConfig.type === "arsip" ? "Arsipkan Sekarang" : "Hapus Permanen"
+        }
       />
     </div>
   );

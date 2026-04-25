@@ -8,11 +8,11 @@ import {
   HiChevronRight,
 } from "react-icons/hi";
 
-// IMPORT API & AUTH
 import { useAuth } from "../../context/AuthContext";
 import { getAdminUsers } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { useAdminToast } from "../../context/AdminToastContext";
+import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
 
 const AdminUsers = () => {
   const { token, user } = useAuth();
@@ -21,31 +21,31 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [activeRoleFilter, setActiveRoleFilter] = useState("Semua");
-
-  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // FETCH DATA DARI BACKEND
+  // STATE UNTUK MODAL DELETE
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    userTarget: null,
+  });
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const data = await getAdminUsers(token);
-        // Format role dari database ke format UI
         const formattedUsers = data.map((u) => {
           let roleUI = "User";
           if (u.role === "super_admin") roleUI = "Super Admin";
           else if (u.role === "admin") roleUI = "Admin";
           else if (u.role === "editor") roleUI = "Editor";
-
           return { ...u, roleUI };
         });
         setUsers(formattedUsers);
       } catch (err) {
-        showError("Gagal mengambil data pengguna: " + err.message); // TOAST ERROR
+        showError("Gagal mengambil data pengguna: " + err.message);
       } finally {
         setIsLoading(false);
       }
@@ -53,33 +53,26 @@ const AdminUsers = () => {
     if (token) fetchUsers();
   }, [token, showError]);
 
-  // Reset pagination saat filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeRoleFilter]);
 
-  // LOGIKA STATISTIK CARDS
   const superAdminCount = users.filter(
     (u) => u.roleUI === "Super Admin",
   ).length;
   const adminCount = users.filter((u) => u.roleUI === "Admin").length;
   const editorCount = users.filter((u) => u.roleUI === "Editor").length;
 
-  // LOGIKA FILTERING
   const filteredUsers = users.filter((u) => {
-    // Abaikan role "User" biasa, halaman ini hanya untuk memanajemen Admin Team
     if (u.roleUI === "User") return false;
-
     const matchSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchRole =
       activeRoleFilter === "Semua" || u.roleUI === activeRoleFilter;
-
     return matchSearch && matchRole;
   });
 
-  // LOGIKA PAGINASI
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedUsers = filteredUsers.slice(
@@ -91,7 +84,6 @@ const AdminUsers = () => {
   const handleNextPage = () =>
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
 
-  // RENDER WARNA ROLE
   const renderRole = (role) => {
     if (role === "Super Admin")
       return <span className="text-orange-500 font-bold">{role}</span>;
@@ -102,7 +94,6 @@ const AdminUsers = () => {
     return role;
   };
 
-  // RENDER STATUS
   const renderStatus = (status) => {
     const isActive = status === "active";
     return (
@@ -117,10 +108,15 @@ const AdminUsers = () => {
     );
   };
 
+  // MOCK FUNGSI HAPUS USER (belum buat API nya)
+  const confirmDeleteUser = () => {
+    setDeleteModal({ isOpen: false, userTarget: null });
+    showError("Fitur Hapus User API belum tersedia di Backend! 🚀");
+  };
+
   return (
     <div className="p-8 md:p-12 w-full min-h-screen bg-gray-50 flex justify-center items-start">
       <div className="w-full max-w-6xl">
-        {/* BARIS 1: SEARCH BAR */}
         <div className="w-full bg-white rounded-[20px] shadow-sm border border-gray-100 flex items-center px-5 py-4 mb-10">
           <HiOutlineSearch className="text-gray-400 text-xl mr-3" />
           <input
@@ -132,7 +128,6 @@ const AdminUsers = () => {
           />
         </div>
 
-        {/* BARIS 2: HEADLINE & TOMBOL TAMBAH */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-black text-gray-900 flex items-center gap-2">
@@ -153,9 +148,7 @@ const AdminUsers = () => {
           </button>
         </div>
 
-        {/* BARIS 3: STATISTIK CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-          {/* Card Super Admin */}
           <div className="bg-[#E87B11] rounded-3xl p-6 flex items-center gap-5 shadow-sm text-white">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shrink-0">
               <svg
@@ -179,8 +172,6 @@ const AdminUsers = () => {
               </p>
             </div>
           </div>
-
-          {/* Card Admin */}
           <div className="bg-[#8E3B87] rounded-3xl p-6 flex items-center gap-5 shadow-sm text-white">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shrink-0">
               <svg
@@ -205,8 +196,6 @@ const AdminUsers = () => {
               </p>
             </div>
           </div>
-
-          {/* Card Editor */}
           <div className="bg-[#1DA1F2] rounded-3xl p-6 flex items-center gap-5 shadow-sm text-white">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shrink-0">
               <svg
@@ -232,7 +221,6 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* BARIS 4: FILTER TABS & PAGINASI */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="flex flex-wrap gap-3">
             {["Semua", "Super Admin", "Admin", "Editor"].map((role) => (
@@ -250,7 +238,6 @@ const AdminUsers = () => {
             ))}
           </div>
 
-          {/* Controls Paginasi */}
           <div className="flex items-center gap-4 shrink-0 font-bold text-gray-900 text-sm bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm">
             <span>
               {filteredUsers.length > 0 ? startIndex + 1 : 0} -{" "}
@@ -276,7 +263,6 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* BARIS 5: TABEL DATA */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto min-h-100">
           <table className="w-full text-left min-w-225">
             <thead>
@@ -360,7 +346,7 @@ const AdminUsers = () => {
                       </button>
                       <button
                         onClick={() =>
-                          showError("Fitur Hapus Segera Hadir! 🚀")
+                          setDeleteModal({ isOpen: true, userTarget: u })
                         }
                         className="p-2 bg-[#EF4444] hover:bg-red-600 text-white rounded-lg shadow-sm transition-colors cursor-pointer"
                         title="Hapus Pengguna"
@@ -375,6 +361,18 @@ const AdminUsers = () => {
           </table>
         </div>
       </div>
+
+      {/* COMPONENT MODAL DINAMIS */}
+      <AdminConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, userTarget: null })}
+        onConfirm={confirmDeleteUser}
+        title="Hapus Akun Tim?"
+        description={`Apakah anda yakin ingin mencabut akses dan menghapus akun "${deleteModal.userTarget?.name}"?`}
+        warningText="Tindakan ini tidak dapat dibatalkan. Pengguna ini tidak akan bisa lagi login ke panel admin."
+        variant="danger"
+        confirmText="Cabut Akses"
+      />
     </div>
   );
 };
