@@ -103,9 +103,6 @@ const BookInfoBanner = ({ book, totalPages = 11 }) => {
     );
   }
 
-  // warna kategori, fallback ungu jika kosong
-  const catColor = book.category_color || "#6B4EFF";
-
   return (
     <div className="w-full bg-[#E9E9FF] rounded-4xl p-6 md:p-8 flex flex-col md:flex-row gap-5 md:gap-8 items-start mt-4 mb-16 shadow-sm border border-white/50">
       <div className="w-30 md:w-40.75 shrink-0 self-center md:self-start">
@@ -138,11 +135,8 @@ const BookInfoBanner = ({ book, totalPages = 11 }) => {
           </div>
           <span className="text-gray-400">|</span>
 
-          {/* WARNA KATEGORI DITERAPKAN DI SINI (DESAIN LAMA) */}
-          <div
-            className="flex items-center gap-1.5 font-bold"
-            style={{ color: catColor }}
-          >
+          {/* Kategori */}
+          <div className="flex items-center gap-1.5 font-bold text-[#6B4EFF]">
             <IconCategory />
             <span>{book.category_name || "Kategori"}</span>
           </div>
