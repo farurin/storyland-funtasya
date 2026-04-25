@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AdminToastProvider } from "./context/AdminToastContext";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout";
@@ -61,7 +62,13 @@ export default function App() {
             <AdminRoute allowedRoles={["editor", "admin", "super_admin"]} />
           }
         >
-          <Route element={<AdminLayout />}>
+          <Route
+            element={
+              <AdminToastProvider>
+                <AdminLayout />
+              </AdminToastProvider>
+            }
+          >
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
 
             <Route path="dashboard" element={<AdminDashboard />} />
