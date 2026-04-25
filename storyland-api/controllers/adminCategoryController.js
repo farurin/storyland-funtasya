@@ -13,9 +13,9 @@ const getAdminCategories = async (req, res) => {
 };
 
 // Create category
-
 const createCategory = async (req, res) => {
-  const { name, description, status } = req.body;
+  // TAMBAHAN: Tangkap color_hex dari req.body
+  const { name, description, status, color_hex } = req.body;
   if (!name || !description)
     return res.status(400).json({ message: "Nama dan Deskripsi wajib diisi!" });
 
@@ -33,34 +33,36 @@ const createCategory = async (req, res) => {
         ? req.files["image_card"][0].path
         : "default-card.png";
 
-    const sql = `INSERT INTO categories (name, description, status, image_icon, image_banner, image_card) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO categories (name, description, status, color_hex, image_icon, image_banner, image_card) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     const [result] = await db.query(sql, [
       name,
       description,
       status || "active",
+      color_hex || "#6B4EFF", // Fallback ke ungu jika kosong
       image_icon,
       image_banner,
       image_card,
     ]);
 
-    res
-      .status(201)
-      .json({
-        message: "Kategori berhasil ditambahkan!",
-        insertId: result.insertId,
-      });
+    res.status(201).json({
+      message: "Kategori berhasil ditambahkan!",
+      insertId: result.insertId,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// Update Category
 const updateCategory = async (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+  // TAMBAHAN: Tangkap color_hex dari req.body
+  const { name, description, color_hex } = req.body;
 
   try {
-    let sql = "UPDATE categories SET name = ?, description = ?";
-    let params = [name, description];
+    // TAMBAHAN: Masukkan color_hex ke query UPDATE
+    let sql = "UPDATE categories SET name = ?, description = ?, color_hex = ?";
+    let params = [name, description, color_hex || "#6B4EFF"];
 
     // Cek apakah ada file baru yang diupload, jika ada, update URL-nya
     if (req.files) {

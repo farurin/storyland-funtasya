@@ -31,17 +31,6 @@ const IconBookmark = () => (
   </svg>
 );
 
-const categoryColors = {
-  "Cerita Mancanegara": "#7A5AF8",
-  "Cerita Nusantara": "#E37500",
-  "Cerita Anak Tauladan": "#FF628E",
-  "Kisah Nabi & Rosul": "#34D62D",
-  "Cerita Hewan": "#5B99CE",
-  "Pahlawan Nusantara": "#FBB3AB",
-  "Cerita Anak Muslim": "#A8F4E2",
-  "Kisah 1001 Malam": "#EDC095",
-};
-
 // fungsi perhitungan waktu (Time Ago)
 const timeAgo = (dateString) => {
   if (!dateString) return "Baru saja";
@@ -70,7 +59,8 @@ const SavedCard = ({ book }) => {
   const location = useLocation();
   if (!book) return null;
 
-  const catColor = categoryColors[book.category_name] || "#6B4EFF";
+  // ambil warna kategori, fallback warna ungu default
+  const catColor = book.category_color || "#6B4EFF";
 
   // Ambil data saved_at (dari DB) lalu ubah jadi teks
   const timeSavedText = timeAgo(book.saved_at);
@@ -79,7 +69,6 @@ const SavedCard = ({ book }) => {
     <div className="w-full bg-[#EBE9FF] rounded-3xl p-5 flex gap-5 transition-transform hover:scale-[1.02] shadow-sm hover:shadow-md border border-white/50">
       <div className="w-28 md:w-32 shrink-0 aspect-2/3 rounded-2xl overflow-hidden shadow-sm bg-gray-200">
         <img
-          // helper bungkus cover buku
           src={getImageUrl(book.image)}
           alt={book.title}
           className="w-full h-full object-cover"
@@ -108,7 +97,6 @@ const SavedCard = ({ book }) => {
           <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-[#6B4EFF]/80">
             <span className="flex items-center gap-1.5">
               <IconClock /> 5min{" "}
-              {/* Catatan: Waktu baca ini masih statis 5min */}
             </span>
             <span className="text-[#6B4EFF]/40">•</span>
             <span className="flex items-center gap-1.5">

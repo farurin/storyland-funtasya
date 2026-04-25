@@ -32,28 +32,22 @@ const getDashboardStats = async (req, res) => {
 
     // 3. STATISTIK DEMOGRAFI (Persentase per Kategori)
     const [categoryStats] = await db.query(`
-      SELECT c.name AS label, COUNT(b.id) AS count
+      SELECT 
+        c.name AS label, 
+        c.color_hex AS color,
+        COUNT(b.id) AS count
       FROM categories c
       LEFT JOIN books b ON c.id = b.id_categories AND b.status = 'terbit'
-      GROUP BY c.id, c.name
+      GROUP BY c.id, c.name, c.color_hex
     `);
 
     const validTotalBooks = totalBooks || 1; // Hindari pembagian dengan nol
-    const colors = [
-      "#FBBF24",
-      "#FB923C",
-      "#3B82F6",
-      "#1D4ED8",
-      "#A855F7",
-      "#F87171",
-      "#EF4444",
-    ];
 
-    const demography = categoryStats.map((cat, index) => ({
+    const demography = categoryStats.map((cat) => ({
       label: cat.label,
       count: cat.count,
       pct: Math.round((cat.count / validTotalBooks) * 100),
-      color: colors[index % colors.length], // Rotasi warna dinamis
+      color: cat.color || "#FBBF24", // Fallback jika warna kosong
     }));
 
     // 4. MANAJEMEN BUKU (Sidebar - 5 Buku Terbaru)

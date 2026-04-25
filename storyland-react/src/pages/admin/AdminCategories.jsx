@@ -28,6 +28,7 @@ const AdminCategories = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
+  const [colorHex, setColorHex] = useState("#6B4EFF");
   const [isEdit, setIsEdit] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -57,6 +58,7 @@ const AdminCategories = () => {
     setName("");
     setDescription("");
     setStatus("active");
+    setColorHex("#6B4EFF"); // Reset ke default
     // Reset File
     setImageIcon(null);
     setImageBanner(null);
@@ -70,7 +72,7 @@ const AdminCategories = () => {
     setName(cat.name);
     setDescription(cat.description);
     setStatus(cat.status || "active");
-    // Reset File agar user upload ulang jika mau ganti, jika tidak biarkan kosong
+    setColorHex(cat.color_hex || "#6B4EFF");
     setImageIcon(null);
     setImageBanner(null);
     setImageCard(null);
@@ -91,6 +93,7 @@ const AdminCategories = () => {
     setIsEdit(false);
     setName("");
     setDescription("");
+    setColorHex("#6B4EFF");
     setTargetCategory(null);
     setImageIcon(null);
     setImageBanner(null);
@@ -106,6 +109,7 @@ const AdminCategories = () => {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
+      formData.append("color_hex", colorHex); // KIRIM WARNA KE BACKEND
       if (!isEdit) formData.append("status", "active");
 
       // Memasukkan file ke FormData (Jika user memilih file baru)
@@ -228,7 +232,7 @@ const AdminCategories = () => {
       {/* MODAL CREATE/EDIT */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-125 rounded-2xl p-6">
+          <div className="bg-white w-125 max-w-[90vw] rounded-2xl p-6">
             <div className="flex justify-between mb-4">
               <h2 className="text-lg font-semibold">
                 {isEdit ? "Edit Kategori" : "Tambah Kategori"}
@@ -241,19 +245,33 @@ const AdminCategories = () => {
               </button>
             </div>
 
-            <div className="flex gap-3 mb-4">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-1/2 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
-                placeholder="Nama Kategori"
-              />
+            <div className="flex flex-col gap-3 mb-4">
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-1 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
+                  placeholder="Nama Kategori"
+                />
+                {/* COLOR PICKER NATIVE HTML */}
+                <div
+                  className="flex items-center gap-2 border rounded-md px-2 shrink-0 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                  title="Pilih Warna Tema"
+                >
+                  <input
+                    type="color"
+                    value={colorHex}
+                    onChange={(e) => setColorHex(e.target.value)}
+                    className="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
+                  />
+                </div>
+              </div>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-1/2 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
+                className="w-full border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
                 placeholder="Deskripsi Singkat"
               />
             </div>

@@ -47,14 +47,19 @@ const BookDetail = () => {
         const currentBook = books.find((b) => b.id === parseInt(id));
 
         if (currentBook) {
-          setBook(currentBook);
           const cat = categories.find(
             (c) => c.id === currentBook.id_categories,
           );
+
           if (cat) {
+            currentBook.category_name = cat.name;
+            currentBook.category_color = cat.color_hex;
+
             cat.books = books.filter((b) => b.id_categories === cat.id);
             setCategoryData(cat);
           }
+
+          setBook(currentBook);
 
           // Fetch status simpan & favorit jika login
           if (isLoggedIn && token) {
@@ -99,7 +104,6 @@ const BookDetail = () => {
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        // Popup add fav guest
         image: popupFavGuestImg,
         title: "Wah, Rak Favoritmu Masih Rahasia!",
         description:
@@ -115,7 +119,6 @@ const BookDetail = () => {
 
     if (isFavorite) {
       setPopupConfig({
-        // Popup delete fav
         image: popupDeleteFavImg,
         title: "Hapus dari Favorit",
         description:
@@ -132,7 +135,6 @@ const BookDetail = () => {
     } else {
       await executeToggleFavAPI();
       setPopupConfig({
-        // Pop up add fav
         image: popupFavImg,
         title: "Difavoritkan",
         description: "Lihat dan baca cerita yang sudah kamu favoritkan yuk!",
@@ -148,7 +150,6 @@ const BookDetail = () => {
   const handleToggleSave = async () => {
     if (!isLoggedIn) {
       setPopupConfig({
-        // Popup simpan guest
         image: popupSavedGuestImg,
         title: "Rak Bukumu Masih Menunggu!",
         description:
@@ -167,7 +168,6 @@ const BookDetail = () => {
     } else {
       await executeToggleSaveAPI();
       setPopupConfig({
-        // Popup simpan
         image: popupBookmarkImg,
         title: "Berhasil Menyimpan",
         description:
