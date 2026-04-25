@@ -14,11 +14,13 @@ import {
 } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const AdminEditBook = () => {
   const { id } = useParams();
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [categoryList, setCategoryList] = useState([]);
@@ -47,14 +49,11 @@ const AdminEditBook = () => {
         const cats = await getCategories();
         setCategoryList(cats);
 
-        // Fetch detail buku untuk pre-fill form
         const bookData = await getAdminBookDetail(id, token);
 
         setTitle(bookData.title);
-        // Anggap backend bisa return description juga di getAdminBookDetail
         setDescription(bookData.description || "Deskripsi buku...");
 
-        // Cari ID kategori dari namanya (karena API getAdminBookDetail saat ini mereturn nama kategori)
         const matchedCat = cats.find((c) => c.name === bookData.category);
         if (matchedCat) setCategoryId(matchedCat.id);
 
@@ -63,45 +62,41 @@ const AdminEditBook = () => {
 
         setExistingBgMusic(bookData.bg_music);
 
-        // Format Scenes
         const formattedScenes = bookData.scenes.map((s, index) => ({
           id: index + 1,
           imageFile: null,
           imagePreview: getImageUrl(s.image),
           existingImage: s.image,
-
           dubbingIdFile: null,
           existingDubbingId: s.dubbing_id_url,
           subtitleId: s.text_id,
-
           dubbingEnFile: null,
           existingDubbingEn: s.dubbing_en_url,
           subtitleEn: s.text_en,
         }));
         setScenes(formattedScenes);
       } catch (err) {
-        alert("Gagal memuat data: " + err.message);
+        showError("Gagal memuat data: " + err.message); // TOAST ERROR
       } finally {
         setIsLoading(false);
       }
     };
     if (token) fetchData();
-  }, [id, token]);
+  }, [id, token, showError]);
 
   const handleNextToStep2 = (e) => {
     e.preventDefault();
-    if (!title) return alert("Harap isi Judul!");
+    if (!title) return showError("Harap isi Judul!"); // TOAST ERROR
     setCurrentStep(2);
   };
 
   const handleNextToStep3 = () => {
-    if (!categoryId) return alert("Harap pilih kategori!");
+    if (!categoryId) return showError("Harap pilih kategori!"); // TOAST ERROR
     setCurrentStep(3);
   };
 
   const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  // MULTIMEDIA HANDLERS
   const handleSceneImageChange = (index, file) => {
     if (!file) return;
     const newScenes = [...scenes];
@@ -149,13 +144,13 @@ const AdminEditBook = () => {
 
   // SUBMIT UPDATE KE BACKEND
   const handleSubmitFinal = async (statusBook) => {
+    showLoading(true); // loading overlay
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("id_categories", categoryId);
     formData.append("status", statusBook);
 
-    // Kirim URL lama jika tidak diubah
     formData.append("existing_cover", existingCover);
     formData.append("existing_bg_music", existingBgMusic || null);
 
@@ -182,10 +177,12 @@ const AdminEditBook = () => {
 
     try {
       const data = await updateAdminBook(id, formData, token);
-      alert(`Sukses: ${data.message}`);
+      showSuccess(data.message || "Buku berhasil diperbarui!"); // TOAST SUKSES
       navigate(`/admin/books/${id}`);
     } catch (err) {
-      alert("Terjadi kesalahan: " + err.message);
+      showError("Terjadi kesalahan: " + err.message); // TOAST ERROR
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 

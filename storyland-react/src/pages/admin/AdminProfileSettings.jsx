@@ -13,9 +13,12 @@ import {
   updateAdminPassword,
 } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext"; // 1. IMPORT TOAST
 
 const AdminProfileSettings = () => {
   const { token } = useAuth();
+  const { showSuccess, showError, showLoading } = useAdminToast(); // 2. PANGGIL TOAST
+
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,7 +57,7 @@ const AdminProfileSettings = () => {
           firstName: data.first_name || "",
           lastName: data.last_name || "",
           email: data.email || "",
-          phone: data.phone_number || "", // <--- DISESUAIKAN DI SINI
+          phone: data.phone_number || "",
           gender: data.gender || "",
         });
 
@@ -63,13 +66,13 @@ const AdminProfileSettings = () => {
           setAvatarPreview(getImageUrl(data.avatar_url));
         }
       } catch (err) {
-        console.error("Gagal memuat profil:", err);
+        showError("Gagal memuat profil: " + err.message); // TOAST ERROR
       } finally {
         setIsLoading(false);
       }
     };
     if (token) fetchProfile();
-  }, [token]);
+  }, [token, showError]);
 
   // HANDLERS
   const handleProfileChange = (e) =>
@@ -90,6 +93,7 @@ const AdminProfileSettings = () => {
   // SUBMIT UPDATE PROFILE
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+    showLoading(true); // GLOBAL LOADING
     const formData = new FormData();
     formData.append("firstName", profileData.firstName);
     formData.append("lastName", profileData.lastName);
@@ -98,14 +102,16 @@ const AdminProfileSettings = () => {
     formData.append("gender", profileData.gender);
     formData.append("existing_avatar", existingAvatar || "");
 
-    if (avatarFile) formData.append("avatar", avatarFile); // Jika pakai nama field lain di multer, sesuaikan
+    if (avatarFile) formData.append("avatar", avatarFile);
 
     try {
       const res = await updateAdminProfile(formData, token);
-      alert(res.message);
+      showSuccess(res.message || "Profil berhasil diperbarui!"); // TOAST SUKSES
       if (res.avatar_url) setExistingAvatar(res.avatar_url);
     } catch (err) {
-      alert("Gagal update profil: " + err.message);
+      showError("Gagal update profil: " + err.message); // TOAST ERROR
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 
@@ -113,18 +119,22 @@ const AdminProfileSettings = () => {
   const handleSavePassword = async (e) => {
     e.preventDefault();
     if (passwordData.new !== passwordData.confirm) {
-      return alert("Password baru dan konfirmasi tidak cocok!");
+      return showError("Password baru dan konfirmasi tidak cocok!"); // TOAST ERROR
     }
+
+    showLoading(true); // GLOBAL LOADING
     try {
       const payload = {
         currentPassword: passwordData.current,
         newPassword: passwordData.new,
       };
       const res = await updateAdminPassword(payload, token);
-      alert(res.message);
-      setPasswordData({ current: "", new: "", confirm: "" }); // Reset form
+      showSuccess(res.message || "Password berhasil diubah!"); // TOAST SUKSES
+      setPasswordData({ current: "", new: "", confirm: "" });
     } catch (err) {
-      alert(err.message);
+      showError(err.message); // TOAST ERROR
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 

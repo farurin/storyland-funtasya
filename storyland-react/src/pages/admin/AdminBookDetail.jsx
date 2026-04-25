@@ -13,17 +13,17 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { getAdminBookDetail, updateAdminBookStatus } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const AdminBookDetail = () => {
   const { id } = useParams();
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
-  // State data diset null terlebih dahulu
   const [book, setBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // MENGAMBIL DATA DETAIL CERITA DARI BACKEND
   useEffect(() => {
     const fetchDetail = async () => {
       if (!token) return;
@@ -31,15 +31,15 @@ const AdminBookDetail = () => {
         const data = await getAdminBookDetail(id, token);
         setBook(data);
       } catch (err) {
-        alert("Gagal memuat detail cerita: " + err.message);
+        showError("Gagal memuat detail cerita: " + err.message);
       } finally {
         setIsLoading(false);
       }
     };
     fetchDetail();
-  }, [id, token]);
+  }, [id, token, showError]);
 
-  // AKSI MENGUBAH STATUS (TERBIT / DITOLAK / ARSIP / REVIEW)
+  // AKSI MENGUBAH STATUS
   const handleUpdateStatus = async (newStatus) => {
     let confirmMsg = `Yakin ingin mengubah status buku ini menjadi ${newStatus.toUpperCase()}?`;
 
@@ -52,29 +52,29 @@ const AdminBookDetail = () => {
 
     if (!window.confirm(confirmMsg)) return;
 
+    showLoading(true); // loading
     try {
       await updateAdminBookStatus(id, newStatus, token);
-      alert(
+      showSuccess(
         `Status cerita berhasil diubah menjadi ${newStatus.toUpperCase()}!`,
       );
-      navigate("/admin/books"); // kembali ke tabel buku
+      navigate("/admin/books");
     } catch (err) {
-      alert("Gagal mengubah status: " + err.message);
+      showError("Gagal mengubah status: " + err.message);
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 
-  // FUNGSI MEMUTAR AUDIO BGM / DUBBING
   const playAudio = (url) => {
-    if (!url) return alert("Audio tidak tersedia");
-    // Pastikan URL-nya sudah lengkap (ditangani oleh getImageUrl)
+    if (!url) return showError("Audio tidak tersedia");
     const audio = new Audio(getImageUrl(url));
     audio.play().catch((err) => {
       console.error(err);
-      alert("Gagal memutar audio. Pastikan file tersedia.");
+      showError("Gagal memutar audio. Pastikan file tersedia.");
     });
   };
 
-  // TAMPILAN SAAT LOADING
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -85,7 +85,6 @@ const AdminBookDetail = () => {
     );
   }
 
-  // TAMPILAN JIKA BUKU TIDAK DITEMUKAN ATAU ERROR
   if (!book) {
     return (
       <div className="flex flex-col h-screen items-center justify-center gap-4">
@@ -102,7 +101,6 @@ const AdminBookDetail = () => {
     );
   }
 
-  // TAMPILAN UTAMA
   return (
     <div className="p-8 md:p-12 max-w-6xl mx-auto w-full">
       {/* BREADCRUMB */}
@@ -120,7 +118,6 @@ const AdminBookDetail = () => {
       <div className="bg-white w-full rounded-4xl shadow-sm border border-gray-100 p-8">
         {/* HEADER: COVER & METADATA */}
         <div className="flex flex-col md:flex-row gap-8 mb-12">
-          {/* Cover Buku */}
           <div className="w-full md:w-64 shrink-0 rounded-2xl overflow-hidden shadow-md bg-gray-100">
             <img
               src={getImageUrl(book.cover_image)}
@@ -201,7 +198,6 @@ const AdminBookDetail = () => {
               key={scene.page_number}
               className="flex flex-col lg:flex-row gap-6 min-w-0"
             >
-              {/* Gambar Scene */}
               <div className="w-full lg:w-1/3 shrink-0">
                 <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200 mb-4 bg-gray-100">
                   <img
@@ -216,7 +212,6 @@ const AdminBookDetail = () => {
                 </div>
               </div>
 
-              {/* Teks & Audio Scene */}
               <div className="w-full lg:w-2/3 flex flex-col gap-5 min-w-0">
                 <h3 className="text-lg font-black text-gray-900">
                   Scene {scene.page_number}
@@ -282,7 +277,6 @@ const AdminBookDetail = () => {
 
         {/* BOTTOM ACTIONS */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-4">
-          {/* Tampil hanya jika status REVIEW */}
           {book.status === "review" && (
             <button
               onClick={() => handleUpdateStatus("ditolak")}
@@ -292,7 +286,6 @@ const AdminBookDetail = () => {
             </button>
           )}
 
-          {/* Tampil jika status REVIEW (Untuk menerbitkan) ATAU status DITOLAK/ARSIP (Untuk ajukan ulang) */}
           {(book.status === "review" ||
             book.status === "arsip" ||
             book.status === "ditolak") && (
@@ -311,7 +304,6 @@ const AdminBookDetail = () => {
             </button>
           )}
 
-          {/* Tampil hanya jika status TERBIT */}
           {book.status === "terbit" && (
             <button
               onClick={() => handleUpdateStatus("arsip")}

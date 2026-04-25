@@ -6,18 +6,17 @@ import {
   HiChevronDown,
 } from "react-icons/hi";
 import { getImageUrl } from "../../utils/getImageUrl";
-
-// IMPORT API & AUTH
 import { useAuth } from "../../context/AuthContext";
 import { getAdminBooks, getAdminUsers } from "../../services/api";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const AdminBackupExport = () => {
   const { token } = useAuth();
+  const { showError, showSuccess } = useAdminToast();
 
   const [activeTab, setActiveTab] = useState("Data Buku");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // State Custom Dropdown
   const [dateFilter, setDateFilter] = useState("Bulan ini");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const filterOptions = [
@@ -28,17 +27,14 @@ const AdminBackupExport = () => {
     "Pilih Rentang Waktu...",
   ];
 
-  // State Data dari Backend
   const [booksData, setBooksData] = useState([]);
   const [usersData, setUsersData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // FETCH DATA DARI BACKEND
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 1. Fetch Data Buku
         const books = await getAdminBooks(token);
         const formattedBooks = books.map((b) => ({
           id: b.id,
@@ -54,10 +50,7 @@ const AdminBackupExport = () => {
         }));
         setBooksData(formattedBooks);
 
-        // 2. Fetch Data User Asli
         const users = await getAdminUsers(token);
-
-        // Filter khusus pembaca
         const normalUsers = users.filter((u) => u.role === "user");
 
         const formattedUsers = normalUsers.map((u) => ({
@@ -70,19 +63,17 @@ const AdminBackupExport = () => {
           date: u.date,
         }));
 
-        // Simpan data asli ke state (dan tidak ditimpa lagi)
         setUsersData(formattedUsers);
       } catch (err) {
-        console.error("Gagal mengambil data:", err);
+        showError("Gagal mengambil data: " + err.message);
       } finally {
         setIsLoading(false);
       }
     };
 
     if (token) fetchData();
-  }, [token]);
+  }, [token, showError]);
 
-  // Logika Filter Pencarian
   const filteredBooks = booksData.filter((b) =>
     (b.title || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -93,32 +84,24 @@ const AdminBackupExport = () => {
       (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // LOGIKA EXPORT CSV (Javascript Murni)
   const handleExportCSV = () => {
     const dataToExport =
       activeTab === "Data Buku" ? filteredBooks : filteredUsers;
 
     if (dataToExport.length === 0) {
-      return alert("Tidak ada data yang bisa diekspor.");
+      return showError("Tidak ada data yang bisa diekspor.");
     }
 
-    // 1. Ambil Header (Key dari JSON)
     const headers = Object.keys(dataToExport[0]);
-
-    // 2. Map data ke dalam bentuk string CSV (Pisahkan dengan koma)
     const csvRows = dataToExport.map((row) => {
       return headers
         .map((fieldName) => {
-          // Bungkus dengan tanda kutip ganda untuk menghindari error jika ada teks yang pakai koma
           return JSON.stringify(row[fieldName] || "");
         })
         .join(",");
     });
 
-    // 3. Gabungkan Header dan Baris
     const csvContent = [headers.join(","), ...csvRows].join("\n");
-
-    // 4. Buat File Blob dan Trigger Download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -131,9 +114,10 @@ const AdminBackupExport = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    showSuccess("File CSV berhasil diunduh!");
   };
 
-  // Render Status Badge
   const renderStatus = (status) => {
     const isActive = status === "Aktif";
     return (
@@ -151,9 +135,7 @@ const AdminBackupExport = () => {
   return (
     <div className="p-8 md:p-12 w-full min-h-screen bg-gray-50 flex justify-center items-start">
       <div className="w-full max-w-6xl">
-        {/* BARIS 1: SEARCH & CUSTOM FILTER */}
         <div className="flex flex-col md:flex-row gap-4 mb-10">
-          {/* Search Input */}
           <div className="relative flex-1 bg-white rounded-[20px] shadow-sm border border-gray-100 flex items-center px-5 py-4">
             <HiOutlineSearch className="text-gray-400 text-xl mr-3" />
             <input
@@ -167,7 +149,6 @@ const AdminBackupExport = () => {
             />
           </div>
 
-          {/* CUSTOM DROPDOWN FILTER WAKTU */}
           <div className="relative w-full md:w-56 shrink-0">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -179,7 +160,6 @@ const AdminBackupExport = () => {
               />
             </button>
 
-            {/* Opsi Dropdown */}
             {isDropdownOpen && (
               <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-100 shadow-xl rounded-[20px] overflow-hidden z-20 animate-fade-in">
                 {filterOptions.map((opt) => (
@@ -203,7 +183,6 @@ const AdminBackupExport = () => {
           </div>
         </div>
 
-        {/* BARIS 2: TABS & ACTION BUTTONS */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-6 border-b border-gray-200 pb-4">
           <div className="flex gap-8 px-2">
             {["Data Buku", "Data Pengguna"].map((tab) => (
@@ -227,8 +206,8 @@ const AdminBackupExport = () => {
           <div className="flex gap-3 w-full md:w-auto">
             <button
               onClick={() =>
-                alert(
-                  "Untuk membackup SQL Database secara penuh, silakan ekspor langsung melalui panel Aiven Cloud kamu.",
+                showError(
+                  "Gunakan panel Aiven Cloud untuk membackup SQL Database secara penuh.",
                 )
               }
               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm border-2 border-[#F8AF2F] text-[#F8AF2F] hover:bg-orange-50 transition-colors shadow-sm cursor-pointer"
@@ -236,7 +215,6 @@ const AdminBackupExport = () => {
               <HiCloudDownload className="text-lg" /> Backup data
             </button>
 
-            {/* TOMBOL EXPORT CSV AKTIF */}
             <button
               onClick={handleExportCSV}
               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-[#F8AF2F] hover:bg-yellow-500 text-white transition-colors shadow-sm cursor-pointer"
@@ -246,10 +224,8 @@ const AdminBackupExport = () => {
           </div>
         </div>
 
-        {/* BARIS 3: TABEL DATA */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto min-h-100">
           <table className="w-full text-left min-w-200">
-            {/* Header Data Buku */}
             {activeTab === "Data Buku" && (
               <>
                 <thead>
@@ -325,7 +301,6 @@ const AdminBackupExport = () => {
               </>
             )}
 
-            {/* Header Data Pengguna */}
             {activeTab === "Data Pengguna" && (
               <>
                 <thead>
@@ -356,15 +331,12 @@ const AdminBackupExport = () => {
                       key={idx}
                       className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors cursor-default"
                     >
-                      {/* id */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.id}
                       </td>
-                      {/* nama */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-800">
                         {user.name}
                       </td>
-                      {/* ava + email */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600 flex items-center gap-3">
                         <img
                           src={getImageUrl(user.avatar)}
@@ -373,13 +345,10 @@ const AdminBackupExport = () => {
                         />
                         {user.email}
                       </td>
-                      {/* jumlah baca */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.readCount}
                       </td>
-                      {/* status */}
                       <td className="py-4 px-6">{renderStatus(user.status)}</td>
-                      {/* tgl daftar */}
                       <td className="py-4 px-6 text-sm font-bold text-gray-600">
                         {user.date}
                       </td>

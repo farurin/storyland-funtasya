@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { getAdminBooks } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const tabs = [
   "Proses Review",
@@ -22,7 +23,6 @@ const tabs = [
   "Dihapus",
 ];
 
-// Helper untuk mengubah nama Tab menjadi nilai status di database
 const getStatusFromTab = (tab) => {
   switch (tab) {
     case "Proses Review":
@@ -43,18 +43,16 @@ const getStatusFromTab = (tab) => {
 const AdminBooks = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { showError } = useAdminToast();
 
-  // States
   const [activeTab, setActiveTab] = useState("Proses Review");
   const [searchQuery, setSearchQuery] = useState("");
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Tarik Data dari API
   useEffect(() => {
     const fetchBooks = async () => {
       if (!token) return;
@@ -62,20 +60,18 @@ const AdminBooks = () => {
         const data = await getAdminBooks(token);
         setBooks(data);
       } catch (error) {
-        console.error("Gagal menarik data buku:", error.message);
+        showError("Gagal menarik data buku: " + error.message); // GUNAKAN TOAST
       } finally {
         setIsLoading(false);
       }
     };
     fetchBooks();
-  }, [token]);
+  }, [token, showError]);
 
-  // Reset ke halaman 1 jika user mengganti Tab atau melakukan Pencarian
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, searchQuery]);
 
-  // LOGIKA STATISTIK DINAMIS
   const reviewCount = books.filter(
     (b) => (b.status || "review").toLowerCase() === "review",
   ).length;
@@ -113,7 +109,6 @@ const AdminBooks = () => {
     },
   ];
 
-  // LOGIKA FILTER (TAB & SEARCH)
   const currentStatusTarget = getStatusFromTab(activeTab);
 
   const filteredBooks = books.filter((book) => {
@@ -125,7 +120,6 @@ const AdminBooks = () => {
     return matchStatus && matchSearch;
   });
 
-  // LOGIKA PAGINASI
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedBooks = filteredBooks.slice(
@@ -139,12 +133,10 @@ const AdminBooks = () => {
 
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
-      {/* HEADER */}
       <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-8">
         Manajemen Buku
       </h1>
 
-      {/* SEARCH & ADD BUTTON */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-10">
         <div className="relative w-full">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
@@ -164,7 +156,6 @@ const AdminBooks = () => {
         </Link>
       </div>
 
-      {/* STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {statCards.map((stat) => (
           <div
@@ -188,9 +179,7 @@ const AdminBooks = () => {
         ))}
       </div>
 
-      {/* TABS & PAGINATION */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        {/* TABS */}
         <div className="flex gap-6 overflow-x-auto w-full border-b border-gray-200 hide-scrollbar pb-1">
           {tabs.map((tab) => (
             <button
@@ -207,7 +196,6 @@ const AdminBooks = () => {
           ))}
         </div>
 
-        {/* PAGINATION CONTROLS */}
         <div className="flex items-center gap-4 shrink-0 font-bold text-gray-900 text-sm">
           <span className="text-gray-500 font-medium">
             {filteredBooks.length > 0 ? startIndex + 1 : 0} -{" "}
@@ -233,7 +221,6 @@ const AdminBooks = () => {
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto">
         <table className="w-full text-left min-w-200">
           <thead>
@@ -340,7 +327,6 @@ const AdminBooks = () => {
         </table>
       </div>
 
-      {/* CSS untuk menyembunyikan scrollbar */}
       <style
         dangerouslySetInnerHTML={{
           __html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`,

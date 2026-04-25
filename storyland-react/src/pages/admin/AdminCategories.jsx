@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { FiSearch } from "react-icons/fi";
 import { HiExclamation } from "react-icons/hi";
 import CardCategories from "../../components/admin/CardCategories";
 import DetailCategories from "../../components/admin/DetailCategories";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminToast } from "../../context/AdminToastContext"; // 1. IMPORT TOAST
 import {
   getAdminCategories,
   createCategory,
@@ -14,6 +15,7 @@ import {
 
 const AdminCategories = () => {
   const { token } = useAuth();
+  const { showSuccess, showError, showLoading } = useAdminToast(); // 2. PANGGIL FUNGSI TOAST
 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -37,19 +39,19 @@ const AdminCategories = () => {
   const [imageBanner, setImageBanner] = useState(null);
   const [imageCard, setImageCard] = useState(null);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
+    if (!token) return;
     try {
       const res = await getAdminCategories(token);
       setCategories(res);
     } catch (err) {
-      console.error(err);
-      alert("Gagal memuat kategori: " + err.message);
+      showError("Gagal memuat kategori: " + err.message);
     }
-  };
+  }, [token, showError]);
 
   useEffect(() => {
-    if (token) fetchCategories();
-  }, [token]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleOpenCreate = () => {
     setIsEdit(false);
@@ -102,53 +104,63 @@ const AdminCategories = () => {
 
   // SUBMIT DENGAN FORMDATA
   const handleSubmitForm = async () => {
-    if (!name || !description) return alert("Nama dan Deskripsi harus diisi!");
+    if (!name || !description)
+      return showError("Nama dan Deskripsi harus diisi!"); // TOAST
 
     setIsProcessing(true);
+    showLoading(true); // GLOBAL LOADING BUKA
     try {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
-      formData.append("color_hex", colorHex); // KIRIM WARNA KE BACKEND
+      formData.append("color_hex", colorHex);
       if (!isEdit) formData.append("status", "active");
 
-      // Memasukkan file ke FormData (Jika user memilih file baru)
       if (imageIcon) formData.append("image_icon", imageIcon);
       if (imageBanner) formData.append("image_banner", imageBanner);
       if (imageCard) formData.append("image_card", imageCard);
 
       if (isEdit) {
         await updateCategory(targetCategory.id, formData, token);
+        showSuccess("Kategori berhasil diperbarui!");
       } else {
         await createCategory(formData, token);
+        showSuccess("Kategori baru berhasil ditambahkan!");
       }
 
       await fetchCategories();
       handleCloseModal();
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setIsProcessing(false);
+      showLoading(false);
     }
   };
 
   const handleConfirmStatus = async () => {
     setIsProcessing(true);
+    showLoading(true);
     try {
       const newStatus =
         targetCategory.status === "active" ? "inactive" : "active";
       await updateCategoryStatus(targetCategory.id, newStatus, token);
       await fetchCategories();
       setIsStatusOpen(false);
+      showSuccess(
+        `Status kategori berhasil diubah menjadi ${newStatus === "active" ? "Aktif" : "Non Aktif"}.`,
+      );
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setIsProcessing(false);
+      showLoading(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     setIsProcessing(true);
+    showLoading(true); // GLOBAL LOADING BUKA
     try {
       await deleteCategory(targetCategory.id, token);
       await fetchCategories();
@@ -157,10 +169,12 @@ const AdminCategories = () => {
         setSelectedCategory(null);
       }
       setIsDeleteOpen(false);
+      showSuccess("Kategori berhasil dihapus secara permanen!");
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setIsProcessing(false);
+      showLoading(false);
     }
   };
 
@@ -254,7 +268,6 @@ const AdminCategories = () => {
                   className="flex-1 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
                   placeholder="Nama Kategori"
                 />
-                {/* COLOR PICKER NATIVE HTML */}
                 <div
                   className="flex items-center gap-2 border rounded-md px-2 shrink-0 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
                   title="Pilih Warna Tema"

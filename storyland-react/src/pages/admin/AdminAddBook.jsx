@@ -9,10 +9,12 @@ import {
 } from "react-icons/hi";
 import { getCategories, createAdminBook } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const AdminAddBook = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [categoryList, setCategoryList] = useState([]);
@@ -55,14 +57,15 @@ const AdminAddBook = () => {
   // NAVIGASI STEP
   const handleNextToStep2 = (e) => {
     e.preventDefault();
-    if (!title || !description) return alert("Harap isi Judul dan Deskripsi!");
+    if (!title || !description)
+      return showError("Harap isi Judul dan Deskripsi!");
     setCurrentStep(2);
   };
 
   const handleNextToStep3 = () => {
-    if (!categoryId) return alert("Harap pilih kategori!");
+    if (!categoryId) return showError("Harap pilih kategori!");
     if (!scenes[0].imageFile)
-      return alert("Harap masukkan minimal 1 gambar untuk Scene 1!");
+      return showError("Harap masukkan minimal 1 gambar untuk Scene 1!");
     setCurrentStep(3);
   };
 
@@ -121,12 +124,8 @@ const AdminAddBook = () => {
     ]);
   };
 
-  // MENGHAPUS SCENE
   const handleRemoveScene = (indexToRemove) => {
-    // Jangan biarkan scene habis, minimal harus ada 1
     if (scenes.length <= 1) return;
-
-    // Filter array scenes untuk membuang scene pada index tertentu
     const updatedScenes = scenes.filter((_, index) => index !== indexToRemove);
     setScenes(updatedScenes);
   };
@@ -140,8 +139,10 @@ const AdminAddBook = () => {
 
   // SUBMIT KE BACKEND
   const handleSubmitFinal = async (statusBook) => {
-    if (!coverImage) return alert("Harap unggah gambar sampul (thumbnail)!");
+    if (!coverImage)
+      return showError("Harap unggah gambar sampul (thumbnail)!");
 
+    showLoading(true); // loading overlay
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -151,14 +152,12 @@ const AdminAddBook = () => {
     formData.append("cover_image", coverImage);
     if (bgMusic) formData.append("bg_music", bgMusic);
 
-    // Menyusun teks scenes
     const sceneDataForDb = scenes.map((s) => ({
       subtitleId: s.subtitleId,
       subtitleEn: s.subtitleEn,
     }));
     formData.append("scenes", JSON.stringify(sceneDataForDb));
 
-    // Append file scenes dengan label ID dan EN
     scenes.forEach((scene, index) => {
       if (scene.imageFile)
         formData.append(`scene_image_${index}`, scene.imageFile);
@@ -170,10 +169,12 @@ const AdminAddBook = () => {
 
     try {
       const data = await createAdminBook(formData, token);
-      alert(`Sukses: ${data.message}`);
+      showSuccess(data.message || "Buku berhasil ditambahkan!");
       navigate("/admin/books");
     } catch (err) {
-      alert("Terjadi kesalahan: " + err.message);
+      showError("Terjadi kesalahan: " + err.message);
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 

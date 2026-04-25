@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAdminDashboardStats, getAdminProfile } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -22,6 +23,7 @@ const tabs = ["Paling Populer", "Terbaru", "Download"];
 
 export default function AdminDashboard() {
   const { token } = useAuth();
+  const { showError } = useAdminToast();
 
   const [activeTab, setActiveTab] = useState("Paling Populer");
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +40,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!token) return;
       try {
         const [dashboardRes, profileRes] = await Promise.all([
           getAdminDashboardStats(token),
@@ -46,13 +49,13 @@ export default function AdminDashboard() {
         setData(dashboardRes);
         setAdminProfile(profileRes);
       } catch (err) {
-        console.error("Gagal memuat dashboard:", err);
+        showError("Gagal memuat dashboard: " + err.message);
       } finally {
         setIsLoading(false);
       }
     };
-    if (token) fetchDashboardData();
-  }, [token]);
+    fetchDashboardData();
+  }, [token, showError]);
 
   // Siapkan Data untuk Doughnut Chart
   const doughnutData = {

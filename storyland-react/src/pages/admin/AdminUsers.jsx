@@ -12,9 +12,11 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { getAdminUsers } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const AdminUsers = () => {
-  const { token, user } = useAuth(); // Ambil data user yang sedang login untuk sapaan
+  const { token, user } = useAuth();
+  const { showSuccess, showError } = useAdminToast();
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,13 +45,13 @@ const AdminUsers = () => {
         });
         setUsers(formattedUsers);
       } catch (err) {
-        console.error("Gagal mengambil data pengguna:", err);
+        showError("Gagal mengambil data pengguna: " + err.message); // TOAST ERROR
       } finally {
         setIsLoading(false);
       }
     };
     if (token) fetchUsers();
-  }, [token]);
+  }, [token, showError]);
 
   // Reset pagination saat filter berubah
   useEffect(() => {
@@ -142,7 +144,9 @@ const AdminUsers = () => {
             </p>
           </div>
           <button
-            onClick={() => alert("Fitur Tambah Pengguna segera hadir!")}
+            onClick={() =>
+              showSuccess("Fitur Tambah Pengguna Segera Hadir! 🚀")
+            }
             className="bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold px-6 py-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <HiPlus className="text-lg" /> Tambah Pengguna
@@ -346,12 +350,18 @@ const AdminUsers = () => {
                     </td>
                     <td className="py-4 px-6 flex items-center justify-center gap-2">
                       <button
+                        onClick={() =>
+                          showSuccess("Fitur Edit Segera Hadir! 🚀")
+                        }
                         className="p-2 bg-[#F8AF2F] hover:bg-yellow-500 text-white rounded-lg shadow-sm transition-colors cursor-pointer"
                         title="Edit Pengguna"
                       >
                         <HiPencil />
                       </button>
                       <button
+                        onClick={() =>
+                          showError("Fitur Hapus Segera Hadir! 🚀")
+                        }
                         className="p-2 bg-[#EF4444] hover:bg-red-600 text-white rounded-lg shadow-sm transition-colors cursor-pointer"
                         title="Hapus Pengguna"
                       >

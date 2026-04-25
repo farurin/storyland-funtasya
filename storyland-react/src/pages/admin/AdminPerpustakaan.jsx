@@ -23,6 +23,7 @@ import {
   updateAdminBookStatus,
 } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 import bannerImg from "../../assets/banner_corner.png";
 
@@ -60,6 +61,7 @@ const IconArrowRight = () => (
 
 const AdminPerpustakaan = () => {
   const { token } = useAuth();
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
   // States
   const [books, setBooks] = useState([]);
@@ -84,42 +86,32 @@ const AdminPerpustakaan = () => {
           getAdminCategories(token),
         ]);
 
-        // Pastikan hanya buku yang berstatus terbit yang tampil di Perpustakaan
         const publishedBooks = booksData.filter((b) => b.status === "terbit");
         setBooks(publishedBooks);
-
-        // Filter kategori agar hanya yang punya gambar ikon yang tampil di slider
         setCategories(catsData.filter((c) => c.image_icon));
       } catch (err) {
-        console.error("Gagal mengambil data perpustakaan:", err);
+        showError("Gagal mengambil data perpustakaan: " + err.message); // TOAST ERROR
       } finally {
         setIsLoading(false);
       }
     };
     if (token) fetchData();
-  }, [token]);
+  }, [token, showError]);
 
   // LOGIKA FILTER
   const filteredBooks = books.filter((book) => {
-    // 1. Pencarian (Judul)
     const matchSearch = book.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // 2. Cek Kategori
     let matchCategory = false;
     if (activeCategoryId === "all") {
       matchCategory = true;
     } else {
       const matchById = book.id_categories == activeCategoryId;
-
-      // Ambil nama kategori yang sedang diklik
       const activeCatObj = categories.find((c) => c.id == activeCategoryId);
       const activeCatName = activeCatObj ? activeCatObj.name : "";
-
-      // Cek apakah nama kategorinya sama
       const matchByName = book.category === activeCatName;
-
       matchCategory = matchById || matchByName;
     }
 
@@ -137,24 +129,34 @@ const AdminPerpustakaan = () => {
   const handleArchive = async (bookId) => {
     if (!window.confirm("Yakin ingin mengarsipkan buku ini dari publik?"))
       return;
+
+    showLoading(true); // GLOBAL LOADING
     try {
       await updateAdminBookStatus(bookId, "arsip", token);
-      setBooks(books.filter((b) => b.id !== bookId)); // Hapus instan dari layar
-      setSelectedBook(null); // Tutup panel detail
+      setBooks(books.filter((b) => b.id !== bookId));
+      setSelectedBook(null);
+      showSuccess("Buku berhasil diarsipkan!"); // TOAST SUKSES
     } catch (err) {
-      alert("Gagal mengarsipkan: " + err.message);
+      showError("Gagal mengarsipkan: " + err.message); // TOAST ERROR
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 
   const handleDelete = async (bookId) => {
     if (!window.confirm("Yakin ingin menghapus buku ini secara permanen?"))
       return;
+
+    showLoading(true); // GLOBAL LOADING
     try {
       await updateAdminBookStatus(bookId, "dihapus", token);
       setBooks(books.filter((b) => b.id !== bookId));
       setSelectedBook(null);
+      showSuccess("Buku berhasil dihapus permanen!"); // TOAST SUKSES
     } catch (err) {
-      alert("Gagal menghapus: " + err.message);
+      showError("Gagal menghapus: " + err.message); // TOAST ERROR
+    } finally {
+      showLoading(false); // MATIKAN LOADING
     }
   };
 
@@ -407,7 +409,6 @@ const AdminPerpustakaan = () => {
                     {selectedBook.category || "Tanpa Kategori"}
                   </p>
 
-                  {/* Mock Stats */}
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
                       <HiHeart className="text-red-500 text-sm" /> 1,2k Suka
