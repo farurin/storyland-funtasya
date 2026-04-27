@@ -17,7 +17,8 @@ const Card = ({ book }) => {
         alt={book.title || "Cover Buku"}
         className="w-full h-65 md:h-63.75 object-cover transition-transform duration-500 group-hover:scale-105"
         onError={(e) => {
-          e.target.src = "https://via.placeholder.com/150x220?text=Cover";
+          e.target.onerror = null;
+          e.target.src = "https://placehold.co/150x220?text=Cover+Buku";
         }}
       />
     </Link>

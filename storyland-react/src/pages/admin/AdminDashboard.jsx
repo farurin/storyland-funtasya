@@ -177,8 +177,8 @@ export default function AdminDashboard() {
                     alt={book.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/300x400?text=Cover";
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/300x400?text=Cover";
                     }}
                   />
                 </div>
@@ -257,10 +257,14 @@ export default function AdminDashboard() {
               src={
                 adminProfile?.avatar_url
                   ? getImageUrl(adminProfile.avatar_url)
-                  : "https://via.placeholder.com/150"
+                  : "https://placehold.co/150x150?text=Avatar"
               }
               alt="Admin Avatar"
               className="w-12 h-12 rounded-full object-cover bg-gray-100 shadow-sm"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/150x150?text=Avatar";
+              }}
             />
             <div className="min-w-0">
               <p className="text-sm font-black text-slate-800 truncate">
@@ -310,8 +314,8 @@ export default function AdminDashboard() {
                   alt={b.title}
                   className="w-12 h-14 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform"
                   onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/100x140?text=Cover";
+                    e.target.onerror = null;
+                    e.target.src = "https://placehold.co/100x140?text=Cover";
                   }}
                 />
                 <div className="min-w-0 flex-1">
