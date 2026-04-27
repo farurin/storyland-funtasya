@@ -38,10 +38,12 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
 
     if (!window.isSessionAlertShown) {
       window.isSessionAlertShown = true;
-      alert("Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!");
+      alert(
+        "Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!",
+      );
       window.location.href = "/"; // redirect home
     }
-    
+
     // Hentikan eksekusi kode selanjutnya
     throw new Error("Sesi kedaluwarsa");
   }
@@ -167,3 +169,10 @@ export const getAdminDashboardStats = (token) =>
 
 // Manajemen Pengguna Admin
 export const getAdminUsers = (token) => fetchAPI("/admin/users", {}, token);
+
+export const createAdminUser = (data, token) =>
+  fetchAPI(
+    "/admin/users",
+    { method: "POST", body: JSON.stringify(data) },
+    token,
+  );

@@ -32,7 +32,10 @@ const {
   getDashboardStats,
 } = require("../controllers/adminDashboardController");
 
-const { getAllUsers } = require("../controllers/adminUserController");
+const {
+  getAllUsers,
+  createAdminUser,
+} = require("../controllers/adminUserController");
 
 // Middleware Global untuk Rute Admin
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
@@ -72,5 +75,6 @@ router.get("/dashboard", getDashboardStats);
 
 // ROUTES MANAJEMEN PENGGUNA (Hanya Super Admin) ---
 router.get("/users", superAdminOnly, getAllUsers);
+router.post("/users", superAdminOnly, createAdminUser);
 
 module.exports = router;

@@ -17,18 +17,36 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Email sudah terdaftar!" });
     }
 
-    // 2. Hash Password & Buat Username
+    // 2. Hash Password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const username = email.split("@")[0];
 
-    // 3. Masukkan ke Database
+    // 3. Buat Username Unik
+    let baseUsername = email.split("@")[0];
+    let finalUsername = baseUsername;
+    let isUnique = false;
+    let counter = 1;
+
+    while (!isUnique) {
+      const [checkUsername] = await db.query(
+        "SELECT id FROM users WHERE username = ?",
+        [finalUsername],
+      );
+      if (checkUsername.length === 0) {
+        isUnique = true;
+      } else {
+        finalUsername = `${baseUsername}${counter}`;
+        counter++;
+      }
+    }
+
+    // 4. Masukkan ke Database
     const [result] = await db.query(
-      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-      [username, email, hashedPassword],
+      "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')",
+      [finalUsername, email, hashedPassword],
     );
 
-    // 4. Buat Token (Set role default 'user' untuk pendaftar baru)
+    // 5. Buat Token (Set role default 'user' untuk pendaftar baru)
     const token = jwt.sign(
       {
         id: result.insertId,
@@ -39,16 +57,16 @@ const register = async (req, res) => {
       { expiresIn: "1d" },
     );
 
-    // 5. Catat Aktivitas
+    // 6. Catat Aktivitas
     recordUserActivity(result.insertId);
 
-    // 6. Kirim Response
+    // 7. Kirim Response
     res.status(201).json({
       message: "Pendaftaran sukses!",
       token,
       user: {
         id: result.insertId,
-        username,
+        username: finalUsername,
         email,
         role: "user",
       },
@@ -93,7 +111,7 @@ const login = async (req, res) => {
     // 4. Catat Aktivitas
     recordUserActivity(user.id);
 
-    // 5. Kirim Response (Tambahkan role agar frontend bisa redirect ke Admin/User)
+    // 5. Kirim Response
     res.json({
       message: "Login sukses!",
       token,
