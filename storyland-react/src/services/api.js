@@ -183,3 +183,6 @@ export const updateAdminUser = (id, data, token) =>
     { method: "PUT", body: JSON.stringify(data) },
     token,
   );
+
+export const deleteAdminUser = (id, token) =>
+  fetchAPI(`/admin/users/${id}`, { method: "DELETE" }, token);

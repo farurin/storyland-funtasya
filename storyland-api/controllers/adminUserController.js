@@ -91,12 +91,10 @@ const createAdminUser = async (req, res) => {
     res.status(201).json({ message: "Pengguna baru berhasil ditambahkan!" });
   } catch (err) {
     console.error("Gagal menambahkan pengguna:", err);
-    res
-      .status(500)
-      .json({
-        message: "Terjadi kesalahan internal server.",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Terjadi kesalahan internal server.",
+      error: err.message,
+    });
   }
 };
 
@@ -142,6 +140,37 @@ const updateAdminUser = async (req, res) => {
     res.json({ message: "Data pengguna berhasil diperbarui!" });
   } catch (err) {
     console.error("Gagal update pengguna:", err);
+    res.status(500).json({
+      message: "Terjadi kesalahan internal server.",
+      error: err.message,
+    });
+  }
+};
+
+// DELETE ADMIN USER (Hard Delete)
+const deleteAdminUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // PROTEKSI: Cek agar user tidak menghapus akunnya sendiri
+    if (req.user && req.user.id === parseInt(id)) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Tindakan ditolak! Anda tidak dapat menghapus akun Anda sendiri.",
+        });
+    }
+
+    const [result] = await db.query("DELETE FROM users WHERE id = ?", [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Pengguna tidak ditemukan." });
+    }
+
+    res.json({ message: "Akses dicabut dan akun berhasil dihapus permanen!" });
+  } catch (err) {
+    console.error("Gagal menghapus pengguna:", err);
     res
       .status(500)
       .json({
@@ -151,4 +180,10 @@ const updateAdminUser = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsers, createAdminUser, updateAdminUser };
+// Pastikan untuk mengekspor fungsi baru ini
+module.exports = {
+  getAllUsers,
+  createAdminUser,
+  updateAdminUser,
+  deleteAdminUser,
+};

@@ -9,7 +9,7 @@ import {
 } from "react-icons/hi";
 
 import { useAuth } from "../../context/AuthContext";
-import { getAdminUsers } from "../../services/api";
+import { getAdminUsers, deleteAdminUser } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { useAdminToast } from "../../context/AdminToastContext";
 import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
@@ -17,7 +17,7 @@ import AdminUserFormModal from "../../components/admin/AdminUserFormModal";
 
 const AdminUsers = () => {
   const { token, user } = useAuth();
-  const { showError } = useAdminToast();
+  const { showSuccess, showError, showLoading } = useAdminToast();
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,9 +115,24 @@ const AdminUsers = () => {
     );
   };
 
-  const confirmDeleteUser = () => {
+  const confirmDeleteUser = async () => {
+    const userId = deleteModal.userTarget.id;
+
+    // Tutup modal terlebih dahulu agar UX terasa cepat
     setDeleteModal({ isOpen: false, userTarget: null });
-    showError("Fitur Hapus User API belum tersedia di Backend! 🚀");
+    showLoading(true);
+
+    try {
+      await deleteAdminUser(userId, token);
+      showSuccess("Akses berhasil dicabut dan pengguna dihapus!");
+
+      // Refresh tabel data secara otomatis
+      fetchUsers();
+    } catch (err) {
+      showError("Gagal menghapus pengguna: " + err.message);
+    } finally {
+      showLoading(false);
+    }
   };
 
   const openAddModal = () => setFormModal({ isOpen: true, userToEdit: null });

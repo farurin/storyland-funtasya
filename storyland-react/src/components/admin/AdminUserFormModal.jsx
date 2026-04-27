@@ -99,8 +99,8 @@ const AdminUserFormModal = ({ isOpen, onClose, onSuccess, userToEdit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[110] p-4 animate-fade-in">
-      <div className="bg-white w-full max-w-[600px] rounded-[32px] p-8 shadow-2xl relative">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-110 p-4 animate-fade-in">
+      <div className="bg-white w-full max-w-150 rounded-4xl p-8 shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-8 right-8 text-gray-400 hover:text-gray-900 transition-colors cursor-pointer"

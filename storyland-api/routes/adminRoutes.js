@@ -36,6 +36,7 @@ const {
   getAllUsers,
   createAdminUser,
   updateAdminUser,
+  deleteAdminUser,
 } = require("../controllers/adminUserController");
 
 // Middleware Global untuk Rute Admin
@@ -78,5 +79,6 @@ router.get("/dashboard", getDashboardStats);
 router.get("/users", superAdminOnly, getAllUsers);
 router.post("/users", superAdminOnly, createAdminUser);
 router.put("/users/:id", superAdminOnly, updateAdminUser);
+router.delete("/users/:id", superAdminOnly, deleteAdminUser);
 
 module.exports = router;
