@@ -45,7 +45,6 @@ const IconLanguage = () => (
   </svg>
 );
 
-// Ikon Sign Up / Login (Masuk)
 const IconSignUp = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -61,6 +60,23 @@ const IconSignUp = () => (
     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
     <polyline points="10 17 15 12 10 7" />
     <line x1="15" y1="12" x2="3" y2="12" />
+  </svg>
+);
+
+// Ikon khusus untuk tombol Admin
+const IconAdmin = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 
@@ -87,7 +103,12 @@ const navLinks = [
 ];
 
 export default function Navigation() {
-  const { isLoggedIn } = useAuth();
+  // PANGGIL USER DARI AUTH CONTEXT
+  const { isLoggedIn, user } = useAuth();
+
+  // CEK APAKAH USER ADALAH ADMIN
+  const isAdmin =
+    user && ["super_admin", "admin", "editor"].includes(user.role);
 
   return (
     <Navbar
@@ -99,6 +120,16 @@ export default function Navigation() {
       </NavbarBrand>
 
       <div className="flex items-center gap-2 md:order-2">
+        {/* JIKA ADMIN, TAMPILKAN TOMBOL DASHBOARD */}
+        {isAdmin && (
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center bg-gray-900 hover:bg-black text-white font-bold rounded-full px-5 py-2 md:px-6 md:py-2 gap-2 transition shadow-sm whitespace-nowrap"
+          >
+            <IconAdmin /> <span className="hidden sm:inline">Panel</span>
+          </Link>
+        )}
+
         {isLoggedIn ? (
           // Tombol Profil (Kuning) jika sudah login
           <Link
