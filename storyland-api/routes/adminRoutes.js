@@ -34,6 +34,7 @@ const {
 
 const { getAllUsers } = require("../controllers/adminUserController");
 
+// Middleware Global untuk Rute Admin
 router.use(verifyToken, authorizeRoles("editor", "admin", "super_admin"));
 
 // Konfigurasi field form gambar yang diterima
@@ -43,35 +44,33 @@ const uploadFields = upload.fields([
   { name: "image_card", maxCount: 1 },
 ]);
 
-// router
+// Helper Middleware untuk membatasi akses khusus
+const adminOnly = authorizeRoles("admin", "super_admin");
+const superAdminOnly = authorizeRoles("super_admin");
 
-// category
-router.get("/categories", getAdminCategories);
-router.post("/categories", uploadFields, createCategory);
-router.put("/categories/:id", uploadFields, updateCategory);
-router.put("/categories/:id/status", updateCategoryStatus);
-router.delete(
-  "/categories/:id",
-  authorizeRoles("admin", "super_admin"),
-  deleteCategory,
-);
+// ROUTES CATEGORY (Hanya Admin & Super Admin) ---
+router.get("/categories", adminOnly, getAdminCategories);
+router.post("/categories", adminOnly, uploadFields, createCategory);
+router.put("/categories/:id", adminOnly, uploadFields, updateCategory);
+router.put("/categories/:id/status", adminOnly, updateCategoryStatus);
+router.delete("/categories/:id", adminOnly, deleteCategory);
 
-// books
+// ROUTES BOOKS (Semua bisa akses) ---
 router.get("/books", getAdminBooks);
 router.post("/books", upload.any(), createBook);
 router.get("/books/:id", getAdminBookDetail);
 router.put("/books/:id/status", updateBookStatus);
 router.put("/books/:id", upload.any(), updateBook);
 
-// profile
+// ROUTES PROFILE (Semua bisa akses) ---
 router.get("/profile", getAdminProfile);
 router.put("/profile", upload.any(), updateAdminProfile);
 router.put("/profile/password", updateAdminPassword);
 
-// dashboard
+// ROUTES DASHBOARD (Semua bisa akses) ---
 router.get("/dashboard", getDashboardStats);
 
-// Manajemen Pengguna
-router.get("/users", getAllUsers);
+// ROUTES MANAJEMEN PENGGUNA (Hanya Super Admin) ---
+router.get("/users", superAdminOnly, getAllUsers);
 
 module.exports = router;

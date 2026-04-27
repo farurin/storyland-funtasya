@@ -55,7 +55,7 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Rute Admin */}
+        {/* Rute Admin (Semua yang punya akses panel) */}
         <Route
           path="/admin"
           element={
@@ -71,16 +71,27 @@ export default function App() {
           >
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
 
+            {/* Bisa diakses SEMUA (Editor, Admin, Super Admin) */}
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="categories" element={<AdminCategories />} />
             <Route path="books" element={<AdminBooks />} />
             <Route path="books/:id" element={<AdminBookDetail />} />
             <Route path="tambah" element={<AdminAddBook />} />
             <Route path="books/:id/edit" element={<AdminEditBook />} />
-            <Route path="settings" element={<AdminProfileSettings />} />
             <Route path="perpustakaan" element={<AdminPerpustakaan />} />
-            <Route path="backup" element={<AdminBackupExport />} />
-            <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<AdminProfileSettings />} />
+
+            {/* Dilarang untuk Editor (Hanya Admin & Super Admin) */}
+            <Route
+              element={<AdminRoute allowedRoles={["admin", "super_admin"]} />}
+            >
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="backup" element={<AdminBackupExport />} />
+            </Route>
+
+            {/* Dilarang untuk Editor & Admin (Hanya Super Admin) */}
+            <Route element={<AdminRoute allowedRoles={["super_admin"]} />}>
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
           </Route>
         </Route>
       </Routes>
