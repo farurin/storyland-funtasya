@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   HiOutlineSearch,
   HiPlus,
@@ -6,40 +6,18 @@ import {
   HiTrash,
   HiChevronLeft,
   HiChevronRight,
-  HiX,
-  HiEye,
-  HiEyeOff,
 } from "react-icons/hi";
 
 import { useAuth } from "../../context/AuthContext";
-import { getAdminUsers, createAdminUser } from "../../services/api";
+import { getAdminUsers } from "../../services/api";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { useAdminToast } from "../../context/AdminToastContext";
 import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
-
-// Ikon khusus untuk Modal Tambah Pengguna
-const IconAddUser = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <line x1="20" y1="8" x2="20" y2="14" />
-    <line x1="23" y1="11" x2="17" y2="11" />
-  </svg>
-);
+import AdminUserFormModal from "../../components/admin/AdminUserFormModal";
 
 const AdminUsers = () => {
   const { token, user } = useAuth();
-  const { showSuccess, showError, showLoading } = useAdminToast();
+  const { showError } = useAdminToast();
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,43 +27,38 @@ const AdminUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // STATE UNTUK MODAL DELETE
+  // STATE MODAL
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     userTarget: null,
   });
-
-  // STATE UNTUK MODAL TAMBAH PENGGUNA
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [newUserForm, setNewUserForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "",
-    password: "",
+  const [formModal, setFormModal] = useState({
+    isOpen: false,
+    userToEdit: null,
   });
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getAdminUsers(token);
-        const formattedUsers = data.map((u) => {
-          let roleUI = "User";
-          if (u.role === "super_admin") roleUI = "Super Admin";
-          else if (u.role === "admin") roleUI = "Admin";
-          else if (u.role === "editor") roleUI = "Editor";
-          return { ...u, roleUI };
-        });
-        setUsers(formattedUsers);
-      } catch (err) {
-        showError("Gagal mengambil data pengguna: " + err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    if (token) fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAdminUsers(token);
+      const formattedUsers = data.map((u) => {
+        let roleUI = "User";
+        if (u.role === "super_admin") roleUI = "Super Admin";
+        else if (u.role === "admin") roleUI = "Admin";
+        else if (u.role === "editor") roleUI = "Editor";
+        return { ...u, roleUI };
+      });
+      setUsers(formattedUsers);
+    } catch (err) {
+      showError("Gagal mengambil data pengguna: " + err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [token, showError]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -142,65 +115,21 @@ const AdminUsers = () => {
     );
   };
 
-  // MOCK FUNGSI HAPUS USER
   const confirmDeleteUser = () => {
     setDeleteModal({ isOpen: false, userTarget: null });
     showError("Fitur Hapus User API belum tersedia di Backend! 🚀");
   };
 
-  // HANDLER FORM TAMBAH PENGGUNA
-  const handleNewUserChange = (e) => {
-    setNewUserForm({ ...newUserForm, [e.target.name]: e.target.value });
-  };
-
-  const handleCreateUser = async (e) => {
-    e.preventDefault();
-
-    if (
-      !newUserForm.firstName ||
-      !newUserForm.email ||
-      !newUserForm.role ||
-      !newUserForm.password
-    ) {
-      return showError(
-        "Harap lengkapi semua kolom wajib (Nama Depan, Email, Role, Password).",
-      );
-    }
-
-    showLoading(true);
-    try {
-      await createAdminUser(newUserForm, token);
-
-      showSuccess("Pengguna baru berhasil ditambahkan!");
-      setIsAddModalOpen(false);
-      setNewUserForm({
-        firstName: "",
-        lastName: "",
-        email: "",
-        role: "",
-        password: "",
-      });
-
-      // PANGGIL ULANG DATA AGAR TABEL LANGSUNG TER-UPDATE TANPA REFRESH
-      const data = await getAdminUsers(token);
-      const formattedUsers = data.map((u) => {
-        let roleUI = "User";
-        if (u.role === "super_admin") roleUI = "Super Admin";
-        else if (u.role === "admin") roleUI = "Admin";
-        else if (u.role === "editor") roleUI = "Editor";
-        return { ...u, roleUI };
-      });
-      setUsers(formattedUsers);
-    } catch (err) {
-      showError("Gagal menambahkan pengguna: " + err.message);
-    } finally {
-      showLoading(false);
-    }
-  };
+  const openAddModal = () => setFormModal({ isOpen: true, userToEdit: null });
+  const openEditModal = (user) =>
+    setFormModal({ isOpen: true, userToEdit: user });
+  const closeFormModal = () =>
+    setFormModal({ isOpen: false, userToEdit: null });
 
   return (
     <div className="p-8 md:p-12 w-full min-h-screen bg-gray-50 flex justify-center items-start">
       <div className="w-full max-w-6xl">
+        {/* Search Bar */}
         <div className="w-full bg-white rounded-[20px] shadow-sm border border-gray-100 flex items-center px-5 py-4 mb-10">
           <HiOutlineSearch className="text-gray-400 text-xl mr-3" />
           <input
@@ -212,6 +141,7 @@ const AdminUsers = () => {
           />
         </div>
 
+        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-black text-gray-900 flex items-center gap-2">
@@ -223,13 +153,14 @@ const AdminUsers = () => {
             </p>
           </div>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddModal}
             className="bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold px-6 py-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <HiPlus className="text-lg" /> Tambah Pengguna
           </button>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
           <div className="bg-[#E87B11] rounded-3xl p-6 flex items-center gap-5 shadow-sm text-white">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shrink-0">
@@ -303,6 +234,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
+        {/* Filter & Pagination */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="flex flex-wrap gap-3">
             {["Semua", "Super Admin", "Admin", "Editor"].map((role) => (
@@ -345,6 +277,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
+        {/* Tabel Data */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto min-h-100">
           <table className="w-full text-left min-w-225">
             <thead>
@@ -418,9 +351,7 @@ const AdminUsers = () => {
                     </td>
                     <td className="py-4 px-6 flex items-center justify-center gap-2">
                       <button
-                        onClick={() =>
-                          showSuccess("Fitur Edit Segera Hadir! 🚀")
-                        }
+                        onClick={() => openEditModal(u)}
                         className="p-2 bg-[#F8AF2F] hover:bg-yellow-500 text-white rounded-lg shadow-sm transition-colors cursor-pointer"
                         title="Edit Pengguna"
                       >
@@ -444,145 +375,14 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* MODAL TAMBAH PENGGUNA */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-110 p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-150 rounded-4xl p-8 shadow-2xl relative">
-            <button
-              onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-8 right-8 text-gray-400 hover:text-gray-900 transition-colors cursor-pointer"
-            >
-              <HiX className="text-2xl" />
-            </button>
+      {/* RENDER MODAL FORM */}
+      <AdminUserFormModal
+        isOpen={formModal.isOpen}
+        onClose={closeFormModal}
+        onSuccess={fetchUsers}
+        userToEdit={formModal.userToEdit}
+      />
 
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center">
-                <IconAddUser />
-              </div>
-              <h2 className="text-2xl font-black text-gray-900">
-                Tambah Pengguna
-              </h2>
-            </div>
-
-            <form onSubmit={handleCreateUser} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Kolom Kiri: Nama & Role */}
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      Nama Depan *
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={newUserForm.firstName}
-                      onChange={handleNewUserChange}
-                      placeholder="Lengkapi nama depan"
-                      className="w-full border border-gray-300 focus:border-[#F8AF2F] focus:ring-1 focus:ring-[#F8AF2F] rounded-xl px-4 py-3 text-sm outline-none transition-colors"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      Nama Belakang
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={newUserForm.lastName}
-                      onChange={handleNewUserChange}
-                      placeholder="Lengkapi nama belakang"
-                      className="w-full border border-gray-300 focus:border-[#F8AF2F] focus:ring-1 focus:ring-[#F8AF2F] rounded-xl px-4 py-3 text-sm outline-none transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      Role *
-                    </label>
-                    <select
-                      name="role"
-                      value={newUserForm.role}
-                      onChange={handleNewUserChange}
-                      className="w-full border border-gray-300 focus:border-[#F8AF2F] focus:ring-1 focus:ring-[#F8AF2F] rounded-xl px-4 py-3 text-sm outline-none transition-colors text-gray-600 bg-white"
-                      required
-                    >
-                      <option value="" disabled>
-                        Pilih Role Pengguna
-                      </option>
-                      <option value="super_admin">Super Admin</option>
-                      <option value="admin">Admin</option>
-                      <option value="editor">Editor</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Kolom Kanan: Email & Password */}
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={newUserForm.email}
-                      onChange={handleNewUserChange}
-                      placeholder="Lengkapi Email"
-                      className="w-full border border-gray-300 focus:border-[#F8AF2F] focus:ring-1 focus:ring-[#F8AF2F] rounded-xl px-4 py-3 text-sm outline-none transition-colors"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      Password *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={newUserForm.password}
-                        onChange={handleNewUserChange}
-                        placeholder="Buat Password"
-                        className="w-full border border-gray-300 focus:border-[#F8AF2F] focus:ring-1 focus:ring-[#F8AF2F] rounded-xl px-4 py-3 pr-12 text-sm outline-none transition-colors"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                      >
-                        {showPassword ? (
-                          <HiEyeOff className="text-xl" />
-                        ) : (
-                          <HiEye className="text-xl" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-6 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-8 py-3.5 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-8 py-3.5 bg-[#F8AF2F] text-white font-bold rounded-xl hover:bg-yellow-500 transition-colors shadow-sm"
-                >
-                  Tambah
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL KONFIRMASI HAPUS */}
       <AdminConfirmModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, userTarget: null })}
@@ -592,15 +392,6 @@ const AdminUsers = () => {
         warningText="Tindakan ini tidak dapat dibatalkan. Pengguna ini tidak akan bisa lagi login ke panel admin."
         variant="danger"
         confirmText="Cabut Akses"
-      />
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      `,
-        }}
       />
     </div>
   );

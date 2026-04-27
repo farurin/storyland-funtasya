@@ -35,6 +35,7 @@ const {
 const {
   getAllUsers,
   createAdminUser,
+  updateAdminUser,
 } = require("../controllers/adminUserController");
 
 // Middleware Global untuk Rute Admin
@@ -51,30 +52,31 @@ const uploadFields = upload.fields([
 const adminOnly = authorizeRoles("admin", "super_admin");
 const superAdminOnly = authorizeRoles("super_admin");
 
-// ROUTES CATEGORY (Hanya Admin & Super Admin) ---
+// ROUTES CATEGORY (Hanya Admin & Super Admin)
 router.get("/categories", adminOnly, getAdminCategories);
 router.post("/categories", adminOnly, uploadFields, createCategory);
 router.put("/categories/:id", adminOnly, uploadFields, updateCategory);
 router.put("/categories/:id/status", adminOnly, updateCategoryStatus);
 router.delete("/categories/:id", adminOnly, deleteCategory);
 
-// ROUTES BOOKS (Semua bisa akses) ---
+// ROUTES BOOKS (Semua bisa akses)
 router.get("/books", getAdminBooks);
 router.post("/books", upload.any(), createBook);
 router.get("/books/:id", getAdminBookDetail);
 router.put("/books/:id/status", updateBookStatus);
 router.put("/books/:id", upload.any(), updateBook);
 
-// ROUTES PROFILE (Semua bisa akses) ---
+// ROUTES PROFILE (Semua bisa akses)
 router.get("/profile", getAdminProfile);
 router.put("/profile", upload.any(), updateAdminProfile);
 router.put("/profile/password", updateAdminPassword);
 
-// ROUTES DASHBOARD (Semua bisa akses) ---
+// ROUTES DASHBOARD (Semua bisa akses)
 router.get("/dashboard", getDashboardStats);
 
-// ROUTES MANAJEMEN PENGGUNA (Hanya Super Admin) ---
+// ROUTES MANAJEMEN PENGGUNA (Hanya Super Admin)
 router.get("/users", superAdminOnly, getAllUsers);
 router.post("/users", superAdminOnly, createAdminUser);
+router.put("/users/:id", superAdminOnly, updateAdminUser);
 
 module.exports = router;

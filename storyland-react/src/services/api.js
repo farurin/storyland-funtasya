@@ -176,3 +176,10 @@ export const createAdminUser = (data, token) =>
     { method: "POST", body: JSON.stringify(data) },
     token,
   );
+
+export const updateAdminUser = (id, data, token) =>
+  fetchAPI(
+    `/admin/users/${id}`,
+    { method: "PUT", body: JSON.stringify(data) },
+    token,
+  );

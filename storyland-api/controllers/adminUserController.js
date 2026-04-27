@@ -1,20 +1,12 @@
 const db = require("../config/db");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // GET ALL USERS (End-Users & Admins)
 const getAllUsers = async (req, res) => {
   try {
     const sql = `
       SELECT 
-        id, 
-        username,
-        first_name, 
-        last_name, 
-        email, 
-        role, 
-        status, 
-        avatar_url,
-        created_at 
+        id, username, first_name, last_name, email, role, status, avatar_url, created_at 
       FROM users 
       ORDER BY created_at DESC
     `;
@@ -22,7 +14,8 @@ const getAllUsers = async (req, res) => {
 
     const formattedUsers = users.map((u) => ({
       id: u.id,
-      // Jika first_name null, otomatis gunakan username
+      firstName: u.first_name || "",
+      lastName: u.last_name || "",
       name: u.first_name
         ? u.last_name
           ? `${u.first_name} ${u.last_name}`
@@ -49,37 +42,29 @@ const getAllUsers = async (req, res) => {
 // CREATE ADMIN USER
 const createAdminUser = async (req, res) => {
   const { firstName, lastName, email, role, password } = req.body;
-
-  // 1. Validasi Input Dasar
   if (!firstName || !email || !role || !password) {
     return res
       .status(400)
       .json({ message: "Nama Depan, Email, Role, dan Password wajib diisi!" });
   }
-
   try {
-    // 2. Cek apakah email sudah terdaftar
     const [existingEmail] = await db.query(
       "SELECT id FROM users WHERE email = ?",
       [email],
     );
-    if (existingEmail.length > 0) {
+    if (existingEmail.length > 0)
       return res
         .status(400)
         .json({ message: "Email sudah digunakan oleh pengguna lain!" });
-    }
 
-    // 3. Hash Password untuk keamanan
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Generate Username Otomatis dari Email
     let baseUsername = email.split("@")[0];
     let finalUsername = baseUsername;
     let isUnique = false;
     let counter = 1;
 
-    // Pastikan username tidak bentrok di database
     while (!isUnique) {
       const [checkUsername] = await db.query(
         "SELECT id FROM users WHERE username = ?",
@@ -93,17 +78,11 @@ const createAdminUser = async (req, res) => {
       }
     }
 
-    // 5. Insert Data ke Database
-    const sql = `
-      INSERT INTO users (
-        username, first_name, last_name, email, role, password, status
-      ) VALUES (?, ?, ?, ?, ?, ?, 'active')
-    `;
-
+    const sql = `INSERT INTO users (username, first_name, last_name, email, role, password, status) VALUES (?, ?, ?, ?, ?, ?, 'active')`;
     await db.query(sql, [
       finalUsername,
       firstName,
-      lastName || null, // Opsional
+      lastName || null,
       email,
       role,
       hashedPassword,
@@ -121,7 +100,55 @@ const createAdminUser = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllUsers,
-  createAdminUser,
+// UPDATE ADMIN USER
+const updateAdminUser = async (req, res) => {
+  const { id } = req.params;
+  const { firstName, lastName, email, role, password } = req.body;
+
+  if (!firstName || !email || !role) {
+    return res
+      .status(400)
+      .json({ message: "Nama Depan, Email, dan Role wajib diisi!" });
+  }
+
+  try {
+    // Cek apakah email dipakai oleh user lain (selain dirinya sendiri)
+    const [existingEmail] = await db.query(
+      "SELECT id FROM users WHERE email = ? AND id != ?",
+      [email, id],
+    );
+    if (existingEmail.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Email sudah digunakan oleh pengguna lain!" });
+    }
+
+    // Jika password diisi, maka update beserta passwordnya
+    if (password && password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      await db.query(
+        "UPDATE users SET first_name=?, last_name=?, email=?, role=?, password=? WHERE id=?",
+        [firstName, lastName || null, email, role, hashedPassword, id],
+      );
+    } else {
+      // Jika password kosong, jangan update password (biarkan yang lama)
+      await db.query(
+        "UPDATE users SET first_name=?, last_name=?, email=?, role=? WHERE id=?",
+        [firstName, lastName || null, email, role, id],
+      );
+    }
+
+    res.json({ message: "Data pengguna berhasil diperbarui!" });
+  } catch (err) {
+    console.error("Gagal update pengguna:", err);
+    res
+      .status(500)
+      .json({
+        message: "Terjadi kesalahan internal server.",
+        error: err.message,
+      });
+  }
 };
+
+module.exports = { getAllUsers, createAdminUser, updateAdminUser };
