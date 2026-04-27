@@ -5,7 +5,6 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
   const headers = { ...options.headers };
 
   // OTOMATIS: Jika body adalah string JSON, set header jadi application/json.
-  // Jika body adalah FormData (file), JANGAN set Content-Type. Biarkan browser yang mengurusnya (multipart/form-data + boundary).
   if (options.body && typeof options.body === "string") {
     headers["Content-Type"] = "application/json";
   }
@@ -17,19 +16,37 @@ const fetchAPI = async (endpoint, options = {}, token = null) => {
     headers,
   });
 
-  // Sesi habis
-  if (response.status === 401) {
+  // BACA DATA JSON DI AWAL AGAR BISA CEK ISI PESANNYA
+  let data;
+  try {
+    data = await response.json();
+  } catch (err) {
+    // Fallback jika response backend bukan JSON (misal error HTML 500)
+    data = { message: "Terjadi kesalahan pada server" };
+  }
+
+  // DETEKSI SESI HABIS:
+  const isSessionExpired =
+    response.status === 401 ||
+    (response.status === 400 &&
+      data.message &&
+      data.message.toLowerCase().includes("token"));
+
+  if (isSessionExpired) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    alert(
-      "Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!",
-    );
-    window.location.href = "/";
+
+    if (!window.isSessionAlertShown) {
+      window.isSessionAlertShown = true;
+      alert("Sesi kamu sudah habis. Silakan login kembali untuk melanjutkan petualangan!");
+      window.location.href = "/"; // redirect home
+    }
+    
+    // Hentikan eksekusi kode selanjutnya
     throw new Error("Sesi kedaluwarsa");
   }
 
-  const data = await response.json();
-
+  // Handle error umum lainnya
   if (!response.ok) {
     throw new Error(data.message || "Terjadi kesalahan pada server");
   }
