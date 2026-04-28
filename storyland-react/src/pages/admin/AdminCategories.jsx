@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { FiSearch } from "react-icons/fi";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+
 import CardCategories from "../../components/admin/CardCategories";
 import DetailCategories from "../../components/admin/DetailCategories";
 import AdminConfirmModal from "../../components/admin/AdminConfirmModal";
+import AdminCategoryFormModal from "../../components/admin/AdminCategoryFormModal";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
 import {
   getAdminCategories,
-  createCategory,
-  updateCategory,
   updateCategoryStatus,
   deleteCategory,
 } from "../../services/api";
@@ -21,23 +22,15 @@ const AdminCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isOpen, setIsOpen] = useState(false);
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Atur jumlah kategori per halaman
+
+  // Modal States
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [targetCategory, setTargetCategory] = useState(null);
-
-  // Form States
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("active");
-  const [colorHex, setColorHex] = useState("#6B4EFF");
-  const [isEdit, setIsEdit] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  // Form Files
-  const [imageIcon, setImageIcon] = useState(null);
-  const [imageBanner, setImageBanner] = useState(null);
-  const [imageCard, setImageCard] = useState(null);
 
   const fetchCategories = useCallback(async () => {
     if (!token) return;
@@ -53,91 +46,45 @@ const AdminCategories = () => {
     fetchCategories();
   }, [fetchCategories]);
 
+  // Reset page to 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Logika Filter & Paginasi
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCategories = filteredCategories.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
+  const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const handleNextPage = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+
+  // Modal Handlers
   const handleOpenCreate = () => {
-    setIsEdit(false);
-    setIsOpen(true);
     setTargetCategory(null);
-    setName("");
-    setDescription("");
-    setStatus("active");
-    setColorHex("#6B4EFF");
-    setImageIcon(null);
-    setImageBanner(null);
-    setImageCard(null);
+    setIsFormOpen(true);
   };
-
   const handleOpenEdit = (cat) => {
-    setIsEdit(true);
-    setIsOpen(true);
     setTargetCategory(cat);
-    setName(cat.name);
-    setDescription(cat.description);
-    setStatus(cat.status || "active");
-    setColorHex(cat.color_hex || "#6B4EFF");
-    setImageIcon(null);
-    setImageBanner(null);
-    setImageCard(null);
+    setIsFormOpen(true);
   };
-
   const handleOpenStatusModal = (cat) => {
     setTargetCategory(cat);
     setIsStatusOpen(true);
   };
-
   const handleOpenDeleteModal = (cat) => {
     setTargetCategory(cat);
     setIsDeleteOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsOpen(false);
-    setIsEdit(false);
-    setName("");
-    setDescription("");
-    setColorHex("#6B4EFF");
-    setTargetCategory(null);
-    setImageIcon(null);
-    setImageBanner(null);
-    setImageCard(null);
-  };
-
-  const handleSubmitForm = async () => {
-    if (!name || !description)
-      return showError("Nama dan Deskripsi harus diisi!");
-
-    setIsProcessing(true);
-    showLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("color_hex", colorHex);
-      if (!isEdit) formData.append("status", "active");
-
-      if (imageIcon) formData.append("image_icon", imageIcon);
-      if (imageBanner) formData.append("image_banner", imageBanner);
-      if (imageCard) formData.append("image_card", imageCard);
-
-      if (isEdit) {
-        await updateCategory(targetCategory.id, formData, token);
-        showSuccess("Kategori berhasil diperbarui!");
-      } else {
-        await createCategory(formData, token);
-        showSuccess("Kategori baru berhasil ditambahkan!");
-      }
-
-      await fetchCategories();
-      handleCloseModal();
-    } catch (err) {
-      showError(err.message);
-    } finally {
-      setIsProcessing(false);
-      showLoading(false);
-    }
-  };
-
   const handleConfirmStatus = async () => {
-    setIsProcessing(true);
     showLoading(true);
     try {
       const newStatus =
@@ -151,13 +98,11 @@ const AdminCategories = () => {
     } catch (err) {
       showError(err.message);
     } finally {
-      setIsProcessing(false);
       showLoading(false);
     }
   };
 
   const handleConfirmDelete = async () => {
-    setIsProcessing(true);
     showLoading(true);
     try {
       await deleteCategory(targetCategory.id, token);
@@ -171,43 +116,65 @@ const AdminCategories = () => {
     } catch (err) {
       showError(err.message);
     } finally {
-      setIsProcessing(false);
       showLoading(false);
       setIsDeleteOpen(false);
     }
   };
 
-  const filteredCategories = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
   return (
-    <div className="p-16 grid grid-cols-4 gap-4">
-      {/* LEFT */}
-      <div className="col-span-3">
-        <div className="flex items-center gap-3">
-          <div className="relative w-full">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+    <div className="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-screen bg-gray-50">
+      {/* LEFT COLUMN: LIST KATEGORI */}
+      <div className="lg:col-span-2 flex flex-col">
+        {/* Header & Search */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="relative w-full md:w-96">
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border border-gray-300 pl-10 pr-5 py-3 rounded-md w-full"
-              placeholder="Search categories or tag"
+              className="bg-white border-none shadow-sm pl-12 pr-5 py-3.5 rounded-xl w-full text-sm font-medium outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="Cari kategori..."
             />
           </div>
 
           <button
             onClick={handleOpenCreate}
-            className="bg-[#F8AF2F] rounded-md px-5 py-3 text-white hover:bg-yellow-500 transition cursor-pointer"
+            className="bg-[#F8AF2F] rounded-xl px-6 py-3.5 text-white font-bold hover:bg-yellow-500 shadow-sm transition-colors cursor-pointer w-full md:w-auto shrink-0"
           >
-            Tambah
+            + Tambah Kategori
           </button>
         </div>
 
-        <div className="space-y-3 mt-4">
-          {filteredCategories.length > 0 ? (
-            filteredCategories.map((cat) => (
+        {/* Paginasi Info */}
+        <div className="flex items-center justify-between bg-white px-5 py-3 rounded-xl shadow-sm border border-gray-100 mb-6">
+          <span className="font-bold text-gray-500 text-sm">
+            {filteredCategories.length > 0 ? startIndex + 1 : 0} -{" "}
+            {Math.min(startIndex + itemsPerPage, filteredCategories.length)}{" "}
+            dari {filteredCategories.length}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="p-1 hover:text-orange-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <HiChevronLeft className="text-xl" />
+            </button>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="p-1 hover:text-orange-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <HiChevronRight className="text-xl" />
+            </button>
+          </div>
+        </div>
+
+        {/* Daftar Kategori */}
+        <div className="space-y-4 flex-1">
+          {paginatedCategories.length > 0 ? (
+            paginatedCategories.map((cat) => (
               <CardCategories
                 key={cat.id}
                 name={cat.name}
@@ -224,125 +191,34 @@ const AdminCategories = () => {
               />
             ))
           ) : (
-            <p className="text-gray-500 text-center py-10">
-              Tidak ada kategori ditemukan.
-            </p>
+            <div className="w-full py-20 flex flex-col items-center justify-center bg-white rounded-3xl border border-gray-100 border-dashed">
+              <p className="text-gray-400 font-bold text-lg">
+                Kategori tidak ditemukan.
+              </p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* RIGHT */}
-      <div className="col-span-1">
+      {/* RIGHT COLUMN: DETAIL KATEGORI */}
+      <div className="lg:col-span-1">
         {selectedCategory ? (
           <DetailCategories category={selectedCategory} />
         ) : (
-          <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl text-gray-400">
-            Pilih kategori untuk melihat detail
+          <div className="h-full min-h-100 flex items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50 rounded-4xl text-gray-400 font-bold text-sm text-center px-8">
+            Klik salah satu kategori di samping untuk melihat detail statistik
+            dan aset gambarnya.
           </div>
         )}
       </div>
 
-      {/* MODAL CREATE/EDIT FORM */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-125 max-w-[90vw] rounded-2xl p-6">
-            <div className="flex justify-between mb-4">
-              <h2 className="text-lg font-semibold">
-                {isEdit ? "Edit Kategori" : "Tambah Kategori"}
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-500 hover:text-black cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3 mb-4">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="flex-1 border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
-                  placeholder="Nama Kategori"
-                />
-                <div
-                  className="flex items-center gap-2 border rounded-md px-2 shrink-0 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                  title="Pilih Warna Tema"
-                >
-                  <input
-                    type="color"
-                    value={colorHex}
-                    onChange={(e) => setColorHex(e.target.value)}
-                    className="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
-                  />
-                </div>
-              </div>
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full border rounded-md p-2 focus:ring-2 focus:ring-yellow-400 outline-none"
-                placeholder="Deskripsi Singkat"
-              />
-            </div>
-
-            {/* INPUT FILES */}
-            <div className="flex flex-col gap-3 mb-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">
-                  Image Icon (Bulat/Kecil)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageIcon(e.target.files[0])}
-                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">
-                  Image Banner (Landscape/Slider)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageBanner(e.target.files[0])}
-                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">
-                  Image Card (Daftar Kategori)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageCard(e.target.files[0])}
-                  className="text-sm w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleSubmitForm}
-                disabled={isProcessing}
-                className="px-4 py-2 bg-[#F8AF2F] text-white rounded-md cursor-pointer hover:bg-yellow-500 disabled:opacity-50"
-              >
-                {isProcessing ? "Menyimpan..." : isEdit ? "Update" : "Tambah"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL FORM COMPONENT */}
+      <AdminCategoryFormModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSuccess={fetchCategories}
+        targetCategory={targetCategory}
+      />
 
       {/* MODAL STATUS COMPONENT */}
       <AdminConfirmModal
