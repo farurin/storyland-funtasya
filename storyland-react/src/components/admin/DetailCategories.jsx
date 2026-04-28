@@ -1,15 +1,8 @@
 import React from "react";
 import { getImageUrl } from "../../utils/getImageUrl";
-import {
-  HiBookOpen,
-  HiEye,
-  HiDownload,
-  HiStar,
-  HiChevronRight,
-} from "react-icons/hi";
+import { HiBookOpen, HiEye, HiChevronRight } from "react-icons/hi";
 
 const DetailCategories = ({ category }) => {
-  // Jika tidak ada kategori yang dipilih, tampilkan placeholder
   if (!category) return null;
 
   return (
@@ -20,10 +13,10 @@ const DetailCategories = ({ category }) => {
           src={getImageUrl(category.image_banner)}
           alt="Banner"
           className="w-full h-full object-cover"
-          onError={(e) =>
-            (e.target.src =
-              "https://via.placeholder.com/600x450?text=No+Banner")
-          }
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://placehold.co/600x450?text=No+Banner";
+          }}
         />
       </div>
 
@@ -44,19 +37,28 @@ const DetailCategories = ({ category }) => {
         </p>
       </div>
 
-      {/* 3. Statistics (Statis - Sesuai Figma) */}
-      <div className="space-y-3.5 mb-8 px-2">
-        <div className="flex items-center gap-4 text-gray-900 font-bold text-sm md:text-base">
-          <HiBookOpen className="text-xl shrink-0" /> Total Buku : 18
+      {/* 3. Statistics (Dinamis dari Database) */}
+      <div className="space-y-4 mb-8 px-2 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+        <div className="flex items-center justify-between text-gray-900 font-bold text-sm md:text-base">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-500 flex items-center justify-center">
+              <HiBookOpen className="text-lg" />
+            </div>
+            Total Buku
+          </div>
+          <span className="text-lg">{category.total_books}</span>
         </div>
-        <div className="flex items-center gap-4 text-gray-900 font-bold text-sm md:text-base">
-          <HiEye className="text-xl shrink-0" /> Total Dibaca : 12.430
-        </div>
-        <div className="flex items-center gap-4 text-gray-900 font-bold text-sm md:text-base">
-          <HiDownload className="text-xl shrink-0" /> Total Download : 3.210
-        </div>
-        <div className="flex items-center gap-4 text-gray-900 font-bold text-sm md:text-base">
-          <HiStar className="text-xl shrink-0" /> Rating rata-rata : 4.6
+
+        <div className="flex items-center justify-between text-gray-900 font-bold text-sm md:text-base">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-500 flex items-center justify-center">
+              <HiEye className="text-lg" />
+            </div>
+            Total Dibaca
+          </div>
+          <span className="text-lg">
+            {category.total_views.toLocaleString("id-ID")}
+          </span>
         </div>
       </div>
 
@@ -64,12 +66,11 @@ const DetailCategories = ({ category }) => {
       <div className="mb-8">
         <h3 className="text-lg font-bold text-gray-900 mb-3">Deskripsi</h3>
         <p className="text-sm text-gray-800 leading-relaxed font-medium">
-          {category.description ||
-            "Kategori ini berisi cerita bertema hewan yang menghadirkan kisah edukatif dan hiburan untuk anak dan remaja."}
+          {category.description || "Tidak ada deskripsi."}
         </p>
       </div>
 
-      {/* 5. Aset Gambar (Menampilkan sisa 2 gambar lainnya) */}
+      {/* 5. Aset Gambar */}
       <div className="mb-8">
         <h3 className="text-lg font-bold text-gray-900 mb-3">Aset Kategori</h3>
         <div className="flex gap-3">
@@ -78,6 +79,10 @@ const DetailCategories = ({ category }) => {
               src={getImageUrl(category.image_icon)}
               alt="Icon"
               className="w-full h-full object-contain"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/100x100?text=Icon";
+              }}
             />
           </div>
           <div className="flex-1 aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
@@ -85,34 +90,18 @@ const DetailCategories = ({ category }) => {
               src={getImageUrl(category.image_card)}
               alt="Card"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/400x225?text=Card";
+              }}
             />
           </div>
         </div>
       </div>
 
-      {/* 6. Buku Teratas (Statis - Sesuai Figma) */}
-      <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">Buku teratas</h3>
-        <ol className="list-decimal list-inside text-sm text-gray-800 space-y-2 font-medium">
-          <li>Maling Kundang : 1412 Kunjungan</li>
-          <li>Maling Kundang : 1412 Kunjungan</li>
-          <li>Maling Kundang : 1412 Kunjungan</li>
-        </ol>
-      </div>
-
-      {/* 7. Buku Aktif (Statis - Sesuai Figma) */}
-      <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">Buku aktif</h3>
-        <ol className="list-decimal list-inside text-sm text-gray-800 space-y-2 font-medium">
-          <li>Maling Kundang : 1412 Kunjungan</li>
-          <li>Maling Kundang : 1412 Kunjungan</li>
-          <li>Maling Kundang : 1412 Kunjungan</li>
-        </ol>
-      </div>
-
-      {/* 8. Button */}
+      {/* 6. Button Pintasan */}
       <button
-        className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-3.5 rounded-[14px] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+        className="w-full bg-[#F8AF2F] hover:bg-yellow-500 text-white font-bold py-3.5 rounded-[14px] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm mt-4"
         onClick={() =>
           alert(
             "Fitur Lihat Lebih Banyak akan diarahkan ke filter tabel Buku nantinya!",
@@ -122,7 +111,6 @@ const DetailCategories = ({ category }) => {
         Lihat lebih banyak <HiChevronRight className="text-xl" />
       </button>
 
-      {/* CSS Scrollbar khusus kalau isinya panjang */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

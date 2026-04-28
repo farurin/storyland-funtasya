@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  HiUser,
-  HiClock,
-  HiPencil,
-  HiTrash,
-  HiEye,
-  HiEyeOff,
-} from "react-icons/hi";
+import { HiPencil, HiTrash, HiEye, HiEyeOff } from "react-icons/hi";
 import { LiaBookSolid } from "react-icons/lia";
 import { getImageUrl } from "../../utils/getImageUrl";
 
@@ -14,7 +7,8 @@ const CardCategories = ({
   name,
   description,
   image_banner,
-  status, // Mengambil status
+  status,
+  total_books,
   isActive = false,
   onClick,
   onEdit,
@@ -30,17 +24,16 @@ const CardCategories = ({
           : "border-gray-200 hover:border-orange-300 hover:shadow-sm"
       } ${status === "inactive" ? "opacity-75 bg-gray-50" : ""}`}
     >
-      {/* image */}
       <div className="w-24 h-16 md:w-28 md:h-20 shrink-0 rounded-xl overflow-hidden bg-gray-100 relative">
         <img
           src={getImageUrl(image_banner)}
           alt={name}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.target.src = "https://via.placeholder.com/150x100?text=Banner";
+            e.target.onerror = null;
+            e.target.src = "https://placehold.co/150x100?text=Banner";
           }}
         />
-        {/* Label Overlay Inactive (Bisa dihapus jika dirasa berlebihan karena sudah ada badge di bawah) */}
         {status === "inactive" && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <span className="text-white text-[10px] font-bold px-2 py-1 bg-red-500 rounded-md shadow-sm">
@@ -50,23 +43,18 @@ const CardCategories = ({
         )}
       </div>
 
-      {/* content */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-bold text-gray-900 truncate">{name}</h3>
+        <h3 className="text-sm font-bold text-gray-900 truncate mb-1">
+          {name}
+        </h3>
 
-        {/* Informasi Kategori & Badge Status */}
-        <div className="flex gap-3 md:gap-4 text-[10px] md:text-xs text-gray-500 my-1.5 flex-wrap items-center">
-          <span className="flex items-center gap-1 whitespace-nowrap">
-            <LiaBookSolid className="text-orange-500 text-sm" /> ? Buku
+        {/* Informasi Dinamis & Badge Status */}
+        <div className="flex gap-3 text-[10px] md:text-xs text-gray-500 mb-1.5 flex-wrap items-center font-semibold">
+          <span className="flex items-center gap-1">
+            <LiaBookSolid className="text-orange-500 text-sm" />
+            {total_books} Buku
           </span>
-          <span className="flex items-center gap-1 whitespace-nowrap">
-            <HiUser className="text-orange-500 text-sm" /> Admin
-          </span>
-          <span className="flex items-center gap-1 whitespace-nowrap">
-            <HiClock className="text-orange-500 text-sm" /> Baru saja
-          </span>
-
-          {/* Badge Status Aktif/Nonaktif */}
+          <span className="text-gray-300">|</span>
           <span
             className={`px-2 py-0.5 rounded-md font-bold text-[9px] uppercase tracking-wider ${
               status === "active"
@@ -78,10 +66,11 @@ const CardCategories = ({
           </span>
         </div>
 
-        <p className="text-xs text-gray-500 line-clamp-1">{description}</p>
+        <p className="text-xs text-gray-500 line-clamp-1 font-medium">
+          {description}
+        </p>
       </div>
 
-      {/* actions */}
       <div className="flex gap-1.5 shrink-0">
         <button
           onClick={(e) => {
@@ -93,8 +82,6 @@ const CardCategories = ({
         >
           <HiPencil />
         </button>
-
-        {/* Tombol Toggle Status (Mata) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -103,15 +90,10 @@ const CardCategories = ({
           title={
             status === "active" ? "Nonaktifkan Kategori" : "Aktifkan Kategori"
           }
-          className={`w-8 h-8 rounded-lg flex items-center justify-center transition shadow-sm ${
-            status === "active"
-              ? "bg-gray-100 text-gray-500 hover:bg-gray-200" // Saat aktif, tombol ini untuk menonaktifkan
-              : "bg-green-50 text-green-600 hover:bg-green-100" // Saat nonaktif, tombol ini untuk mengaktifkan
-          }`}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center transition shadow-sm ${status === "active" ? "bg-gray-100 text-gray-500 hover:bg-gray-200" : "bg-green-50 text-green-600 hover:bg-green-100"}`}
         >
           {status === "active" ? <HiEyeOff /> : <HiEye />}
         </button>
-
         <button
           onClick={(e) => {
             e.stopPropagation();

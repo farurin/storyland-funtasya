@@ -24,7 +24,7 @@ const AdminCategories = () => {
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Atur jumlah kategori per halaman
+  const itemsPerPage = 5; // Atur jumlah kategori per halaman
 
   // Modal States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -180,6 +180,7 @@ const AdminCategories = () => {
                 name={cat.name}
                 description={cat.description}
                 status={cat.status}
+                total_books={cat.total_books}
                 image_icon={cat.image_icon}
                 image_card={cat.image_card}
                 image_banner={cat.image_banner}
@@ -205,7 +206,7 @@ const AdminCategories = () => {
         {selectedCategory ? (
           <DetailCategories category={selectedCategory} />
         ) : (
-          <div className="h-full min-h-100 flex items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50 rounded-4xl text-gray-400 font-bold text-sm text-center px-8">
+          <div className="h-full min-h-100 flex items-start justify-center border-2 border-dashed border-gray-200 bg-gray-50 rounded-4xl text-gray-400 font-bold text-sm text-center px-8 pt-20">
             Klik salah satu kategori di samping untuk melihat detail statistik
             dan aset gambarnya.
           </div>

@@ -1,12 +1,29 @@
 const db = require("../config/db");
 
-// GET ALL CATEGORIES (Khusus Admin, ambil semua termasuk yang inactive)
+// GET ALL CATEGORIES (Khusus Admin, ambil semua termasuk yang inactive beserta metriknya)
 const getAdminCategories = async (req, res) => {
   try {
-    const [results] = await db.query(
-      "SELECT * FROM categories ORDER BY id DESC",
-    );
-    res.json(results);
+    // Menggunakan LEFT JOIN agar kategori yang belum punya buku tetap muncul (dengan nilai 0)
+    const sql = `
+      SELECT 
+        c.*,
+        COUNT(b.id) AS total_books,
+        COALESCE(SUM(b.views_count), 0) AS total_views
+      FROM categories c
+      LEFT JOIN books b ON c.id = b.id_categories
+      GROUP BY c.id
+      ORDER BY c.id DESC
+    `;
+    const [results] = await db.query(sql);
+
+    // Pastikan angka di-cast ke tipe Number agar aman saat diproses di Frontend
+    const formattedResults = results.map((cat) => ({
+      ...cat,
+      total_books: Number(cat.total_books),
+      total_views: Number(cat.total_views),
+    }));
+
+    res.json(formattedResults);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
